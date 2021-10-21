@@ -1,0 +1,9 @@
+{
+  "name": "spice-ppx",
+  "version": "1.0.0",
+  "description": "Spice ppx",
+  "license": "MIT",
+  "scripts": {
+    "postinstall": "node postInstall.js"
+  }
+}

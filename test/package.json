@@ -1,0 +1,18 @@
+{
+  "name": "spice-ppx-test",
+  "version": "1.0.0",
+  "description": "Test spice ppx",
+  "license": "MIT",
+  "devDependencies": {
+    "@glennsl/bs-jest": "^0.7.0",
+    "jest": "^27.3.1",
+    "rescript": "^9.1.4"
+  },
+  "scripts": {
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:watch": "rescript build -w",
+    "test": "jest",
+    "test:watch": "jest --watchAll"
+  }
+}

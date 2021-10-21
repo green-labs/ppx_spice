@@ -1,0 +1,5 @@
+(executable
+ (package ppx_spice)
+ (name bin)
+ (public_name ppx_spice)
+ (libraries ppx_spice))

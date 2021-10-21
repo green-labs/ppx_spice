@@ -1,0 +1,27 @@
+{
+  "name": "spice-ppx",
+  "sources": [
+    {
+      "dir": "__tests__",
+      "type": "dev"
+    },
+    {
+      "dir": "src"
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
+  "bs-dependencies": [],
+  "bs-dev-dependencies": ["@glennsl/bs-jest"],
+  "ppx-flags": ["../ppx"],
+  "warnings": {
+    "error": true,
+    "number": "-48"
+  },
+  "generators": [],
+  "bsc-flags": ["-bs-super-errors"]
+}
