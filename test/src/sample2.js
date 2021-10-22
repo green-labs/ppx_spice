@@ -7,9 +7,9 @@ var Belt_Array = require("rescript/lib/js/belt_Array.js");
 
 function t_encode(v) {
   if (v) {
-    return ["Two"];
+    return ["second"];
   } else {
-    return ["One"];
+    return ["first"];
   }
 }
 

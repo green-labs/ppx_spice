@@ -10,12 +10,13 @@ type parsedDecl = {
 }
 
 let generateEncoderCase generatorSettings unboxed
-    { pcd_name = { txt = name }; pcd_args; pcd_loc } =
+    {name; alias; constrDecl={ pcd_args; pcd_loc }} =
   match pcd_args with
   | Pcstr_tuple args ->
+      let alias_name = getStringFromExpression alias in
       let constructorExpr =
         Exp.constant
-          (Pconst_string (name, Location.none, None) [@explicit_arity])
+          (Pconst_string (alias_name, Location.none, None) [@explicit_arity])
       in
       let lhsVars =
         match args with
@@ -152,7 +153,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
   let encoder =
     match doEncode with
     | true ->
-        List.map (generateEncoderCase generatorSettings unboxed) constrDecls
+        List.map (generateEncoderCase generatorSettings unboxed) parsedDecls
         |> Exp.match_ [%expr v]
         |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
         |> Option.some
