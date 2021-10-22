@@ -70,9 +70,9 @@ let getGeneratorSettingsFromAttributes attributes =
 
 let getExpressionFromPayload { attr_name = { loc }; attr_payload = payload } =
   match payload with
-  | ((PStr [ { pstr_desc } ]) [@explicit_arity]) -> (
+  | PStr [ { pstr_desc } ] -> (
       match pstr_desc with
-      | ((Pstr_eval (expr, _)) [@explicit_arity]) -> expr
+      | Pstr_eval (expr, _) -> expr
       | _ -> fail loc "Expected expression as attribute payload")
   | _ -> fail loc "Expected expression as attribute payload"
 
@@ -80,14 +80,21 @@ let getParamNames params =
   params
   |> List.map (fun ({ ptyp_desc; ptyp_loc }, _) ->
          match ptyp_desc with
-         | ((Ptyp_var s) [@explicit_arity]) -> s
+         | Ptyp_var s -> s
          | _ ->
              fail ptyp_loc "Unhandled param type" |> fun v ->
-             (Location.Error v [@explicit_arity]) |> raise)
+             Location.Error v |> raise)
+
+let getStringFromExpression { pexp_desc; pexp_loc } =
+  match pexp_desc with
+  | Pexp_constant const -> (
+      match const with
+      | Pconst_string (name, _, _) -> name
+      | _ -> fail pexp_loc "cannot find a name??")
+  | _ -> fail pexp_loc "cannot find a name??"
 
 let indexConst i =
-  (Pconst_string ("[" ^ string_of_int i ^ "]", Location.none, None)
-  [@explicit_arity])
+  Pconst_string ("[" ^ string_of_int i ^ "]", Location.none, None)
   |> Exp.constant
 
 let rec isIdentifierUsedInCoreType typeName { ptyp_desc; ptyp_loc } =

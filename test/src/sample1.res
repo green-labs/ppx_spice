@@ -1,10 +1,4 @@
-@spices
-type t = {
-  label: string,
-  value: int,
-}
+@spice
+type t = [#one | #two]
 
-let sample1 = {
-  label: "sample1",
-  value: 1
-}
+let sample1 = #one

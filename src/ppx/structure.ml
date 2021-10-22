@@ -1,7 +1,6 @@
 open Ppxlib
 open Parsetree
 open Ast_helper
-open Codecs
 open Utils
 
 let addParams paramNames expr =
@@ -60,11 +59,13 @@ let mapTypeDecl decl =
   } =
     decl
   in
+
   let isUnboxed =
     match Utils.getAttributeByName ptype_attributes "unboxed" with
     | Ok (Some _) -> true
     | _ -> false
   in
+
   match getGeneratorSettingsFromAttributes ptype_attributes with
   | Ok None -> []
   | Ok (Some generatorSettings) -> (
@@ -77,19 +78,11 @@ let mapTypeDecl decl =
             (getParamNames ptype_params)
             (Polyvariants.generateCodecs generatorSettings rowFieldsDec
                isUnboxed)
-      | Some manifest, _ ->
-          generateCodecDecls typeName
-            (getParamNames ptype_params)
-            (generateCodecs generatorSettings manifest)
       | None, Ptype_variant decls ->
           generateCodecDecls typeName
             (getParamNames ptype_params)
             (Variants.generateCodecs generatorSettings decls isUnboxed)
-      | None, Ptype_record decls ->
-          generateCodecDecls typeName
-            (getParamNames ptype_params)
-            (Records.generateCodecs generatorSettings decls isUnboxed)
-      | _ -> fail ptype_loc "This type is not handled by decco")
+      | _ -> fail ptype_loc "This type is not handled by spice")
   | Error s -> fail ptype_loc s
 
 let mapStructureItem mapper ({ pstr_desc } as structureItem) =

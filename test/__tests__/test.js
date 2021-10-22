@@ -3,12 +3,26 @@
 
 var Jest = require("@glennsl/bs-jest/src/jest.js");
 var Sample1 = require("../src/sample1.js");
+var Sample2 = require("../src/sample2.js");
 
-console.log(Sample1.t_decode);
-
-Jest.describe("init", (function (param) {
-        return Jest.test("actually running?", (function (param) {
-                      return Jest.Expect.toEqual("a", Jest.Expect.expect("a"));
+Jest.describe("ppx_spice test", (function (param) {
+        Jest.test("polymorphic variants", (function (param) {
+                var sample1 = Sample1.t_decode(["one"]);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: "one"
+                          }, Jest.Expect.expect(sample1));
+              }));
+        Jest.test("variants encode", (function (param) {
+                var sample2Encoded = Sample2.t_encode(/* One */0);
+                return Jest.Expect.toEqual(["first"], Jest.Expect.expect(sample2Encoded));
+              }));
+        return Jest.test("variants decode", (function (param) {
+                      var sample2Decoded = Sample2.t_decode(["second"]);
+                      return Jest.Expect.toEqual({
+                                  TAG: /* Ok */0,
+                                  _0: /* Two */1
+                                }, Jest.Expect.expect(sample2Decoded));
                     }));
       }));
 
