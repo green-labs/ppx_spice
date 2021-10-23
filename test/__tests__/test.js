@@ -8,10 +8,10 @@ var Sample2 = require("../src/sample2.js");
 Jest.describe("ppx_spice test", (function (param) {
         Jest.test("polymorphic variant encode", (function (param) {
                 var sample1Encoded = Sample1.t_encode("one");
-                return Jest.Expect.toEqual(["first"], Jest.Expect.expect(sample1Encoded));
+                return Jest.Expect.toEqual("first", Jest.Expect.expect(sample1Encoded));
               }));
         Jest.test("polymorphic variant decode", (function (param) {
-                var sample1Decoded = Sample1.t_decode(["second"]);
+                var sample1Decoded = Sample1.t_decode("second");
                 return Jest.Expect.toEqual({
                             TAG: /* Ok */0,
                             _0: "two"

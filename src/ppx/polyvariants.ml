@@ -12,20 +12,6 @@ type parsedField = {
   rowField : Parsetree.row_field;
 }
 
-let getArgsFromPolyvars ~loc coreTypes =
-  match coreTypes with
-  | [] -> []
-  | [ coreType ] -> (
-      match coreType.ptyp_desc with
-      (* If it's a tuple, return the args *)
-      | Ptyp_tuple coreTypes -> coreTypes
-      (* If it's any other coreType, return it *)
-      | _ -> [ coreType ])
-  | _ ->
-      fail loc
-        "This error shoudn't happen, means that the AST of your polyvariant is \
-         wrong"
-
 let generateEncoderCase generatorSettings unboxed row =
   let { name; alias; rowField = { prf_desc } } = row in
   let alias_name = getStringFromExpression alias in
@@ -34,114 +20,33 @@ let generateEncoderCase generatorSettings unboxed row =
       let constructorExpr =
         Exp.constant (Pconst_string (alias_name, Location.none, None))
       in
-      let args = getArgsFromPolyvars ~loc coreTypes in
-
-      let lhsVars =
-        match args with
-        | [] -> None
-        | [ _ ] -> Some (Pat.var (mknoloc "v0"))
-        | _ ->
-            args
-            |> List.mapi (fun i _ ->
-                   mkloc ("v" ^ string_of_int i) loc |> Pat.var)
-            |> Pat.tuple
-            |> fun v -> Some v
-      in
-
-      let rhsList =
-        args
-        |> List.map (Codecs.generateCodecs generatorSettings)
-        |> List.map (fun (encoder, _) -> Option.get encoder)
-        |> List.mapi (fun i e ->
-               Exp.apply ~loc e
-                 [ (Asttypes.Nolabel, makeIdentExpr ("v" ^ string_of_int i)) ])
-        |> List.append [ [%expr Js.Json.string [%e constructorExpr]] ]
-      in
 
       {
-        pc_lhs = Pat.variant name lhsVars;
+        pc_lhs = Pat.variant name None;
         pc_guard = None;
-        pc_rhs =
-          (if unboxed then List.tl rhsList |> List.hd
-          else [%expr Js.Json.array [%e rhsList |> Exp.array]]);
+        pc_rhs = [%expr Js.Json.string [%e constructorExpr]];
       }
   (* We don't have enough information to generate a encoder *)
   | Rinherit arg ->
       fail arg.ptyp_loc "This syntax is not yet implemented by decco"
 
-let generateDecodeSuccessCase numArgs constructorName =
-  {
-    pc_lhs =
-      Array.init numArgs (fun i ->
-          mknoloc ("v" ^ string_of_int i) |> Pat.var |> fun p ->
-          [%pat? Belt.Result.Ok [%p p]])
-      |> Array.to_list |> tupleOrSingleton Pat.tuple;
-    pc_guard = None;
-    pc_rhs =
-      ( Array.init numArgs (fun i -> makeIdentExpr ("v" ^ string_of_int i))
-      |> Array.to_list |> tupleOrSingleton Exp.tuple
-      |> (fun v -> Some v)
-      |> Exp.variant constructorName
-      |> fun e -> [%expr Belt.Result.Ok [%e e]] );
-  }
-
-let generateArgDecoder generatorSettings args constructorName =
-  let numArgs = List.length args in
-  args
-  |> List.mapi (Decode_cases.generateErrorCase numArgs)
-  |> List.append [ generateDecodeSuccessCase numArgs constructorName ]
-  |> Exp.match_
-       (args
-       |> List.map (Codecs.generateCodecs generatorSettings)
-       |> List.mapi (fun i (_, decoder) ->
-              Exp.apply (Option.get decoder)
-                [
-                  ( Asttypes.Nolabel,
-                    let idx =
-                      Pconst_integer (string_of_int (i + 1), None)
-                      |> Exp.constant
-                    in
-                    [%expr Belt.Array.getExn jsonArr [%e idx]] );
-                ])
-       |> tupleOrSingleton Exp.tuple)
-
 let generateDecoderCase generatorSettings row =
   let { name; alias; rowField = { prf_desc } } = row in
   match prf_desc with
   | ((Rtag ({ txt; loc }, _, coreTypes)) [@explicit_arity]) ->
-      let args = getArgsFromPolyvars ~loc coreTypes in
-      
-      let argLen =
-        (Pconst_integer (string_of_int (List.length args + 1), None)
-        [@explicit_arity])
-        |> Exp.constant
-      in
-      
       let decoded =
-        match args with
-        | [] ->
-            let resultantExp = Exp.variant txt None in
-            [%expr Belt.Result.Ok [%e resultantExp]]
-        | _ -> generateArgDecoder generatorSettings args txt
+        let resultantExp = Exp.variant txt None in
+        [%expr Belt.Result.Ok [%e resultantExp]]
       in
 
       let alias_name = getStringFromExpression alias in
 
       {
         pc_lhs =
-          (Pconst_string (alias_name, Location.none, None)
-          |> Pat.constant
-          |> fun v ->
-            (Some v [@explicit_arity])
-            |> Pat.construct (lid "Js.Json.JSONString") );
+          ( Pconst_string (alias_name, Location.none, None) |> Pat.constant
+          |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
         pc_guard = None;
-        pc_rhs =
-          [%expr
-            match Js.Array.length tagged != [%e argLen] with
-            | true ->
-                Decco.error
-                  "Invalid number of arguments to polyvariant constructor" v
-            | false -> [%e decoded]];
+        pc_rhs = [%expr [%e decoded]];
       }
   | ((Rinherit coreType) [@explicit_arity]) ->
       fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
@@ -200,10 +105,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
     {
       pc_lhs = [%pat? _];
       pc_guard = None;
-      pc_rhs =
-        [%expr
-          Decco.error "Invalid polyvariant constructor"
-            (Belt.Array.getExn jsonArr 0)];
+      pc_rhs = [%expr Decco.error "Invalid polyvariant constructor" v];
     }
   in
   let decoder =
@@ -216,17 +118,14 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
             let decoderSwitch =
               List.map (generateDecoderCase generatorSettings) parsedFields
               |> fun l ->
-              l @ [ decoderDefaultCase ]
-              |> Exp.match_ [%expr Belt.Array.getExn tagged 0]
+              l @ [ decoderDefaultCase ] |> Exp.match_ [%expr tagged]
             in
             (Some
                [%expr
                  fun v ->
                    match Js.Json.classify v with
-                   | ((Js.Json.JSONArray [||]) [@explicit_arity]) ->
-                       Decco.error "Expected polyvariant, found empty array" v
-                   | ((Js.Json.JSONArray jsonArr) [@explicit_arity]) ->
-                       let tagged = Js.Array.map Js.Json.classify jsonArr in
+                   | Js.Json.JSONString _ ->
+                       let tagged = Js.Json.classify v in
                        [%e decoderSwitch]
                    | _ -> Decco.error "Not a polyvariant" v]
             [@explicit_arity]))
