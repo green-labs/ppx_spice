@@ -33,7 +33,7 @@ let generateEncoderCase generatorSettings unboxed row =
 let generateDecoderCase generatorSettings row =
   let { name; alias; rowField = { prf_desc } } = row in
   match prf_desc with
-  | ((Rtag ({ txt; loc }, _, coreTypes)) [@explicit_arity]) ->
+  | Rtag ({ txt; loc }, _, coreTypes) ->
       let decoded =
         let resultantExp = Exp.variant txt None in
         [%expr Belt.Result.Ok [%e resultantExp]]
@@ -48,7 +48,7 @@ let generateDecoderCase generatorSettings row =
         pc_guard = None;
         pc_rhs = [%expr [%e decoded]];
       }
-  | ((Rinherit coreType) [@explicit_arity]) ->
+  | Rinherit coreType ->
       fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
 
 let generateUnboxedDecode generatorSettings row =
@@ -120,14 +120,13 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
               |> fun l ->
               l @ [ decoderDefaultCase ] |> Exp.match_ [%expr tagged]
             in
-            (Some
-               [%expr
-                 fun v ->
-                   match Js.Json.classify v with
-                   | Js.Json.JSONString _ ->
-                       let tagged = Js.Json.classify v in
-                       [%e decoderSwitch]
-                   | _ -> Decco.error "Not a polyvariant" v]
-            [@explicit_arity]))
+            Some
+              [%expr
+                fun v ->
+                  match Js.Json.classify v with
+                  | Js.Json.JSONString _ ->
+                      let tagged = Js.Json.classify v in
+                      [%e decoderSwitch]
+                  | _ -> Decco.error "Not a polyvariant" v])
   in
   (encoder, decoder)

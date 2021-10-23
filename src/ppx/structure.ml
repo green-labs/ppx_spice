@@ -75,8 +75,7 @@ let mapTypeDecl decl =
       | Some { ptyp_desc = Ptyp_variant (rowFields, _, _) }, Ptype_abstract ->
           generateCodecDecls typeName
             (getParamNames ptype_params)
-            (Polyvariants.generateCodecs generatorSettings rowFields
-               isUnboxed)
+            (Polyvariants.generateCodecs generatorSettings rowFields isUnboxed)
       | None, Ptype_variant decls ->
           generateCodecDecls typeName
             (getParamNames ptype_params)

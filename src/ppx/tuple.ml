@@ -23,13 +23,13 @@ let generateDecodeSuccessCase numArgs =
     pc_lhs =
       Array.init numArgs (fun i ->
           mknoloc ("v" ^ string_of_int i) |> Pat.var |> fun p ->
-          [%pat? ((Belt.Result.Ok [%p p]) [@explicit_arity])])
+          [%pat? Belt.Result.Ok [%p p]])
       |> Array.to_list |> tupleOrSingleton Pat.tuple;
     pc_guard = None;
     pc_rhs =
       ( Array.init numArgs (fun i -> makeIdentExpr ("v" ^ string_of_int i))
       |> Array.to_list |> Exp.tuple
-      |> fun e -> [%expr Belt.Result.Ok [%e e] [@explicit_arity]] );
+      |> fun e -> [%expr Belt.Result.Ok [%e e]] );
   }
 
 let generateDecodeSwitch compositeDecoders =
@@ -51,9 +51,7 @@ let generateDecoder compositeDecoders =
     |> List.mapi (fun i _ -> Pat.var (mknoloc ("v" ^ string_of_int i)))
     |> Pat.array
   in
-  let matchPattern =
-    [%pat? ((Js.Json.JSONArray [%p matchArrPattern]) [@explicit_arity])]
-  in
+  let matchPattern = [%pat? Js.Json.JSONArray [%p matchArrPattern]] in
   let outerSwitch =
     Exp.match_ [%expr Js.Json.classify json]
       [

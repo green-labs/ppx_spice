@@ -51,7 +51,7 @@ let generateUnboxedDecode generatorSettings
               let constructor = Exp.construct (lid name) (Some [%expr v]) in
               Some
                 [%expr
-                  fun v -> Belt.Result.map (([%e d] v), fun v -> [%e constructor])]
+                  fun v -> Belt.Result.map ([%e d] v, fun v -> [%e constructor])]
           | None -> None)
       | _ -> fail pcd_loc "Expected exactly one type argument")
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by decco"
@@ -85,8 +85,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
     {
       pc_lhs = [%pat? _];
       pc_guard = None;
-      pc_rhs =
-        [%expr Decco.error "Invalid variant constructor" v];
+      pc_rhs = [%expr Decco.error "Invalid variant constructor" v];
     }
   in
 

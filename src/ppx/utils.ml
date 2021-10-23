@@ -35,37 +35,27 @@ let getAttributeByName attributes name =
     |> List.filter (fun { attr_name = { Location.txt } } -> txt = name)
   in
   match filtered with
-  | [] -> Ok None [@explicit_arity]
-  | [ attribute ] -> Ok (Some attribute [@explicit_arity]) [@explicit_arity]
-  | _ ->
-      Error ("Too many occurrences of \"" ^ name ^ "\" attribute")
-      [@explicit_arity]
+  | [] -> Ok None
+  | [ attribute ] -> Ok (Some attribute)
+  | _ -> Error ("Too many occurrences of \"" ^ name ^ "\" attribute")
 
 type generatorSettings = { doEncode : bool; doDecode : bool }
 
 let getGeneratorSettingsFromAttributes attributes =
   match getAttributeByName attributes annotationName with
-  | ((Ok None) [@explicit_arity]) -> (
+  | Ok None -> (
       match
         ( getAttributeByName attributes (annotationName ^ ".decode"),
           getAttributeByName attributes (annotationName ^ ".encode") )
       with
-      | ((Ok (Some _)) [@explicit_arity]), ((Ok (Some _)) [@explicit_arity]) ->
-          Ok (Some { doEncode = true; doDecode = true } [@explicit_arity])
-          [@explicit_arity]
-      | ((Ok (Some _)) [@explicit_arity]), ((Ok None) [@explicit_arity]) ->
-          Ok (Some { doEncode = false; doDecode = true } [@explicit_arity])
-          [@explicit_arity]
-      | ((Ok None) [@explicit_arity]), ((Ok (Some _)) [@explicit_arity]) ->
-          Ok (Some { doEncode = true; doDecode = false } [@explicit_arity])
-          [@explicit_arity]
-      | ((Ok None) [@explicit_arity]), ((Ok None) [@explicit_arity]) ->
-          Ok None [@explicit_arity]
+      | Ok (Some _), Ok (Some _) ->
+          Ok (Some { doEncode = true; doDecode = true })
+      | Ok (Some _), Ok None -> Ok (Some { doEncode = false; doDecode = true })
+      | Ok None, Ok (Some _) -> Ok (Some { doEncode = true; doDecode = false })
+      | Ok None, Ok None -> Ok None
       | (Error _ as e), _ -> e
       | _, (Error _ as e) -> e)
-  | ((Ok (Some _)) [@explicit_arity]) ->
-      Ok (Some { doEncode = true; doDecode = true } [@explicit_arity])
-      [@explicit_arity]
+  | Ok (Some _) -> Ok (Some { doEncode = true; doDecode = true })
   | Error _ as e -> e
 
 let getExpressionFromPayload { attr_name = { loc }; attr_payload = payload } =
@@ -99,17 +89,16 @@ let indexConst i =
 
 let rec isIdentifierUsedInCoreType typeName { ptyp_desc; ptyp_loc } =
   match ptyp_desc with
-  | ((Ptyp_arrow (_, _, _)) [@explicit_arity]) ->
+  | Ptyp_arrow (_, _, _) ->
       fail ptyp_loc "Can't generate codecs for function type"
   | Ptyp_any -> fail ptyp_loc "Can't generate codecs for `any` type"
   | Ptyp_package _ -> fail ptyp_loc "Can't generate codecs for module type"
-  | ((Ptyp_variant (_, _, _)) [@explicit_arity]) ->
-      fail ptyp_loc "Unexpected Ptyp_variant"
+  | Ptyp_variant (_, _, _) -> fail ptyp_loc "Unexpected Ptyp_variant"
   | Ptyp_var _ -> false
-  | ((Ptyp_tuple childTypes) [@explicit_arity]) ->
+  | Ptyp_tuple childTypes ->
       List.exists (isIdentifierUsedInCoreType typeName) childTypes
-  | ((Ptyp_constr ({ txt }, childTypes)) [@explicit_arity]) -> (
-      match txt = (Lident typeName [@explicit_arity]) with
+  | Ptyp_constr ({ txt }, childTypes) -> (
+      match txt = Lident typeName with
       | true -> true
       | false -> List.exists (isIdentifierUsedInCoreType typeName) childTypes)
   | _ -> fail ptyp_loc "This syntax is not yet handled by decco"
@@ -117,11 +106,6 @@ let rec isIdentifierUsedInCoreType typeName { ptyp_desc; ptyp_loc } =
 let attrWarning expr =
   {
     attr_name = mkloc "ocaml.warning" loc;
-    attr_payload =
-      PStr
-        [
-          { pstr_desc = Pstr_eval (expr, []) [@explicit_arity]; pstr_loc = loc };
-        ]
-      [@explicit_arity];
+    attr_payload = PStr [ { pstr_desc = Pstr_eval (expr, []); pstr_loc = loc } ];
     attr_loc = loc;
   }
