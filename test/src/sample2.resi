@@ -1,2 +1,2 @@
 @spice
-type t = One | Two
+type t = | @spice.as("first") One | @spice.as("second") Two

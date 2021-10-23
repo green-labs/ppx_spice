@@ -3,55 +3,44 @@
 
 var Decco = require("./Decco.js");
 var Js_json = require("rescript/lib/js/js_json.js");
-var Belt_Array = require("rescript/lib/js/belt_Array.js");
 
 function t_encode(v) {
   if (v) {
-    return ["second"];
+    return "second";
   } else {
-    return ["first"];
+    return "first";
   }
 }
 
 function t_decode(v) {
-  var jsonArr = Js_json.classify(v);
-  if (typeof jsonArr === "number") {
-    return Decco.error(undefined, "Not a variant", v);
+  var match = Js_json.classify(v);
+  if (typeof match === "number") {
+    return Decco.error(undefined, "Not a variants", v);
   }
-  if (jsonArr.TAG !== /* JSONArray */3) {
-    return Decco.error(undefined, "Not a variant", v);
+  if (match.TAG !== /* JSONString */0) {
+    return Decco.error(undefined, "Not a variants", v);
   }
-  var jsonArr$1 = jsonArr._0;
-  if (jsonArr$1.length === 0) {
-    return Decco.error(undefined, "Expected variant, found empty array", v);
+  var tagged = Js_json.classify(v);
+  if (typeof tagged === "number") {
+    return Decco.error(undefined, "Invalid variant constructor", v);
   }
-  var tagged = jsonArr$1.map(Js_json.classify);
-  var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match !== "number" && match.TAG === /* JSONString */0) {
-    switch (match._0) {
-      case "first" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", v);
-          } else {
-            return {
-                    TAG: /* Ok */0,
-                    _0: /* One */0
-                  };
-          }
-      case "second" :
-          if (tagged.length !== 1) {
-            return Decco.error(undefined, "Invalid number of arguments to variant constructor", v);
-          } else {
-            return {
-                    TAG: /* Ok */0,
-                    _0: /* Two */1
-                  };
-          }
-      default:
-        
-    }
+  if (tagged.TAG !== /* JSONString */0) {
+    return Decco.error(undefined, "Invalid variant constructor", v);
   }
-  return Decco.error(undefined, "Invalid variant constructor", Belt_Array.getExn(jsonArr$1, 0));
+  switch (tagged._0) {
+    case "first" :
+        return {
+                TAG: /* Ok */0,
+                _0: /* One */0
+              };
+    case "second" :
+        return {
+                TAG: /* Ok */0,
+                _0: /* Two */1
+              };
+    default:
+      return Decco.error(undefined, "Invalid variant constructor", v);
+  }
 }
 
 exports.t_encode = t_encode;

@@ -9,114 +9,35 @@ type parsedDecl = {
   constrDecl : Parsetree.constructor_declaration;
 }
 
-let generateEncoderCase generatorSettings unboxed
-    {name; alias; constrDecl={ pcd_args; pcd_loc }} =
-  match pcd_args with
-  | Pcstr_tuple args ->
-      let alias_name = getStringFromExpression alias in
-      let constructorExpr =
-        Exp.constant
-          (Pconst_string (alias_name, Location.none, None) [@explicit_arity])
-      in
-      let lhsVars =
-        match args with
-        | [] -> None
-        | [ _ ] -> Some (Pat.var (mknoloc "v0")) [@explicit_arity]
-        | _ ->
-            args
-            |> List.mapi (fun i _ ->
-                   mkloc ("v" ^ string_of_int i) pcd_loc |> Pat.var)
-            |> Pat.tuple
-            |> fun v -> Some v
-      in
-      let rhsList =
-        args
-        |> List.map (Codecs.generateCodecs generatorSettings)
-        |> List.map (fun (encoder, _) -> Option.get encoder)
-        |> List.mapi (fun i e ->
-               Exp.apply ~loc:pcd_loc e
-                 [ (Asttypes.Nolabel, makeIdentExpr ("v" ^ string_of_int i)) ])
-        |> List.append [ [%expr Js.Json.string [%e constructorExpr]] ]
-      in
-      {
-        pc_lhs = Pat.construct (lid name) lhsVars;
-        pc_guard = None;
-        pc_rhs =
-          (match unboxed with
-          | true -> List.tl rhsList |> List.hd
-          | false -> [%expr Js.Json.array [%e rhsList |> Exp.array]]);
-      }
-  | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by decco"
+let generateEncoderCase generatorSettings
+    { name; alias; constrDecl = { pcd_args; pcd_loc } } =
+  let alias_name = getStringFromExpression alias in
+  let constructorExpr =
+    Exp.constant (Pconst_string (alias_name, Location.none, None))
+  in
 
-let generateDecodeSuccessCase numArgs constructorName =
   {
-    pc_lhs =
-      Array.init numArgs (fun i ->
-          mknoloc ("v" ^ string_of_int i) |> Pat.var |> fun p ->
-          [%pat? Belt.Result.Ok [%p p]])
-      |> Array.to_list |> tupleOrSingleton Pat.tuple;
+    pc_lhs = Pat.construct (lid name) None;
     pc_guard = None;
-    pc_rhs =
-      ( Array.init numArgs (fun i -> makeIdentExpr ("v" ^ string_of_int i))
-      |> Array.to_list |> tupleOrSingleton Exp.tuple
-      |> (fun v -> Some v)
-      |> Exp.construct (lid constructorName)
-      |> fun e -> [%expr Belt.Result.Ok [%e e]] );
+    pc_rhs = [%expr Js.Json.string [%e constructorExpr]];
   }
-
-let generateArgDecoder generatorSettings args constructorName =
-  let numArgs = List.length args in
-  args
-  |> List.mapi (Decode_cases.generateErrorCase numArgs)
-  |> List.append [ generateDecodeSuccessCase numArgs constructorName ]
-  |> Exp.match_
-       (args
-       |> List.map (Codecs.generateCodecs generatorSettings)
-       |> List.mapi (fun i (_, decoder) ->
-              Exp.apply (Option.get decoder)
-                [
-                  ( Asttypes.Nolabel,
-                    let idx =
-                      Pconst_integer (string_of_int (i + 1), None)
-                      |> Exp.constant
-                    in
-                    [%expr Belt.Array.getExn jsonArr [%e idx]] );
-                ])
-       |> tupleOrSingleton Exp.tuple)
 
 let generateDecoderCase generatorSettings
     { name; alias; constrDecl = { pcd_args; pcd_loc } } =
-  match pcd_args with
-  | Pcstr_tuple args ->
-      let argLen =
-        Pconst_integer (string_of_int (List.length args + 1), None)
-        |> Exp.constant
-      in
+  let decoded =
+    let ident = lid name in
+    [%expr Belt.Result.Ok [%e Exp.construct ident None]]
+  in
 
-      let decoded =
-        match args with
-        | [] ->
-            let ident = lid name in
-            [%expr Belt.Result.Ok [%e Exp.construct ident None]]
-        | _ -> generateArgDecoder generatorSettings args name
-      in
+  let alias_name = getStringFromExpression alias in
 
-      let alias_name = getStringFromExpression alias in
-
-      {
-        pc_lhs =
-          ( Pconst_string (alias_name, Location.none, None) |> Pat.constant
-          |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
-        pc_guard = None;
-        pc_rhs =
-          [%expr
-            match Js.Array.length tagged != [%e argLen] with
-            | true ->
-                Decco.error "Invalid number of arguments to variant constructor"
-                  v
-            | false -> [%e decoded]];
-      }
-  | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by decco"
+  {
+    pc_lhs =
+      ( Pconst_string (alias_name, Location.none, None) |> Pat.constant
+      |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
+    pc_guard = None;
+    pc_rhs = [%expr [%e decoded]];
+  }
 
 let generateUnboxedDecode generatorSettings
     { pcd_name = { txt = name }; pcd_args; pcd_loc } =
@@ -130,7 +51,7 @@ let generateUnboxedDecode generatorSettings
               let constructor = Exp.construct (lid name) (Some [%expr v]) in
               Some
                 [%expr
-                  fun v -> Belt.Result.map ([%e d] v, v => [%e constructor])]
+                  fun v -> Belt.Result.map (([%e d] v), fun v -> [%e constructor])]
           | None -> None)
       | _ -> fail pcd_loc "Expected exactly one type argument")
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by decco"
@@ -153,7 +74,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
   let encoder =
     match doEncode with
     | true ->
-        List.map (generateEncoderCase generatorSettings unboxed) parsedDecls
+        List.map (generateEncoderCase generatorSettings) parsedDecls
         |> Exp.match_ [%expr v]
         |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
         |> Option.some
@@ -165,9 +86,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
       pc_lhs = [%pat? _];
       pc_guard = None;
       pc_rhs =
-        [%expr
-          Decco.error "Invalid variant constructor"
-            (Belt.Array.getExn jsonArr 0)];
+        [%expr Decco.error "Invalid variant constructor" v];
     }
   in
 
@@ -181,20 +100,17 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
             let decoderSwitch =
               List.map (generateDecoderCase generatorSettings) parsedDecls
               |> fun l ->
-              l @ [ decoderDefaultCase ]
-              |> Exp.match_ [%expr Belt.Array.getExn tagged 0]
+              l @ [ decoderDefaultCase ] |> Exp.match_ [%expr tagged]
             in
 
             Some
               [%expr
                 fun v ->
                   match Js.Json.classify v with
-                  | Js.Json.JSONArray [||] ->
-                      Decco.error "Expected variant, found empty array" v
-                  | Js.Json.JSONArray jsonArr ->
-                      let tagged = Js.Array.map Js.Json.classify jsonArr in
+                  | Js.Json.JSONString _ ->
+                      let tagged = Js.Json.classify v in
                       [%e decoderSwitch]
-                  | _ -> Decco.error "Not a variant" v])
+                  | _ -> Decco.error "Not a variants" v])
   in
 
   (encoder, decoder)
