@@ -27,7 +27,7 @@ let generateEncoderCase generatorSettings unboxed
             |> List.mapi (fun i _ ->
                    mkloc ("v" ^ string_of_int i) pcd_loc |> Pat.var)
             |> Pat.tuple
-            |> fun v -> (Some v [@explicit_arity])
+            |> fun v -> Some v
       in
       let rhsList =
         args
@@ -138,7 +138,7 @@ let generateUnboxedDecode generatorSettings
 let parseDecl generatorSettings
     ({ pcd_name = { txt }; pcd_loc; pcd_attributes } as constrDecl) =
   let ({ pexp_desc } as alias) =
-    match getAttributeByName pcd_attributes "spice.key" with
+    match getAttributeByName pcd_attributes "spice.as" with
     | Ok (Some attribute) -> getExpressionFromPayload attribute
     | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
     | Error s -> fail pcd_loc s
