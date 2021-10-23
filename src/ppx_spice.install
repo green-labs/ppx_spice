@@ -42,7 +42,7 @@ lib: [
   "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/ppx_spice__Variants.cmx"
   "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/signature.ml"
   "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/structure.ml"
-  "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/tuple.re"
+  "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/tuple.ml"
   "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/utils.ml"
   "/Users/woonki/Documents/projects/spice-ppx/src/_esy/default/store/b/ppx__spices-c8ca1be7/install/default/lib/ppx_spice/variants.ml"
 ]
