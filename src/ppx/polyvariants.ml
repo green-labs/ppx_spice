@@ -6,6 +6,12 @@ open Utils
    one arg it's the coreType, but if there's more than one arg it's a tuple of one tuple with those args.
    This function abstract this particuliarity from polyvariants (It's different from Variants). *)
 
+type parsedField = {
+  name : string;
+  alias : expression;
+  rowField : Parsetree.row_field;
+}
+
 let getArgsFromPolyvars ~loc coreTypes =
   match coreTypes with
   | [] -> []
@@ -21,10 +27,12 @@ let getArgsFromPolyvars ~loc coreTypes =
          wrong"
 
 let generateEncoderCase generatorSettings unboxed row =
-  match row with
-  | Rtag ({ txt = name; loc }, _attributes, coreTypes) ->
+  let { name; alias; rowField = { prf_desc } } = row in
+  let alias_name = getStringFromExpression alias in
+  match prf_desc with
+  | Rtag ({ loc }, _attributes, coreTypes) ->
       let constructorExpr =
-        Exp.constant (Pconst_string (name, Location.none, None))
+        Exp.constant (Pconst_string (alias_name, Location.none, None))
       in
       let args = getArgsFromPolyvars ~loc coreTypes in
 
@@ -98,24 +106,30 @@ let generateArgDecoder generatorSettings args constructorName =
        |> tupleOrSingleton Exp.tuple)
 
 let generateDecoderCase generatorSettings row =
-  match row with
+  let { name; alias; rowField = { prf_desc } } = row in
+  match prf_desc with
   | ((Rtag ({ txt; loc }, _, coreTypes)) [@explicit_arity]) ->
       let args = getArgsFromPolyvars ~loc coreTypes in
+      
       let argLen =
         (Pconst_integer (string_of_int (List.length args + 1), None)
         [@explicit_arity])
         |> Exp.constant
       in
+      
       let decoded =
         match args with
         | [] ->
             let resultantExp = Exp.variant txt None in
-            [%expr Belt.Result.Ok [%e resultantExp] [@explicit_arity]]
+            [%expr Belt.Result.Ok [%e resultantExp]]
         | _ -> generateArgDecoder generatorSettings args txt
       in
+
+      let alias_name = getStringFromExpression alias in
+
       {
         pc_lhs =
-          ( (Pconst_string (txt, Location.none, None) [@explicit_arity])
+          (Pconst_string (alias_name, Location.none, None)
           |> Pat.constant
           |> fun v ->
             (Some v [@explicit_arity])
@@ -133,7 +147,8 @@ let generateDecoderCase generatorSettings row =
       fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
 
 let generateUnboxedDecode generatorSettings row =
-  match row with
+  let { prf_desc } = row in
+  match prf_desc with
   | Rtag ({ txt; loc }, _, args) -> (
       match args with
       | [ a ] -> (
@@ -150,17 +165,37 @@ let generateUnboxedDecode generatorSettings row =
   | Rinherit coreType ->
       fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
 
+let parseDecl generatorSettings
+    ({ prf_desc; prf_loc; prf_attributes } as rowField) =
+  let txt =
+    match prf_desc with
+    | Rtag ({ txt }, _, _) -> txt
+    | _ -> failwith "cannot get polymorphic variant constructor"
+  in
+
+  let alias =
+    match getAttributeByName prf_attributes "spice.as" with
+    | Ok (Some attribute) -> getExpressionFromPayload attribute
+    | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
+    | Error s -> fail prf_loc s
+  in
+
+  { name = txt; alias; rowField }
+
 let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
     unboxed =
+  let parsedFields = List.map (parseDecl generatorSettings) rowFields in
+
   let encoder =
     match doEncode with
     | true ->
-        List.map (generateEncoderCase generatorSettings unboxed) rowFields
+        List.map (generateEncoderCase generatorSettings unboxed) parsedFields
         |> Exp.match_ [%expr v]
         |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
         |> Option.some
     | false -> None
   in
+
   let decoderDefaultCase =
     {
       pc_lhs = [%pat? _];
@@ -179,7 +214,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
         | true -> generateUnboxedDecode generatorSettings (List.hd rowFields)
         | false ->
             let decoderSwitch =
-              rowFields |> List.map (generateDecoderCase generatorSettings)
+              List.map (generateDecoderCase generatorSettings) parsedFields
               |> fun l ->
               l @ [ decoderDefaultCase ]
               |> Exp.match_ [%expr Belt.Array.getExn tagged 0]

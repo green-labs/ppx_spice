@@ -7,9 +7,9 @@ var Belt_Array = require("rescript/lib/js/belt_Array.js");
 
 function t_encode(v) {
   if (v === "two") {
-    return ["two"];
+    return ["second"];
   } else {
-    return ["one"];
+    return ["first"];
   }
 }
 
@@ -29,7 +29,7 @@ function t_decode(v) {
   var match = Belt_Array.getExn(tagged, 0);
   if (typeof match !== "number" && match.TAG === /* JSONString */0) {
     switch (match._0) {
-      case "one" :
+      case "first" :
           if (tagged.length !== 1) {
             return Decco.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
           } else {
@@ -38,7 +38,7 @@ function t_decode(v) {
                     _0: "one"
                   };
           }
-      case "two" :
+      case "second" :
           if (tagged.length !== 1) {
             return Decco.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
           } else {

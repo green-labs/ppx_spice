@@ -73,10 +73,9 @@ let mapTypeDecl decl =
       | None, Ptype_abstract ->
           fail ptype_loc "Can't generate codecs for unspecified type"
       | Some { ptyp_desc = Ptyp_variant (rowFields, _, _) }, Ptype_abstract ->
-          let rowFieldsDec = List.map (fun row -> row.prf_desc) rowFields in
           generateCodecDecls typeName
             (getParamNames ptype_params)
-            (Polyvariants.generateCodecs generatorSettings rowFieldsDec
+            (Polyvariants.generateCodecs generatorSettings rowFields
                isUnboxed)
       | None, Ptype_variant decls ->
           generateCodecDecls typeName
