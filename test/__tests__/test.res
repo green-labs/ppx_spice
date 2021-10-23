@@ -5,10 +5,10 @@ open Expect
 describe("ppx_spice test", _ => {
   test("polymorphic variant encode", _ => {
     let sample1Encoded = #one->Sample1.t_encode
-    expect(sample1Encoded) |> toEqual(["one"->Js.Json.string]->Js.Json.array)
+    expect(sample1Encoded) |> toEqual(["first"->Js.Json.string]->Js.Json.array)
   })
   test("polymorphic variant decode", _ => {
-    let sample1Decoded = ["two"->Js.Json.string]->Js.Json.array->Sample1.t_decode
+    let sample1Decoded = ["second"->Js.Json.string]->Js.Json.array->Sample1.t_decode
     expect(sample1Decoded) |> toEqual(Ok(#two))
   })
 
