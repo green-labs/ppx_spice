@@ -11,9 +11,9 @@ type parsedDecl = {
 
 let generateEncoderCase generatorSettings
     { name; alias; constrDecl = { pcd_args; pcd_loc } } =
-  let alias_name = getStringFromExpression alias in
+  let alias_name, _, delimit = getStringFromExpression alias in
   let constructorExpr =
-    Exp.constant (Pconst_string (alias_name, Location.none, None))
+    Exp.constant (Pconst_string (alias_name, Location.none, delimit))
   in
 
   {
@@ -29,11 +29,11 @@ let generateDecoderCase generatorSettings
     [%expr Belt.Result.Ok [%e Exp.construct ident None]]
   in
 
-  let alias_name = getStringFromExpression alias in
+  let alias_name, _, delimit = getStringFromExpression alias in
 
   {
     pc_lhs =
-      ( Pconst_string (alias_name, Location.none, None) |> Pat.constant
+      ( Pconst_string (alias_name, Location.none, delimit) |> Pat.constant
       |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
     pc_guard = None;
     pc_rhs = [%expr [%e decoded]];

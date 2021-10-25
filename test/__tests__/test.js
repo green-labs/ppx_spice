@@ -19,10 +19,10 @@ Jest.describe("ppx_spice test", (function (param) {
               }));
         Jest.test("variant encode", (function (param) {
                 var sample2Encoded = Sample2.t_encode(/* One */0);
-                return Jest.Expect.toEqual("first", Jest.Expect.expect(sample2Encoded));
+                return Jest.Expect.toEqual("하나", Jest.Expect.expect(sample2Encoded));
               }));
         return Jest.test("variant decode", (function (param) {
-                      var sample2Decoded = Sample2.t_decode("second");
+                      var sample2Decoded = Sample2.t_decode("\xeb\x91\x98");
                       return Jest.Expect.toEqual({
                                   TAG: /* Ok */0,
                                   _0: /* Two */1

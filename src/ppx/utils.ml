@@ -79,7 +79,7 @@ let getStringFromExpression { pexp_desc; pexp_loc } =
   match pexp_desc with
   | Pexp_constant const -> (
       match const with
-      | Pconst_string (name, _, _) -> name
+      | Pconst_string (name, loc, delimit) -> (name, loc, delimit)
       | _ -> fail pexp_loc "cannot find a name??")
   | _ -> fail pexp_loc "cannot find a name??"
 

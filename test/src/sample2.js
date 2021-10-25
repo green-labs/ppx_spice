@@ -6,9 +6,9 @@ var Js_json = require("rescript/lib/js/js_json.js");
 
 function t_encode(v) {
   if (v) {
-    return "second";
+    return "둘";
   } else {
-    return "first";
+    return "하나";
   }
 }
 
@@ -28,15 +28,15 @@ function t_decode(v) {
     return Decco.error(undefined, "Invalid variant constructor", v);
   }
   switch (tagged._0) {
-    case "first" :
-        return {
-                TAG: /* Ok */0,
-                _0: /* One */0
-              };
-    case "second" :
+    case "\xeb\x91\x98" :
         return {
                 TAG: /* Ok */0,
                 _0: /* Two */1
+              };
+    case "\xed\x95\x98\xeb\x82\x98" :
+        return {
+                TAG: /* Ok */0,
+                _0: /* One */0
               };
     default:
       return Decco.error(undefined, "Invalid variant constructor", v);

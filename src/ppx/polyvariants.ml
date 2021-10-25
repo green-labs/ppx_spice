@@ -14,11 +14,11 @@ type parsedField = {
 
 let generateEncoderCase generatorSettings unboxed row =
   let { name; alias; rowField = { prf_desc } } = row in
-  let alias_name = getStringFromExpression alias in
+  let alias_name, _, delimit = getStringFromExpression alias in
   match prf_desc with
   | Rtag ({ loc }, _attributes, coreTypes) ->
       let constructorExpr =
-        Exp.constant (Pconst_string (alias_name, Location.none, None))
+        Exp.constant (Pconst_string (alias_name, Location.none, delimit))
       in
 
       {
@@ -39,11 +39,11 @@ let generateDecoderCase generatorSettings row =
         [%expr Belt.Result.Ok [%e resultantExp]]
       in
 
-      let alias_name = getStringFromExpression alias in
+      let alias_name, loc, delimit = getStringFromExpression alias in
 
       {
         pc_lhs =
-          ( Pconst_string (alias_name, Location.none, None) |> Pat.constant
+          ( Pconst_string (alias_name, Location.none, delimit) |> Pat.constant
           |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
         pc_guard = None;
         pc_rhs = [%expr [%e decoded]];
