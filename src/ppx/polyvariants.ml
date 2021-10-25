@@ -34,20 +34,24 @@ let generateDecoderCase generatorSettings row =
   let { name; alias; rowField = { prf_desc } } = row in
   match prf_desc with
   | Rtag ({ txt; loc }, _, coreTypes) ->
+      let alias_name, loc, delimit = getStringFromExpression alias in
       let decoded =
         let resultantExp = Exp.variant txt None in
         [%expr Belt.Result.Ok [%e resultantExp]]
       in
 
-      let alias_name, loc, delimit = getStringFromExpression alias in
+      let if' =
+        Exp.apply (makeIdentExpr "=")
+          [
+            ( Asttypes.Nolabel,
+              Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
+              |> fun v -> Some v |> Exp.construct (lid "Js.Json.JSONString") );
+            (Asttypes.Nolabel, [%expr tagged]);
+          ]
+      in
+      let then' = [%expr [%e decoded]] in
 
-      {
-        pc_lhs =
-          ( Pconst_string (alias_name, Location.none, delimit) |> Pat.constant
-          |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
-        pc_guard = None;
-        pc_rhs = [%expr [%e decoded]];
-      }
+      (if', then')
   | Rinherit coreType ->
       fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
 
@@ -101,13 +105,14 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
     | false -> None
   in
 
-  let decoderDefaultCase =
-    {
-      pc_lhs = [%pat? _];
-      pc_guard = None;
-      pc_rhs = [%expr Decco.error "Invalid polyvariant constructor" v];
-    }
+  let rec makeIfThenElse cases =
+    match cases with
+    | [] -> [%expr Decco.error "Not matched" v]
+    | hd :: tl ->
+        let if_, then_ = hd in
+        Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
   in
+
   let decoder =
     match not doDecode with
     | true -> None
@@ -117,9 +122,9 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
         | false ->
             let decoderSwitch =
               List.map (generateDecoderCase generatorSettings) parsedFields
-              |> fun l ->
-              l @ [ decoderDefaultCase ] |> Exp.match_ [%expr tagged]
+              |> makeIfThenElse
             in
+
             Some
               [%expr
                 fun v ->
@@ -129,4 +134,5 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
                       [%e decoderSwitch]
                   | _ -> Decco.error "Not a polyvariant" v])
   in
+
   (encoder, decoder)

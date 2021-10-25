@@ -1,4 +1,2 @@
 @spice
-type t = [@spice.as("first") #one | @spice.as("second") #two]
-
-let sample1 = #one
+type t = [@spice.as(`하나`) #one | @spice.as(`둘`) #two]

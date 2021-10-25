@@ -3,6 +3,7 @@
 
 var Decco = require("./Decco.js");
 var Js_json = require("rescript/lib/js/js_json.js");
+var Caml_obj = require("rescript/lib/js/caml_obj.js");
 
 function t_encode(v) {
   if (v) {
@@ -21,25 +22,24 @@ function t_decode(v) {
     return Decco.error(undefined, "Not a variants", v);
   }
   var tagged = Js_json.classify(v);
-  if (typeof tagged === "number") {
-    return Decco.error(undefined, "Invalid variant constructor", v);
-  }
-  if (tagged.TAG !== /* JSONString */0) {
-    return Decco.error(undefined, "Invalid variant constructor", v);
-  }
-  switch (tagged._0) {
-    case "\xeb\x91\x98" :
-        return {
-                TAG: /* Ok */0,
-                _0: /* Two */1
-              };
-    case "\xed\x95\x98\xeb\x82\x98" :
-        return {
-                TAG: /* Ok */0,
-                _0: /* One */0
-              };
-    default:
-      return Decco.error(undefined, "Invalid variant constructor", v);
+  if (Caml_obj.caml_equal({
+          TAG: /* JSONString */0,
+          _0: "하나"
+        }, tagged)) {
+    return {
+            TAG: /* Ok */0,
+            _0: /* One */0
+          };
+  } else if (Caml_obj.caml_equal({
+          TAG: /* JSONString */0,
+          _0: "둘"
+        }, tagged)) {
+    return {
+            TAG: /* Ok */0,
+            _0: /* Two */1
+          };
+  } else {
+    return Decco.error(undefined, "Not matched", v);
   }
 }
 

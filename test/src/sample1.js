@@ -3,12 +3,13 @@
 
 var Decco = require("./Decco.js");
 var Js_json = require("rescript/lib/js/js_json.js");
+var Caml_obj = require("rescript/lib/js/caml_obj.js");
 
 function t_encode(v) {
   if (v === "two") {
-    return "second";
+    return "둘";
   } else {
-    return "first";
+    return "하나";
   }
 }
 
@@ -21,31 +22,27 @@ function t_decode(v) {
     return Decco.error(undefined, "Not a polyvariant", v);
   }
   var tagged = Js_json.classify(v);
-  if (typeof tagged === "number") {
-    return Decco.error(undefined, "Invalid polyvariant constructor", v);
-  }
-  if (tagged.TAG !== /* JSONString */0) {
-    return Decco.error(undefined, "Invalid polyvariant constructor", v);
-  }
-  switch (tagged._0) {
-    case "first" :
-        return {
-                TAG: /* Ok */0,
-                _0: "one"
-              };
-    case "second" :
-        return {
-                TAG: /* Ok */0,
-                _0: "two"
-              };
-    default:
-      return Decco.error(undefined, "Invalid polyvariant constructor", v);
+  if (Caml_obj.caml_equal({
+          TAG: /* JSONString */0,
+          _0: "하나"
+        }, tagged)) {
+    return {
+            TAG: /* Ok */0,
+            _0: "one"
+          };
+  } else if (Caml_obj.caml_equal({
+          TAG: /* JSONString */0,
+          _0: "둘"
+        }, tagged)) {
+    return {
+            TAG: /* Ok */0,
+            _0: "two"
+          };
+  } else {
+    return Decco.error(undefined, "Not matched", v);
   }
 }
 
-var sample1 = "one";
-
 exports.t_encode = t_encode;
 exports.t_decode = t_decode;
-exports.sample1 = sample1;
 /* No side effect */

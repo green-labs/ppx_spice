@@ -24,20 +24,24 @@ let generateEncoderCase generatorSettings
 
 let generateDecoderCase generatorSettings
     { name; alias; constrDecl = { pcd_args; pcd_loc } } =
+  let alias_name, _, delimit = getStringFromExpression alias in
   let decoded =
     let ident = lid name in
     [%expr Belt.Result.Ok [%e Exp.construct ident None]]
   in
 
-  let alias_name, _, delimit = getStringFromExpression alias in
+  let if' =
+    Exp.apply (makeIdentExpr "=")
+      [
+        ( Asttypes.Nolabel,
+          Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
+          |> fun v -> Some v |> Exp.construct (lid "Js.Json.JSONString") );
+        (Asttypes.Nolabel, [%expr tagged]);
+      ]
+  in
+  let then' = [%expr [%e decoded]] in
 
-  {
-    pc_lhs =
-      ( Pconst_string (alias_name, Location.none, delimit) |> Pat.constant
-      |> fun v -> Some v |> Pat.construct (lid "Js.Json.JSONString") );
-    pc_guard = None;
-    pc_rhs = [%expr [%e decoded]];
-  }
+  (if', then')
 
 let generateUnboxedDecode generatorSettings
     { pcd_name = { txt = name }; pcd_args; pcd_loc } =
@@ -81,12 +85,12 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
     | false -> None
   in
 
-  let decoderDefaultCase =
-    {
-      pc_lhs = [%pat? _];
-      pc_guard = None;
-      pc_rhs = [%expr Decco.error "Invalid variant constructor" v];
-    }
+  let rec makeIfThenElse cases =
+    match cases with
+    | [] -> [%expr Decco.error "Not matched" v]
+    | hd :: tl ->
+        let if_, then_ = hd in
+        Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
   in
 
   let decoder =
@@ -98,8 +102,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
         | false ->
             let decoderSwitch =
               List.map (generateDecoderCase generatorSettings) parsedDecls
-              |> fun l ->
-              l @ [ decoderDefaultCase ] |> Exp.match_ [%expr tagged]
+              |> makeIfThenElse
             in
 
             Some
