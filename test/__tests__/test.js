@@ -10,6 +10,17 @@ Jest.describe("ppx_spice test", (function (param) {
                 var sample1Encoded = Sample1.t_encode("one");
                 return Jest.Expect.toEqual("하나", Jest.Expect.expect(sample1Encoded));
               }));
+        Jest.test("polymorphic variant encode", (function (param) {
+                var sample1Encoded = Sample1.t_encode("two");
+                return Jest.Expect.toEqual("둘", Jest.Expect.expect(sample1Encoded));
+              }));
+        Jest.test("polymorphic variant decode", (function (param) {
+                var sample1Decoded = Sample1.t_decode("하나");
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: "one"
+                          }, Jest.Expect.expect(sample1Decoded));
+              }));
         Jest.test("polymorphic variant decode", (function (param) {
                 var sample1Decoded = Sample1.t_decode("둘");
                 return Jest.Expect.toEqual({
@@ -20,6 +31,17 @@ Jest.describe("ppx_spice test", (function (param) {
         Jest.test("variant encode", (function (param) {
                 var sample2Encoded = Sample2.t_encode(/* One */0);
                 return Jest.Expect.toEqual("하나", Jest.Expect.expect(sample2Encoded));
+              }));
+        Jest.test("variant encode", (function (param) {
+                var sample2Encoded = Sample2.t_encode(/* Two */1);
+                return Jest.Expect.toEqual("둘", Jest.Expect.expect(sample2Encoded));
+              }));
+        Jest.test("variant decode", (function (param) {
+                var sample2Decoded = Sample2.t_decode("하나");
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: /* One */0
+                          }, Jest.Expect.expect(sample2Decoded));
               }));
         return Jest.test("variant decode", (function (param) {
                       var sample2Decoded = Sample2.t_decode("둘");
