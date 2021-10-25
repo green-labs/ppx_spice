@@ -58,8 +58,8 @@ let generateDecoder compositeDecoders =
         Exp.case matchPattern (generateDecodeSwitch compositeDecoders);
         Exp.case
           [%pat? Js.Json.JSONArray _]
-          [%expr Decco.error "Incorrect cardinality" json];
-        Exp.case [%pat? _] [%expr Decco.error "Not a tuple" json];
+          [%expr Spice.error "Incorrect cardinality" json];
+        Exp.case [%pat? _] [%expr Spice.error "Not a tuple" json];
       ]
   in
   [%expr fun json -> [%e outerSwitch]]

@@ -8,7 +8,7 @@ let generateErrorCase numArgs i _ =
     pc_lhs =
       Array.init numArgs (fun which ->
           match which == i with
-          | true -> [%pat? Belt.Result.Error (e : Decco.decodeError)]
+          | true -> [%pat? Belt.Result.Error (e : Spice.decodeError)]
           | false -> [%pat? _])
       |> Array.to_list |> tupleOrSingleton Pat.tuple;
     pc_guard = None;

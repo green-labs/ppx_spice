@@ -24,11 +24,11 @@ let generateEncoderCase generatorSettings unboxed row =
       {
         pc_lhs = Pat.variant name None;
         pc_guard = None;
-        pc_rhs = [%expr Js.Json.string [%e constructorExpr]];
+        pc_rhs = [%expr [%e constructorExpr]];
       }
   (* We don't have enough information to generate a encoder *)
   | Rinherit arg ->
-      fail arg.ptyp_loc "This syntax is not yet implemented by decco"
+      fail arg.ptyp_loc "This syntax is not yet implemented by spice"
 
 let generateDecoderCase generatorSettings row =
   let { name; alias; rowField = { prf_desc } } = row in
@@ -45,15 +45,15 @@ let generateDecoderCase generatorSettings row =
           [
             ( Asttypes.Nolabel,
               Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
-              |> fun v -> Some v |> Exp.construct (lid "Js.Json.JSONString") );
-            (Asttypes.Nolabel, [%expr tagged]);
+            );
+            (Asttypes.Nolabel, [%expr v]);
           ]
       in
       let then' = [%expr [%e decoded]] in
 
       (if', then')
   | Rinherit coreType ->
-      fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
+      fail coreType.ptyp_loc "This syntax is not yet implemented by spice"
 
 let generateUnboxedDecode generatorSettings row =
   let { prf_desc } = row in
@@ -72,7 +72,7 @@ let generateUnboxedDecode generatorSettings row =
           | None -> None)
       | _ -> fail loc "Expected exactly one type argument")
   | Rinherit coreType ->
-      fail coreType.ptyp_loc "This syntax is not yet implemented by decco"
+      fail coreType.ptyp_loc "This syntax is not yet implemented by spice"
 
 let parseDecl generatorSettings
     ({ prf_desc; prf_loc; prf_attributes } as rowField) =
@@ -107,7 +107,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
 
   let rec makeIfThenElse cases =
     match cases with
-    | [] -> [%expr Decco.error "Not matched" v]
+    | [] -> [%expr Spice.error "Not matched" v]
     | hd :: tl ->
         let if_, then_ = hd in
         Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
@@ -125,14 +125,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
               |> makeIfThenElse
             in
 
-            Some
-              [%expr
-                fun v ->
-                  match Js.Json.classify v with
-                  | Js.Json.JSONString _ ->
-                      let tagged = Js.Json.classify v in
-                      [%e decoderSwitch]
-                  | _ -> Decco.error "Not a polyvariant" v])
+            Some [%expr fun v -> [%e decoderSwitch]])
   in
 
   (encoder, decoder)

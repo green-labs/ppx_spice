@@ -6,18 +6,18 @@ let rec addEncoderParams paramNames resultType =
   match paramNames with
   | [] -> resultType
   | hd :: tl ->
-      [%type: ([%t Ast_helper.Typ.var hd] -> Js.Json.t) -> [%t resultType]]
+      [%type: ([%t Ast_helper.Typ.var hd] -> string) -> [%t resultType]]
       |> addEncoderParams tl
 
 let makeResultType valueType =
-  [%type: ([%t valueType], Decco.decodeError) Belt.Result.t]
+  [%type: ([%t valueType], Spice.decodeError) Belt.Result.t]
 
 let rec addDecoderParams paramNames resultType =
   match paramNames with
   | [] -> resultType
   | hd :: tl ->
       let decoderParam =
-        [%type: Js.Json.t -> [%t makeResultType (Ast_helper.Typ.var hd)]]
+        [%type: string -> [%t makeResultType (Ast_helper.Typ.var hd)]]
       in
       [%type: [%t decoderParam] -> [%t resultType]] |> addDecoderParams tl
 
@@ -37,7 +37,7 @@ let generateSigDecls { doEncode; doDecode } typeName paramNames =
     | true ->
         decls
         @ [
-            [%type: [%t valueType] -> Js.Json.t]
+            [%type: [%t valueType] -> string]
             |> addEncoderParams (List.rev paramNames)
             |> Ast_helper.Val.mk (mknoloc encoderPat)
             |> Ast_helper.Sig.value;
@@ -50,7 +50,7 @@ let generateSigDecls { doEncode; doDecode } typeName paramNames =
     | true ->
         decls
         @ [
-            [%type: Js.Json.t -> [%t makeResultType valueType]]
+            [%type: string -> [%t makeResultType valueType]]
             |> addDecoderParams (List.rev paramNames)
             |> Ast_helper.Val.mk (mknoloc decoderPat)
             |> Ast_helper.Sig.value;

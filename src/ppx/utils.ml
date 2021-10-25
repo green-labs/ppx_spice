@@ -101,7 +101,7 @@ let rec isIdentifierUsedInCoreType typeName { ptyp_desc; ptyp_loc } =
       match txt = Lident typeName with
       | true -> true
       | false -> List.exists (isIdentifierUsedInCoreType typeName) childTypes)
-  | _ -> fail ptyp_loc "This syntax is not yet handled by decco"
+  | _ -> fail ptyp_loc "This syntax is not yet handled by spice"
 
 let attrWarning expr =
   {

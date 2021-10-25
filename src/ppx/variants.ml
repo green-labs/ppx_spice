@@ -19,7 +19,7 @@ let generateEncoderCase generatorSettings
   {
     pc_lhs = Pat.construct (lid name) None;
     pc_guard = None;
-    pc_rhs = [%expr Js.Json.string [%e constructorExpr]];
+    pc_rhs = [%expr [%e constructorExpr]];
   }
 
 let generateDecoderCase generatorSettings
@@ -34,9 +34,8 @@ let generateDecoderCase generatorSettings
     Exp.apply (makeIdentExpr "=")
       [
         ( Asttypes.Nolabel,
-          Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
-          |> fun v -> Some v |> Exp.construct (lid "Js.Json.JSONString") );
-        (Asttypes.Nolabel, [%expr tagged]);
+          Pconst_string (alias_name, Location.none, delimit) |> Exp.constant );
+        (Asttypes.Nolabel, [%expr v]);
       ]
   in
   let then' = [%expr [%e decoded]] in
@@ -58,7 +57,7 @@ let generateUnboxedDecode generatorSettings
                   fun v -> Belt.Result.map ([%e d] v, fun v -> [%e constructor])]
           | None -> None)
       | _ -> fail pcd_loc "Expected exactly one type argument")
-  | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by decco"
+  | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
 
 let parseDecl generatorSettings
     ({ pcd_name = { txt }; pcd_loc; pcd_attributes } as constrDecl) =
@@ -87,7 +86,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
 
   let rec makeIfThenElse cases =
     match cases with
-    | [] -> [%expr Decco.error "Not matched" v]
+    | [] -> [%expr Spice.error "Not matched" v]
     | hd :: tl ->
         let if_, then_ = hd in
         Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
@@ -105,14 +104,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
               |> makeIfThenElse
             in
 
-            Some
-              [%expr
-                fun v ->
-                  match Js.Json.classify v with
-                  | Js.Json.JSONString _ ->
-                      let tagged = Js.Json.classify v in
-                      [%e decoderSwitch]
-                  | _ -> Decco.error "Not a variants" v])
+            Some [%expr fun v -> [%e decoderSwitch]])
   in
 
   (encoder, decoder)

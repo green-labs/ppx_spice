@@ -28,80 +28,80 @@ and generateConstrCodecs { doEncode; doDecode }
   match identifier with
   | Lident "string" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.stringToJson]
+        | true -> Some [%expr Spice.stringToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.stringFromJson]
+        | true -> Some [%expr Spice.stringFromJson]
         | false -> None ))
   | Lident "int" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.intToJson]
+        | true -> Some [%expr Spice.intToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.intFromJson]
+        | true -> Some [%expr Spice.intFromJson]
         | false -> None ))
   | Lident "int64" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.int64ToJson]
+        | true -> Some [%expr Spice.int64ToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.int64FromJson]
+        | true -> Some [%expr Spice.int64FromJson]
         | false -> None ))
   | Lident "float" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.floatToJson]
+        | true -> Some [%expr Spice.floatToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.floatFromJson]
+        | true -> Some [%expr Spice.floatFromJson]
         | false -> None ))
   | Lident "bool" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.boolToJson]
+        | true -> Some [%expr Spice.boolToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.boolFromJson]
+        | true -> Some [%expr Spice.boolFromJson]
         | false -> None ))
   | Lident "unit" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.unitToJson]
+        | true -> Some [%expr Spice.unitToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.unitFromJson]
+        | true -> Some [%expr Spice.unitFromJson]
         | false -> None ))
   | Lident "array" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.arrayToJson]
+        | true -> Some [%expr Spice.arrayToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.arrayFromJson]
+        | true -> Some [%expr Spice.arrayFromJson]
         | false -> None ))
   | Lident "list" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.listToJson]
+        | true -> Some [%expr Spice.listToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.listFromJson]
+        | true -> Some [%expr Spice.listFromJson]
         | false -> None ))
   | Lident "option" -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.optionToJson]
+        | true -> Some [%expr Spice.optionToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.optionFromJson]
+        | true -> Some [%expr Spice.optionFromJson]
         | false -> None ))
   | Ldot (Ldot (Lident "Belt", "Result"), "t") -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.resultToJson]
+        | true -> Some [%expr Spice.resultToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.resultFromJson]
+        | true -> Some [%expr Spice.resultFromJson]
         | false -> None ))
   | Ldot (Ldot (Lident "Js", "Dict"), "t") -> (
       ( (match doEncode with
-        | true -> Some [%expr Decco.dictToJson]
+        | true -> Some [%expr Spice.dictToJson]
         | false -> None),
         match doDecode with
-        | true -> Some [%expr Decco.dictFromJson]
+        | true -> Some [%expr Spice.dictFromJson]
         | false -> None ))
   | Ldot (Ldot (Lident "Js", "Json"), "t") -> (
       ( (match doEncode with true -> Some [%expr fun v -> v] | false -> None),
@@ -128,7 +128,7 @@ and generateConstrCodecs { doEncode; doDecode }
               (Exp.ident
                  (mknoloc (Ldot (left, right ^ Utils.decoderFuncSuffix))))
         | false -> None ))
-  | Lapply (_, _) -> fail loc "Lapply syntax not yet handled by decco"
+  | Lapply (_, _) -> fail loc "Lapply syntax not yet handled by spice"
 
 and generateCodecs ({ doEncode; doDecode } as generatorSettings)
     { ptyp_desc; ptyp_loc; ptyp_attributes } =
@@ -161,7 +161,7 @@ and generateCodecs ({ doEncode; doDecode } as generatorSettings)
         | true -> Some (makeIdentExpr (decoderVarPrefix ^ s))
         | false -> None ))
   | Ptyp_constr (constr, typeArgs) -> (
-      let customCodec = getAttributeByName ptyp_attributes "decco.codec" in
+      let customCodec = getAttributeByName ptyp_attributes "spice.codec" in
       let encode, decode =
         match customCodec with
         | Ok None -> generateConstrCodecs generatorSettings constr
@@ -188,4 +188,4 @@ and generateCodecs ({ doEncode; doDecode } as generatorSettings)
       match List.length typeArgs = 0 with
       | true -> (encode, decode)
       | false -> parameterizeCodecs typeArgs encode decode generatorSettings)
-  | _ -> fail ptyp_loc "This syntax is not yet handled by decco"
+  | _ -> fail ptyp_loc "This syntax is not yet handled by spice"
