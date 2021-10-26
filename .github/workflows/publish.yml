@@ -12,7 +12,7 @@ jobs:
     strategy:
       matrix:
         node-version: [12.x]
-        os: [macOS-latest, ubuntu-latest, windows-latest]
+        os: [macOS-latest, ubuntu-latest]
     steps:
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v1
@@ -46,14 +46,19 @@ jobs:
           key: build-${{ matrix.os }}-${{ hashFiles('**/index.json') }}
           restore-keys: build-${{ matrix.os }}-
 
-      - name: build
+      - name: Build
         run: esy b
+
+      - name: Copy built PPX file
+        run: |
+          mv ./_esy/default/build/default/bin/bin.exe ppx.exe
 
       - name: (only on release) Upload artifacts ${{ matrix.os }}
         uses: actions/upload-artifact@master
         with:
           name: ${{ matrix.os }}
-          path: src/_build/default/bin/bin.exe
+          path: src/ppx.exe
+          if-no-files-found: error
 
   publish:
     needs: [build]
@@ -80,20 +85,12 @@ jobs:
           name: macOS-latest
           path: binaries/darwin
 
-      - name: Download windows artifacts
-        if: success()
-        uses: actions/download-artifact@master
-        with:
-          name: windows-latest
-          path: binaries/windows
-
       - name: Move artifacts
         if: success()
         run: |
           mkdir -p bin
-          mv binaries/linux/bin.exe ppx-linux.exe
-          mv binaries/darwin/bin.exe ppx-osx.exe
-          mv binaries/windows/bin.exe ppx-windows.exe
+          mv binaries/linux/ppx.exe ppx-linux.exe
+          mv binaries/darwin/ppx.exe ppx-osx.exe
 
       - name: Publish
         if: success()
