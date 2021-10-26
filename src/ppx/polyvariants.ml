@@ -55,25 +55,6 @@ let generateDecoderCase generatorSettings row =
   | Rinherit coreType ->
       fail coreType.ptyp_loc "This syntax is not yet implemented by spice"
 
-let generateUnboxedDecode generatorSettings row =
-  let { prf_desc } = row in
-  match prf_desc with
-  | Rtag ({ txt; loc }, _, args) -> (
-      match args with
-      | [ a ] -> (
-          let _, d = Codecs.generateCodecs generatorSettings a in
-          match d with
-          | Some d ->
-              let constructor = Exp.construct (lid txt) (Some [%expr v]) in
-
-              Some
-                [%expr
-                  fun v -> Belt.Result.map ([%e d] v, fun v -> [%e constructor])]
-          | None -> None)
-      | _ -> fail loc "Expected exactly one type argument")
-  | Rinherit coreType ->
-      fail coreType.ptyp_loc "This syntax is not yet implemented by spice"
-
 let parseDecl generatorSettings
     ({ prf_desc; prf_loc; prf_attributes } as rowField) =
   let txt =
@@ -107,7 +88,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
 
   let rec makeIfThenElse cases =
     match cases with
-    | [] -> [%expr Spice.error "Not matched" v]
+    | [] -> [%expr Belt.Result.Error ("Not matched" ^ v)]
     | hd :: tl ->
         let if_, then_ = hd in
         Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
@@ -116,16 +97,13 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
   let decoder =
     match not doDecode with
     | true -> None
-    | false -> (
-        match unboxed with
-        | true -> generateUnboxedDecode generatorSettings (List.hd rowFields)
-        | false ->
-            let decoderSwitch =
-              List.map (generateDecoderCase generatorSettings) parsedFields
-              |> makeIfThenElse
-            in
+    | false ->
+        let decoderSwitch =
+          List.map (generateDecoderCase generatorSettings) parsedFields
+          |> makeIfThenElse
+        in
 
-            Some [%expr fun v -> [%e decoderSwitch]])
+        Some [%expr fun v -> [%e decoderSwitch]]
   in
 
   (encoder, decoder)

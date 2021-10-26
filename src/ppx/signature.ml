@@ -9,8 +9,7 @@ let rec addEncoderParams paramNames resultType =
       [%type: ([%t Ast_helper.Typ.var hd] -> string) -> [%t resultType]]
       |> addEncoderParams tl
 
-let makeResultType valueType =
-  [%type: ([%t valueType], Spice.decodeError) Belt.Result.t]
+let makeResultType valueType = [%type: ([%t valueType], string) Belt.Result.t]
 
 let rec addDecoderParams paramNames resultType =
   match paramNames with

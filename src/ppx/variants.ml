@@ -42,23 +42,6 @@ let generateDecoderCase generatorSettings
 
   (if', then')
 
-let generateUnboxedDecode generatorSettings
-    { pcd_name = { txt = name }; pcd_args; pcd_loc } =
-  match pcd_args with
-  | Pcstr_tuple args -> (
-      match args with
-      | [ a ] -> (
-          let _, d = Codecs.generateCodecs generatorSettings a in
-          match d with
-          | Some d ->
-              let constructor = Exp.construct (lid name) (Some [%expr v]) in
-              Some
-                [%expr
-                  fun v -> Belt.Result.map ([%e d] v, fun v -> [%e constructor])]
-          | None -> None)
-      | _ -> fail pcd_loc "Expected exactly one type argument")
-  | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
-
 let parseDecl generatorSettings
     ({ pcd_name = { txt }; pcd_loc; pcd_attributes } as constrDecl) =
   let ({ pexp_desc } as alias) =
@@ -86,7 +69,7 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
 
   let rec makeIfThenElse cases =
     match cases with
-    | [] -> [%expr Spice.error "Not matched" v]
+    | [] -> [%expr Belt.Result.Error ("Not matched" ^ v)]
     | hd :: tl ->
         let if_, then_ = hd in
         Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
@@ -95,16 +78,13 @@ let generateCodecs ({ doEncode; doDecode } as generatorSettings) constrDecls
   let decoder =
     match not doDecode with
     | true -> None
-    | false -> (
-        match unboxed with
-        | true -> generateUnboxedDecode generatorSettings (List.hd constrDecls)
-        | false ->
-            let decoderSwitch =
-              List.map (generateDecoderCase generatorSettings) parsedDecls
-              |> makeIfThenElse
-            in
+    | false ->
+        let decoderSwitch =
+          List.map (generateDecoderCase generatorSettings) parsedDecls
+          |> makeIfThenElse
+        in
 
-            Some [%expr fun v -> [%e decoderSwitch]])
+        Some [%expr fun v -> [%e decoderSwitch]]
   in
 
   (encoder, decoder)
