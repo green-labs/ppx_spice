@@ -1,10 +1,10 @@
 {
   "checksum": "4bde96391a6fbd27267260408ad13f1d",
-  "root": "ppx_spices@link-dev:./esy.json",
+  "root": "ppx_spice@link-dev:./esy.json",
   "node": {
-    "ppx_spices@link-dev:./esy.json": {
-      "id": "ppx_spices@link-dev:./esy.json",
-      "name": "ppx_spices",
+    "ppx_spice@link-dev:./esy.json": {
+      "id": "ppx_spice@link-dev:./esy.json",
+      "name": "ppx_spice",
       "version": "link-dev:./esy.json",
       "source": { "type": "link-dev", "path": ".", "manifest": "esy.json" },
       "overrides": [],
