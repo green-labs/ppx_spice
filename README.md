@@ -2,10 +2,12 @@
 
 A ReScript PPX which generates the (polymorphic) variant (de)serializer.
 
+> This ppx is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco.
+
 Example
 ```rescript
 @spice
-type t = | @spice.as(`first`) One | @spice.as(`second`) Two
+type t = | @spice.as(`하나`) One | @spice.as(`second`) Two
 
 // automatically generated
 let t_encode = ...
@@ -13,9 +15,9 @@ let t_encode = ...
 // automatically generated
 let t_decode = ...
 
-let encoded = Sample2.One->t_encode // `first`->Js.Json.string
+let encoded = One->t_encode // `하나`
 
-let decoded = `second`->Js.Json.string->t_decode // Result.Ok(Two)
+let decoded = `second`->t_decode // Belt.Result.Ok(Two)
 ```
 
 ## Development
