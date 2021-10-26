@@ -1,9 +1,21 @@
 {
-  "name": "spice-ppx",
-  "version": "1.0.0",
-  "description": "Spice ppx",
+  "name": "@greenlabs/ppx-spice",
+  "version": "0.1.0",
+  "description": "ReScript PPX which generate the (polymorphic) variant (de)serializer",
   "license": "MIT",
+  "author": "Greenlabs Dev <developer@greenlabs.co.kr>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/green-labs/ppx_spice.git"
+  },
+  "bugs": {
+    "url": "https://github.com/green-labs/ppx_spice/issues"
+    },
+  "keywords": [
+    "ReScript",
+    "ppx"
+  ],
   "scripts": {
-    "postinstall": "node postInstall.js"
+    "postinstall": "node ./postInstall.js"
   }
 }
