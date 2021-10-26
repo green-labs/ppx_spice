@@ -20,6 +20,20 @@ let encoded = One->t_encode // `하나`
 let decoded = `second`->t_decode // Belt.Result.Ok(Two)
 ```
 
+## Install
+
+```
+// bsconfig.json
+"bs-dependencies": [
+  ...,
+  "@greenlabs/ppx-spice"
+],
+"ppx-flags": [
+  ...,
+  "@greenlabs/ppx-spice/ppx"
+],
+```
+
 ## Development
 
 1. Install dependencies
