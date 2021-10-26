@@ -2,6 +2,10 @@
 
 A ReScript PPX which generates the (polymorphic) variant (de)serializer.
 
+`Spice` is originated from
+* The `Spice melange` in the novel, Dune
+* A flavour for the (polymorphic) variant
+
 > This ppx is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco.
 
 Example
@@ -23,11 +27,11 @@ let decoded = `second`->t_decode // Belt.Result.Ok(Two)
 ## Install
 
 ```
+yarn add -D @greenlabs/ppx-spice
+```
+
+```
 // bsconfig.json
-"bs-dependencies": [
-  ...,
-  "@greenlabs/ppx-spice"
-],
 "ppx-flags": [
   ...,
   "@greenlabs/ppx-spice/ppx"
