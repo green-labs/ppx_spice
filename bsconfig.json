@@ -1,0 +1,9 @@
+{
+  "name": "@greenlabs/ppx-spice",
+  "refmt": 3,
+  "ppx-flags": ["./ppx"],
+  "warnings": {
+    "number": "+A-9-40-42"
+  },
+  "bsc-flags": ["-bs-super-errors"]
+}
