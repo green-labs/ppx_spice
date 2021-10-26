@@ -1,0 +1,102 @@
+name: ppx_spice publish
+
+on: [workflow_dispatch]
+
+jobs:
+  build:
+    name: ${{ matrix.os }}/node-${{ matrix.node-version }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: src
+    strategy:
+      matrix:
+        node-version: [12.x]
+        os: [macOS-latest, ubuntu-latest, windows-latest]
+    steps:
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - uses: actions/checkout@v2
+
+      - name: Install esy
+        run: |
+          npm install -g esy
+
+      - name: Try to restore install cache
+        uses: actions/cache@v1
+        with:
+          path: ~/.esy/source
+          key: source-${{ hashFiles('**/index.json') }}
+
+      - name: Install
+        run: esy install
+
+      - name: Print esy cache
+        id: print_esy_cache
+        run: node ../.github/workflows/print_esy_cache.js
+
+      - name: Try to restore dependencies cache
+        id: deps-cache
+        uses: actions/cache@v1
+        with:
+          path: ${{ steps.print_esy_cache.outputs.esy_cache }}
+          key: build-${{ matrix.os }}-${{ hashFiles('**/index.json') }}
+          restore-keys: build-${{ matrix.os }}-
+
+      - name: build
+        run: esy b
+
+      - name: (only on release) Upload artifacts ${{ matrix.os }}
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ matrix.os }}
+          path: src/_build/default/bin/bin.exe
+
+  publish:
+    needs: [build]
+    name: (only on release) Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v1
+      - uses: actions/setup-node@v1
+        with:
+          node-version: "12.x"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Download linux artifacts
+        if: success()
+        uses: actions/download-artifact@master
+        with:
+          name: ubuntu-latest
+          path: binaries/linux
+
+      - name: Download macOS artifacts
+        if: success()
+        uses: actions/download-artifact@master
+        with:
+          name: macOS-latest
+          path: binaries/darwin
+
+      - name: Download windows artifacts
+        if: success()
+        uses: actions/download-artifact@master
+        with:
+          name: windows-latest
+          path: binaries/windows
+
+      - name: Move artifacts
+        if: success()
+        run: |
+          mkdir -p bin
+          mv binaries/linux/bin.exe ppx-linux.exe
+          mv binaries/darwin/bin.exe ppx-osx.exe
+          mv binaries/windows/bin.exe ppx-windows.exe
+
+      - name: Publish
+        if: success()
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

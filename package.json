@@ -1,6 +1,6 @@
 {
   "name": "@greenlabs/ppx-spice",
-  "version": "0.1.1",
+  "version": "0.1.3",
   "description": "ReScript PPX which generate the (polymorphic) variant (de)serializer",
   "license": "MIT",
   "author": "Greenlabs Dev <developer@greenlabs.co.kr>",
