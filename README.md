@@ -1,12 +1,22 @@
 # Spice
 
-A ReScript PPX which generates the (polymorphic) variant (de)serializer.
+A ReScript PPX, which generates the (polymorphic) variant (de)serializer.
 
 `Spice` is originated from
 * The `Spice melange` in the novel, Dune
-* A flavour for the (polymorphic) variant
+* A flavor for the (polymorphic) variant
 
-> This ppx is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco.
+> This PPX is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco.
+
+## Motivation
+
+1. Parse the string instead of the array
+
+To parse the JSON data, [Decco](https://github.com/reasonml-labs/decco) is heavily used in the projects. There's a restriction to parse the JSON string into a variant. With the Decco, the data should be formed in an array. It is obvious at some point. But generally, we face the string data which needs to be parsed into the variant in most use cases.
+
+2. Parse/stringify the Unicode string
+
+There are many cases to parse and stringify the string data against (polymorphic) variants. Furthermore, the Unicode string needs to be handled with a variant. Currently, pattern matching is not working for the Unicode string in ReScript, the Spice is using `if ... then ... else` to compare the Unicode string.
 
 Example
 ```rescript
