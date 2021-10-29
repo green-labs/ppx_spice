@@ -2,21 +2,21 @@ open Ppxlib
 open Parsetree
 open Ast_helper
 
-let annotationName = "spice"
+let annotation_name = "spice"
 
-let encoderFuncSuffix = "_encode"
+let encoder_func_suffix = "_encode"
 
-let decoderFuncSuffix = "_decode"
+let decoder_func_suffix = "_decode"
 
-let encoderVarPrefix = "encoder_"
+let encoder_var_prefix = "encoder_"
 
-let decoderVarPrefix = "decoder_"
+let decoder_var_prefix = "decoder_"
 
 let loc = !default_loc
 
 let fail loc message = Location.raise_errorf ~loc "%s" message
 
-let longidentParse = Longident.parse [@@ocaml.warning "-3"]
+let longident_parse = Longident.parse [@@ocaml.warning "-3"]
 
 let mkloc txt loc = { Location.txt; loc }
 
@@ -24,12 +24,12 @@ let mknoloc txt = mkloc txt Location.none
 
 let lid ?(loc = Location.none) s = mkloc (Longident.parse s) loc
 
-let makeIdentExpr s = Exp.ident (mknoloc (longidentParse s))
+let make_ident_expr s = Exp.ident (mknoloc (longident_parse s))
 
-let tupleOrSingleton tuple l =
+let tuple_or_singleton tuple l =
   match List.length l > 1 with true -> tuple l | false -> List.hd l
 
-let getAttributeByName attributes name =
+let get_attribute_by_name attributes name =
   let filtered =
     attributes
     |> List.filter (fun { attr_name = { Location.txt } } -> txt = name)
@@ -39,26 +39,26 @@ let getAttributeByName attributes name =
   | [ attribute ] -> Ok (Some attribute)
   | _ -> Error ("Too many occurrences of \"" ^ name ^ "\" attribute")
 
-type generatorSettings = { doEncode : bool; doDecode : bool }
+type generator_settings = { do_encode : bool; do_decode : bool }
 
-let getGeneratorSettingsFromAttributes attributes =
-  match getAttributeByName attributes annotationName with
+let get_generator_settings_from_attributes attributes =
+  match get_attribute_by_name attributes annotation_name with
   | Ok None -> (
       match
-        ( getAttributeByName attributes (annotationName ^ ".decode"),
-          getAttributeByName attributes (annotationName ^ ".encode") )
+        ( get_attribute_by_name attributes (annotation_name ^ ".decode"),
+          get_attribute_by_name attributes (annotation_name ^ ".encode") )
       with
       | Ok (Some _), Ok (Some _) ->
-          Ok (Some { doEncode = true; doDecode = true })
-      | Ok (Some _), Ok None -> Ok (Some { doEncode = false; doDecode = true })
-      | Ok None, Ok (Some _) -> Ok (Some { doEncode = true; doDecode = false })
+          Ok (Some { do_encode = true; do_decode = true })
+      | Ok (Some _), Ok None -> Ok (Some { do_encode = false; do_decode = true })
+      | Ok None, Ok (Some _) -> Ok (Some { do_encode = true; do_decode = false })
       | Ok None, Ok None -> Ok None
       | (Error _ as e), _ -> e
       | _, (Error _ as e) -> e)
-  | Ok (Some _) -> Ok (Some { doEncode = true; doDecode = true })
+  | Ok (Some _) -> Ok (Some { do_encode = true; do_decode = true })
   | Error _ as e -> e
 
-let getExpressionFromPayload { attr_name = { loc }; attr_payload = payload } =
+let get_expression_from_payload { attr_name = { loc }; attr_payload = payload } =
   match payload with
   | PStr [ { pstr_desc } ] -> (
       match pstr_desc with
@@ -66,7 +66,7 @@ let getExpressionFromPayload { attr_name = { loc }; attr_payload = payload } =
       | _ -> fail loc "Expected expression as attribute payload")
   | _ -> fail loc "Expected expression as attribute payload"
 
-let getParamNames params =
+let get_param_names params =
   params
   |> List.map (fun ({ ptyp_desc; ptyp_loc }, _) ->
          match ptyp_desc with
@@ -75,7 +75,7 @@ let getParamNames params =
              fail ptyp_loc "Unhandled param type" |> fun v ->
              Location.Error v |> raise)
 
-let getStringFromExpression { pexp_desc; pexp_loc } =
+let get_string_from_expression { pexp_desc; pexp_loc } =
   match pexp_desc with
   | Pexp_constant const -> (
       match const with
@@ -83,11 +83,11 @@ let getStringFromExpression { pexp_desc; pexp_loc } =
       | _ -> fail pexp_loc "cannot find a name??")
   | _ -> fail pexp_loc "cannot find a name??"
 
-let indexConst i =
+let index_const i =
   Pconst_string ("[" ^ string_of_int i ^ "]", Location.none, None)
   |> Exp.constant
 
-let rec isIdentifierUsedInCoreType typeName { ptyp_desc; ptyp_loc } =
+let rec is_identifier_used_in_core_type type_name { ptyp_desc; ptyp_loc } =
   match ptyp_desc with
   | Ptyp_arrow (_, _, _) ->
       fail ptyp_loc "Can't generate codecs for function type"
@@ -95,15 +95,15 @@ let rec isIdentifierUsedInCoreType typeName { ptyp_desc; ptyp_loc } =
   | Ptyp_package _ -> fail ptyp_loc "Can't generate codecs for module type"
   | Ptyp_variant (_, _, _) -> fail ptyp_loc "Unexpected Ptyp_variant"
   | Ptyp_var _ -> false
-  | Ptyp_tuple childTypes ->
-      List.exists (isIdentifierUsedInCoreType typeName) childTypes
-  | Ptyp_constr ({ txt }, childTypes) -> (
-      match txt = Lident typeName with
+  | Ptyp_tuple child_types ->
+      List.exists (is_identifier_used_in_core_type type_name) child_types
+  | Ptyp_constr ({ txt }, child_types) -> (
+      match txt = Lident type_name with
       | true -> true
-      | false -> List.exists (isIdentifierUsedInCoreType typeName) childTypes)
+      | false -> List.exists (is_identifier_used_in_core_type type_name) child_types)
   | _ -> fail ptyp_loc "This syntax is not yet handled by spice"
 
-let attrWarning expr =
+let attr_warning expr =
   {
     attr_name = mkloc "ocaml.warning" loc;
     attr_payload = PStr [ { pstr_desc = Pstr_eval (expr, []); pstr_loc = loc } ];

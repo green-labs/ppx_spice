@@ -2,56 +2,57 @@ open Ppxlib
 open Parsetree
 open Utils
 
-let rec addEncoderParams paramNames resultType =
-  match paramNames with
-  | [] -> resultType
+let rec add_encoder_params param_names result_type =
+  match param_names with
+  | [] -> result_type
   | hd :: tl ->
-      [%type: ([%t Ast_helper.Typ.var hd] -> string) -> [%t resultType]]
-      |> addEncoderParams tl
+      [%type: ([%t Ast_helper.Typ.var hd] -> string) -> [%t result_type]]
+      |> add_encoder_params tl
 
-let makeResultType valueType = [%type: ([%t valueType], string) Belt.Result.t]
+let make_result_type value_type =
+  [%type: ([%t value_type], string) Belt.Result.t]
 
-let rec addDecoderParams paramNames resultType =
-  match paramNames with
-  | [] -> resultType
+let rec add_decoder_params param_names result_type =
+  match param_names with
+  | [] -> result_type
   | hd :: tl ->
-      let decoderParam =
-        [%type: string -> [%t makeResultType (Ast_helper.Typ.var hd)]]
+      let decoder_param =
+        [%type: string -> [%t make_result_type (Ast_helper.Typ.var hd)]]
       in
-      [%type: [%t decoderParam] -> [%t resultType]] |> addDecoderParams tl
+      [%type: [%t decoder_param] -> [%t result_type]] |> add_decoder_params tl
 
-let generateSigDecls { doEncode; doDecode } typeName paramNames =
-  let encoderPat = typeName ^ Utils.encoderFuncSuffix in
-  let decoderPat = typeName ^ Utils.decoderFuncSuffix in
-  let valueType =
-    paramNames
+let generate_sig_decls { do_encode; do_decode } type_name param_names =
+  let encoder_pat = type_name ^ Utils.encoder_func_suffix in
+  let decoder_pat = type_name ^ Utils.decoder_func_suffix in
+  let value_type =
+    param_names
     |> List.map Ast_helper.Typ.var
-    |> Ast_helper.Typ.constr (lid typeName)
+    |> Ast_helper.Typ.constr (lid type_name)
   in
 
   let decls = [] in
 
   let decls =
-    match doEncode with
+    match do_encode with
     | true ->
         decls
         @ [
-            [%type: [%t valueType] -> string]
-            |> addEncoderParams (List.rev paramNames)
-            |> Ast_helper.Val.mk (mknoloc encoderPat)
+            [%type: [%t value_type] -> string]
+            |> add_encoder_params (List.rev param_names)
+            |> Ast_helper.Val.mk (mknoloc encoder_pat)
             |> Ast_helper.Sig.value;
           ]
     | false -> decls
   in
 
   let decls =
-    match doDecode with
+    match do_decode with
     | true ->
         decls
         @ [
-            [%type: string -> [%t makeResultType valueType]]
-            |> addDecoderParams (List.rev paramNames)
-            |> Ast_helper.Val.mk (mknoloc decoderPat)
+            [%type: string -> [%t make_result_type value_type]]
+            |> add_decoder_params (List.rev param_names)
+            |> Ast_helper.Val.mk (mknoloc decoder_pat)
             |> Ast_helper.Sig.value;
           ]
     | false -> decls
@@ -59,7 +60,7 @@ let generateSigDecls { doEncode; doDecode } typeName paramNames =
 
   decls
 
-let mapTypeDecl decl =
+let map_type_decl decl =
   let {
     ptype_attributes;
     ptype_name = { txt = typeName };
@@ -69,15 +70,18 @@ let mapTypeDecl decl =
     decl
   in
 
-  match getGeneratorSettingsFromAttributes ptype_attributes with
+  match get_generator_settings_from_attributes ptype_attributes with
   | Error s -> fail ptype_loc s
   | Ok None -> []
-  | Ok (Some generatorSettings) ->
-      generateSigDecls generatorSettings typeName (getParamNames ptype_params)
+  | Ok (Some generator_settings) ->
+      generate_sig_decls generator_settings typeName
+        (get_param_names ptype_params)
 
-let mapSignatureItem mapper ({ psig_desc } as signatureItem) =
+let map_signature_item mapper ({ psig_desc } as signature_item) =
   match psig_desc with
   | Psig_type (_, decls) ->
-      let generatedSigItems = decls |> List.map mapTypeDecl |> List.concat in
-      mapper#signature_item signatureItem :: generatedSigItems
-  | _ -> [ mapper#signature_item signatureItem ]
+      let generated_sig_items =
+        decls |> List.map map_type_decl |> List.concat
+      in
+      mapper#signature_item signature_item :: generated_sig_items
+  | _ -> [ mapper#signature_item signature_item ]

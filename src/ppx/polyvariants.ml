@@ -6,42 +6,42 @@ open Utils
    one arg it's the coreType, but if there's more than one arg it's a tuple of one tuple with those args.
    This function abstract this particuliarity from polyvariants (It's different from Variants). *)
 
-type parsedField = {
+type parsed_field = {
   name : string;
   alias : expression;
-  rowField : Parsetree.row_field;
+  row_field : Parsetree.row_field;
 }
 
-let generateEncoderCase generatorSettings unboxed row =
-  let { name; alias; rowField = { prf_desc } } = row in
-  let alias_name, _, delimit = getStringFromExpression alias in
+let generate_encoder_case _generator_settings _unboxed row =
+  let { name; alias; row_field = { prf_desc } } = row in
+  let alias_name, _, delimit = get_string_from_expression alias in
   match prf_desc with
-  | Rtag ({ loc }, _attributes, coreTypes) ->
-      let constructorExpr =
+  | Rtag (_, _attributes, _) ->
+      let constructor_expr =
         Exp.constant (Pconst_string (alias_name, Location.none, delimit))
       in
 
       {
         pc_lhs = Pat.variant name None;
         pc_guard = None;
-        pc_rhs = [%expr [%e constructorExpr]];
+        pc_rhs = [%expr [%e constructor_expr]];
       }
   (* We don't have enough information to generate a encoder *)
   | Rinherit arg ->
       fail arg.ptyp_loc "This syntax is not yet implemented by spice"
 
-let generateDecoderCase generatorSettings row =
-  let { name; alias; rowField = { prf_desc } } = row in
+let generate_decoder_case _generator_settings row =
+  let { alias; row_field = { prf_desc } } = row in
   match prf_desc with
-  | Rtag ({ txt; loc }, _, coreTypes) ->
-      let alias_name, loc, delimit = getStringFromExpression alias in
+  | Rtag ({ txt }, _, _) ->
+      let alias_name, loc, delimit = get_string_from_expression alias in
       let decoded =
-        let resultantExp = Exp.variant txt None in
-        [%expr Belt.Result.Ok [%e resultantExp]]
+        let resultant_exp = Exp.variant txt None in
+        [%expr Belt.Result.Ok [%e resultant_exp]]
       in
 
       let if' =
-        Exp.apply (makeIdentExpr "=")
+        Exp.apply (make_ident_expr "=")
           [
             ( Asttypes.Nolabel,
               Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
@@ -52,11 +52,11 @@ let generateDecoderCase generatorSettings row =
       let then' = [%expr [%e decoded]] in
 
       (if', then')
-  | Rinherit coreType ->
-      fail coreType.ptyp_loc "This syntax is not yet implemented by spice"
+  | Rinherit core_type ->
+      fail core_type.ptyp_loc "This syntax is not yet implemented by spice"
 
-let parseDecl generatorSettings
-    ({ prf_desc; prf_loc; prf_attributes } as rowField) =
+let parse_decl _generator_settings
+    ({ prf_desc; prf_loc; prf_attributes } as row_field) =
   let txt =
     match prf_desc with
     | Rtag ({ txt }, _, _) -> txt
@@ -64,46 +64,46 @@ let parseDecl generatorSettings
   in
 
   let alias =
-    match getAttributeByName prf_attributes "spice.as" with
-    | Ok (Some attribute) -> getExpressionFromPayload attribute
+    match get_attribute_by_name prf_attributes "spice.as" with
+    | Ok (Some attribute) -> get_expression_from_payload attribute
     | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
     | Error s -> fail prf_loc s
   in
 
-  { name = txt; alias; rowField }
+  { name = txt; alias; row_field }
 
-let generateCodecs ({ doEncode; doDecode } as generatorSettings) rowFields
+let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
     unboxed =
-  let parsedFields = List.map (parseDecl generatorSettings) rowFields in
+  let parsed_fields = List.map (parse_decl generator_settings) row_fields in
 
   let encoder =
-    match doEncode with
+    match do_encode with
     | true ->
-        List.map (generateEncoderCase generatorSettings unboxed) parsedFields
+        List.map (generate_encoder_case generator_settings unboxed) parsed_fields
         |> Exp.match_ [%expr v]
         |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
         |> Option.some
     | false -> None
   in
 
-  let rec makeIfThenElse cases =
+  let rec make_ifthenelse cases =
     match cases with
     | [] -> [%expr Belt.Result.Error ("Not matched" ^ v)]
     | hd :: tl ->
         let if_, then_ = hd in
-        Exp.ifthenelse if_ then_ (Some (makeIfThenElse tl))
+        Exp.ifthenelse if_ then_ (Some (make_ifthenelse tl))
   in
 
   let decoder =
-    match not doDecode with
+    match not do_decode with
     | true -> None
     | false ->
-        let decoderSwitch =
-          List.map (generateDecoderCase generatorSettings) parsedFields
-          |> makeIfThenElse
+        let decoder_switch =
+          List.map (generate_decoder_case generator_settings) parsed_fields
+          |> make_ifthenelse
         in
 
-        Some [%expr fun v -> [%e decoderSwitch]]
+        Some [%expr fun v -> [%e decoder_switch]]
   in
 
   (encoder, decoder)

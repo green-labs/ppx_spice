@@ -3,20 +3,24 @@ open Parsetree
 open Ast_helper
 open Utils
 
-let addParams paramNames expr =
+let add_params param_names expr =
   List.fold_right
     (fun s acc ->
       let pat = Pat.var (mknoloc s) in
       Exp.fun_ Asttypes.Nolabel None pat acc)
-    paramNames
+    param_names
     [%expr fun v -> [%e expr] v]
 
-let generateCodecDecls typeName paramNames (encoder, decoder) =
-  let encoderPat = Pat.var (mknoloc (typeName ^ Utils.encoderFuncSuffix)) in
-  let encoderParamNames = List.map (fun s -> encoderVarPrefix ^ s) paramNames in
+let generate_codec_decls type_name param_names (encoder, decoder) =
+  let encoder_pat = Pat.var (mknoloc (type_name ^ Utils.encoder_func_suffix)) in
+  let encoder_param_names =
+    List.map (fun s -> encoder_var_prefix ^ s) param_names
+  in
 
-  let decoderPat = Pat.var (mknoloc (typeName ^ Utils.decoderFuncSuffix)) in
-  let decoderParamNames = List.map (fun s -> decoderVarPrefix ^ s) paramNames in
+  let decoder_pat = Pat.var (mknoloc (type_name ^ Utils.decoder_func_suffix)) in
+  let decoder_param_names =
+    List.map (fun s -> decoder_var_prefix ^ s) param_names
+  in
 
   let vbs = [] in
 
@@ -27,9 +31,9 @@ let generateCodecDecls typeName paramNames (encoder, decoder) =
         vbs
         @ [
             Vb.mk
-              ~attrs:[ attrWarning [%expr "-39"] ]
-              encoderPat
-              (addParams encoderParamNames encoder);
+              ~attrs:[ attr_warning [%expr "-39"] ]
+              encoder_pat
+              (add_params encoder_param_names encoder);
           ]
   in
 
@@ -40,18 +44,18 @@ let generateCodecDecls typeName paramNames (encoder, decoder) =
         vbs
         @ [
             Vb.mk
-              ~attrs:[ attrWarning [%expr "-4"]; attrWarning [%expr "-39"] ]
-              decoderPat
-              (addParams decoderParamNames decoder);
+              ~attrs:[ attr_warning [%expr "-4"]; attr_warning [%expr "-39"] ]
+              decoder_pat
+              (add_params decoder_param_names decoder);
           ]
   in
 
   vbs
 
-let mapTypeDecl decl =
+let map_type_decl decl =
   let {
     ptype_attributes;
-    ptype_name = { txt = typeName };
+    ptype_name = { txt = type_name };
     ptype_manifest;
     ptype_params;
     ptype_loc;
@@ -60,36 +64,37 @@ let mapTypeDecl decl =
     decl
   in
 
-  let isUnboxed =
-    match Utils.getAttributeByName ptype_attributes "unboxed" with
+  let is_unboxed =
+    match Utils.get_attribute_by_name ptype_attributes "unboxed" with
     | Ok (Some _) -> true
     | _ -> false
   in
 
-  match getGeneratorSettingsFromAttributes ptype_attributes with
+  match get_generator_settings_from_attributes ptype_attributes with
   | Ok None -> []
-  | Ok (Some generatorSettings) -> (
+  | Ok (Some generator_settings) -> (
       match (ptype_manifest, ptype_kind) with
       | None, Ptype_abstract ->
           fail ptype_loc "Can't generate codecs for unspecified type"
-      | Some { ptyp_desc = Ptyp_variant (rowFields, _, _) }, Ptype_abstract ->
-          generateCodecDecls typeName
-            (getParamNames ptype_params)
-            (Polyvariants.generateCodecs generatorSettings rowFields isUnboxed)
+      | Some { ptyp_desc = Ptyp_variant (row_fields, _, _) }, Ptype_abstract ->
+          generate_codec_decls type_name
+            (get_param_names ptype_params)
+            (Polyvariants.generate_codecs generator_settings row_fields
+               is_unboxed)
       | None, Ptype_variant decls ->
-          generateCodecDecls typeName
-            (getParamNames ptype_params)
-            (Variants.generateCodecs generatorSettings decls isUnboxed)
+          generate_codec_decls type_name
+            (get_param_names ptype_params)
+            (Variants.generate_codecs generator_settings decls is_unboxed)
       | _ -> fail ptype_loc "This type is not handled by spice")
   | Error s -> fail ptype_loc s
 
-let mapStructureItem mapper ({ pstr_desc } as structureItem) =
+let map_structure_item mapper ({ pstr_desc } as structure_item) =
   match pstr_desc with
-  | Pstr_type (recFlag, decls) -> (
-      let valueBindings = decls |> List.map mapTypeDecl |> List.concat in
-      [ mapper#structure_item structureItem ]
+  | Pstr_type (rec_flag, decls) -> (
+      let value_bindings = decls |> List.map map_type_decl |> List.concat in
+      [ mapper#structure_item structure_item ]
       @
-      match List.length valueBindings > 0 with
-      | true -> [ Str.value recFlag valueBindings ]
+      match List.length value_bindings > 0 with
+      | true -> [ Str.value rec_flag value_bindings ]
       | false -> [])
-  | _ -> [ mapper#structure_item structureItem ]
+  | _ -> [ mapper#structure_item structure_item ]
