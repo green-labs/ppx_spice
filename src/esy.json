@@ -2,10 +2,12 @@
   "name": "ppx_spice",
   "description": "OCaml/ReasonML ppx that generate parse/stringify function",
   "scripts": {
-    "format": "dune build @fmt --auto-promote"
+    "format": "dune build @fmt --auto-promote",
+    "release-static": "dune build --root . --only-packages '#{self.name}' --ignore-promoted-rules --no-config --profile release-static"
   },
   "esy": {
-    "build": "dune build -p #{self.name}"
+    "build": "dune build -p #{self.name}",
+    "buildsInSource": "_build"
   },
   "dependencies": {
     "@opam/dune": "*",
