@@ -44,7 +44,7 @@ jobs:
       - name: Build
         run: esy b
 
-      - name: Build
+      - name: Build release-static
         run: esy release-static
 
       - name: Copy built PPX file
@@ -106,7 +106,7 @@ jobs:
 
       - name: Copy built PPX file
         run: |
-          mv ./_esy/default/build/default/bin/bin.exe ppx.exe
+          mv ./_build/default/bin/bin.exe ppx.exe
 
       - name: (only on release) Upload artifacts ${{ matrix.os }}
         uses: actions/upload-artifact@master
