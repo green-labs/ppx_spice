@@ -12,8 +12,7 @@
   "dependencies": {
     "@opam/dune": "*",
     "@opam/ppxlib": "0.23.0",
-    "ocaml": "4.12.x",
-    "@opam/reason": "*"
+    "ocaml": "4.12.x"
   },
   "devDependencies": {
     "@opam/ocaml-lsp-server": "1.8.3",
