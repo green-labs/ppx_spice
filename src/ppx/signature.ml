@@ -6,18 +6,18 @@ let rec add_encoder_params param_names result_type =
   match param_names with
   | [] -> result_type
   | hd :: tl ->
-      [%type: ([%t Ast_helper.Typ.var hd] -> string) -> [%t result_type]]
+      [%type: ([%t Ast_helper.Typ.var hd] -> Js.Json.t) -> [%t result_type]]
       |> add_encoder_params tl
 
 let make_result_type value_type =
-  [%type: ([%t value_type], string) Belt.Result.t]
+  [%type: ([%t value_type], Spice.decodeError) Belt.Result.t]
 
 let rec add_decoder_params param_names result_type =
   match param_names with
   | [] -> result_type
   | hd :: tl ->
       let decoder_param =
-        [%type: string -> [%t make_result_type (Ast_helper.Typ.var hd)]]
+        [%type: Js.Json.t -> [%t make_result_type (Ast_helper.Typ.var hd)]]
       in
       [%type: [%t decoder_param] -> [%t result_type]] |> add_decoder_params tl
 
@@ -37,20 +37,19 @@ let generate_sig_decls { do_encode; do_decode } type_name param_names =
     | true ->
         decls
         @ [
-            [%type: [%t value_type] -> string]
+            [%type: [%t value_type] -> Js.Json.t]
             |> add_encoder_params (List.rev param_names)
             |> Ast_helper.Val.mk (mknoloc encoder_pat)
             |> Ast_helper.Sig.value;
           ]
     | false -> decls
   in
-
   let decls =
     match do_decode with
     | true ->
         decls
         @ [
-            [%type: string -> [%t make_result_type value_type]]
+            [%type: Js.Json.t -> [%t make_result_type value_type]]
             |> add_decoder_params (List.rev param_names)
             |> Ast_helper.Val.mk (mknoloc decoder_pat)
             |> Ast_helper.Sig.value;
@@ -63,7 +62,7 @@ let generate_sig_decls { do_encode; do_decode } type_name param_names =
 let map_type_decl decl =
   let {
     ptype_attributes;
-    ptype_name = { txt = typeName };
+    ptype_name = { txt = type_name };
     ptype_params;
     ptype_loc;
   } =
@@ -74,7 +73,7 @@ let map_type_decl decl =
   | Error s -> fail ptype_loc s
   | Ok None -> []
   | Ok (Some generator_settings) ->
-      generate_sig_decls generator_settings typeName
+      generate_sig_decls generator_settings type_name
         (get_param_names ptype_params)
 
 let map_signature_item mapper ({ psig_desc } as signature_item) =

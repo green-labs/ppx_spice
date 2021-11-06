@@ -50,15 +50,18 @@ let get_generator_settings_from_attributes attributes =
       with
       | Ok (Some _), Ok (Some _) ->
           Ok (Some { do_encode = true; do_decode = true })
-      | Ok (Some _), Ok None -> Ok (Some { do_encode = false; do_decode = true })
-      | Ok None, Ok (Some _) -> Ok (Some { do_encode = true; do_decode = false })
+      | Ok (Some _), Ok None ->
+          Ok (Some { do_encode = false; do_decode = true })
+      | Ok None, Ok (Some _) ->
+          Ok (Some { do_encode = true; do_decode = false })
       | Ok None, Ok None -> Ok None
       | (Error _ as e), _ -> e
       | _, (Error _ as e) -> e)
   | Ok (Some _) -> Ok (Some { do_encode = true; do_decode = true })
   | Error _ as e -> e
 
-let get_expression_from_payload { attr_name = { loc }; attr_payload = payload } =
+let get_expression_from_payload { attr_name = { loc }; attr_payload = payload }
+    =
   match payload with
   | PStr [ { pstr_desc } ] -> (
       match pstr_desc with
@@ -100,7 +103,8 @@ let rec is_identifier_used_in_core_type type_name { ptyp_desc; ptyp_loc } =
   | Ptyp_constr ({ txt }, child_types) -> (
       match txt = Lident type_name with
       | true -> true
-      | false -> List.exists (is_identifier_used_in_core_type type_name) child_types)
+      | false ->
+          List.exists (is_identifier_used_in_core_type type_name) child_types)
   | _ -> fail ptyp_loc "This syntax is not yet handled by spice"
 
 let attr_warning expr =

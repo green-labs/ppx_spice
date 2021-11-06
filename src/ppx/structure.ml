@@ -1,6 +1,7 @@
 open Ppxlib
 open Parsetree
 open Ast_helper
+open Codecs
 open Utils
 
 let add_params param_names expr =
@@ -81,10 +82,18 @@ let map_type_decl decl =
             (get_param_names ptype_params)
             (Polyvariants.generate_codecs generator_settings row_fields
                is_unboxed)
+      | Some manifest, _ ->
+          generate_codec_decls type_name
+            (get_param_names ptype_params)
+            (generate_codecs generator_settings manifest)
       | None, Ptype_variant decls ->
           generate_codec_decls type_name
             (get_param_names ptype_params)
             (Variants.generate_codecs generator_settings decls is_unboxed)
+      | None, Ptype_record decls ->
+          generate_codec_decls type_name
+            (get_param_names ptype_params)
+            (Records.generate_codecs generator_settings decls is_unboxed)
       | _ -> fail ptype_loc "This type is not handled by spice")
   | Error s -> fail ptype_loc s
 
