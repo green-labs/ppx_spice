@@ -3,7 +3,7 @@
   "sources": [
     {
       "dir": "src",
-      "subdirs": true
+      "subdirs": ["rescript"]
     },
     {
       "dir": "test",
