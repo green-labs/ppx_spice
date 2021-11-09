@@ -155,7 +155,9 @@ jobs:
 
       - name: Change npm release version
         if: success()
-        run: npm version ${{ github.event.inputs.release_version }} 
+        uses: reedyuk/npm-version@1.1.1
+        with:
+          version: ${{ github.event.inputs.release_version }}
 
       - name: Pack package
         if: success()
