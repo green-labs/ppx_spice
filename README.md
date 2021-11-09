@@ -32,9 +32,9 @@ let t_encode = ...
 // automatically generated
 let t_decode = ...
 
-let encoded = One->t_encode // `하나`
+let encoded = One->t_encode // Js.Json.JSONString(`하나`)
 
-let decoded = `second`->t_decode // Belt.Result.Ok(Two)
+let decoded = Js.Json.string(`second`)->t_decode // Belt.Result.Ok(Two)
 ```
 
 2. Record
@@ -46,9 +46,20 @@ type t = {
   @spice.key("spice-value") value: int,
 }
 
-let encoded = sampleRecord->Records.t_encode // Js.Json.JSONObject
+let sample = Js.Dict.empty()
+sample->Js.Dict.set("spice-label", Js.Json.string("sample"))
+sample->Js.Dict.set("spice-value", Js.Json.number(1.0))
+let sampleJson = sample->Js.Json.object_
 
-let decoded = sampleJson->Records.t_decode // record t
+let sampleRecord: t = {
+  label: "sample",
+  value: 1,
+}
+
+
+let encoded = sampleRecord->Records.t_encode // sampleJson
+
+let decoded = sampleJson->Records.t_decode // Belt.Result.Ok(sampleRecord)
 ```
 
 ## Install
