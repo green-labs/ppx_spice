@@ -1,4 +1,4 @@
-name: ppx_spice publish
+name: ppx_spice publish prerelease
 
 on:
   workflow_dispatch:
