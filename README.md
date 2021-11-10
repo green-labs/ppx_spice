@@ -124,6 +124,10 @@ yarn add -D @greenlabs/ppx-spice
 
 ```
 // bsconfig.json
+
+"bs-dependencies": [
+  "@greenlabs/ppx-spice"
+],
 "ppx-flags": [
   ...,
   "@greenlabs/ppx-spice/ppx"
