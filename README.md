@@ -6,13 +6,67 @@ A ReScript PPX, which generates JSON (de)serializers.
 * The `Spice melange` in the novel, Dune
 * A flavor for the (polymorphic) variant
 
-> This PPX is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco. Spice has implemented all the features of Decco@1.5.0 and additional useful features for (polymorphic) variant of its own.
+> This PPX is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco. Spice has implemented all the features of Decco@1.5.0 and additional useful features for the (polymorphic) variant of its own.
 
 ## Motivation
 
 1. Parse the string instead of the array to the (polymorphic) variant
 
 To parse the JSON data, [Decco](https://github.com/reasonml-labs/decco) is being heavily used in many projects. But, there's a restriction to parse the JSON string into a (polymorphic) variant with the Decco. The JSON data should be formed in an array. It is obvious at some point. But generally, we face the string data which needs to be parsed into the variant in most use cases.
+
+Whenever it is needed to parse the response in Json, the custom encoder/decoder functions are needed to parse the Json string into the (polymorphic) variant with Decco. But you don't need to write it with the Spice as long as you add `@spice.as` in (polymorphic) variants.
+
+with Decco
+
+```
+@decco
+type status = WAITING | PROCESSING | SUCCESS | FAIL
+
+let encoderStatus = v =>
+  switch v {
+  | WAITING => "waiting"
+  | PROCESSING => "processing"
+  | SUCCESS => "success"
+  | FAIL => "fail"
+  }->Js.Json.string
+
+let decoderStatus = json => {
+  switch json |> Js.Json.classify {
+  | Js.Json.JSONString(str) =>
+    switch str {
+    | "waiting" => WAITING->Ok
+    | "processing" => PROCESSING->Ok
+    | "success" => SUCCESS->Ok
+    | "fail" => FAIL->Ok
+    | _ => Error({Decco.path: "", message: "Expected JSONString", value: json})
+    }
+  | _ => Error({Decco.path: "", message: "Expected JSONString", value: json})
+  }
+}
+
+let codecStatus: Decco.codec<status> = (encoderStatus, decoderStatus)
+
+
+@decco
+type data = {
+  status: @decco.codec(codecStatus) status,
+}
+```
+
+with Spice
+```
+@spice
+type status =
+  | @spice.as("waiting") WAITING
+  | @spice.as("processing") PROCESSING
+  | @spice.as("success") SUCCESS
+  | @spice.as("fail") FAIL
+
+@spice
+type data = {
+  status: status,
+}
+```
 
 2. Parse/stringify the Unicode string
 
