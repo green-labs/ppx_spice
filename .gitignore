@@ -3,3 +3,4 @@ lib
 node_modules
 _esy
 _build
+ppx_spice.install
