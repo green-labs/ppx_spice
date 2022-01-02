@@ -1,0 +1,21 @@
+opam-version: "2.0"
+name: "ppx_spice"
+version: "0.1.6"
+synopsis: "ReScript PPX which generate JSON (de)serializer"
+description: """
+ReScript PPX which generate JSON (de)serializer
+"""
+maintainer: "Greenlabs Dev <developer@greenlabs.co.kr>"
+authors: "Greenlabs Dev <developer@greenlabs.co.kr>"
+license: "MIT"
+homepage: "https://github.com/green-labs/ppx_spice"
+bug-reports: "https://github.com/green-labs/ppx_spice/issues"
+dev-repo: "git+https://github.com/green-labs/ppx_spice.git"
+depends: [
+  "ocaml" {>= "4.12.1"}
+  "dune" { >= "2.7"}
+  "ppxlib"
+]
+build: [
+  ["dune" "build" "-p" name "-j" jobs]
+]
