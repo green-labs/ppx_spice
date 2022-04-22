@@ -3,8 +3,9 @@
 A ReScript PPX, which generates JSON (de)serializers.
 
 `Spice` is originated from
-* The `Spice melange` in the novel, Dune
-* A flavor for the (polymorphic) variant
+
+- The `Spice melange` in the novel, Dune
+- A flavor for the (polymorphic) variant
 
 > This PPX is highly influenced by [Decco](https://github.com/reasonml-labs/decco) and developed with forking the source codes of Decco. Spice has implemented all the features of Decco@1.5.0 and additional useful features for the (polymorphic) variant of its own.
 
@@ -18,7 +19,7 @@ Whenever it is needed to parse the response in Json, the custom encoder/decoder 
 
 with Decco
 
-```
+```rescript
 @decco
 type status = WAITING | PROCESSING | SUCCESS | FAIL
 
@@ -54,7 +55,8 @@ type data = {
 ```
 
 with Spice
-```
+
+```rescript
 @spice
 type status =
   | @spice.as("waiting") WAITING
@@ -118,11 +120,11 @@ let decoded = sampleJson->Records.t_decode // Belt.Result.Ok(sampleRecord)
 
 ## Install
 
-```
+```sh
 yarn add -D @greenlabs/ppx-spice
 ```
 
-```
+```json
 // bsconfig.json
 
 "bs-dependencies": [
