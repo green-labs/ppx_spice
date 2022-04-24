@@ -113,3 +113,5 @@ let attr_warning expr =
     attr_payload = PStr [ { pstr_desc = Pstr_eval (expr, []); pstr_loc = loc } ];
     attr_loc = loc;
   }
+
+let some_if_true cond a = match cond with true -> Some a | false -> None
