@@ -124,9 +124,5 @@ let parse_decl generator_settings
 let generate_codecs ({ do_encode; do_decode } as generator_settings) decls
     unboxed =
   let parsed_decls = List.map (parse_decl generator_settings) decls in
-  ( (match do_encode with
-    | true -> Some (generate_encoder parsed_decls unboxed)
-    | false -> None),
-    match do_decode with
-    | true -> Some (generate_decoder parsed_decls unboxed)
-    | false -> None )
+  ( some_if_true do_encode (generate_encoder parsed_decls unboxed),
+    some_if_true do_decode (generate_decoder parsed_decls unboxed) )
