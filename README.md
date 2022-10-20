@@ -88,7 +88,7 @@ let t_encode = ...
 // automatically generated
 let t_decode = ...
 
-let encoded = One->t_encode // Js.Json.JSONString(`하나`)
+let encoded = One->t_encode // Js.Json.string(`하나`)
 
 let decoded = Js.Json.string(`second`)->t_decode // Belt.Result.Ok(Two)
 ```
