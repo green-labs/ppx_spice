@@ -14,7 +14,7 @@ let error = (~path=?, message, value) => {
   | None => ""
   | Some(s) => s
   }
-  Belt.Result.Error({path: path, message: message, value: value})
+  Belt.Result.Error({path, message, value})
 }
 
 let stringToJson = s => Js.Json.string(s)
@@ -97,6 +97,11 @@ let optionToJson = (encoder, opt) =>
   | Some(x) => encoder(x)
   | None => Js.Json.null
   }
+
+let filterOptional = arr =>
+  arr
+  |> Belt.Array.keep(_, ((_, isOptional, x)) => !(isOptional && x == Js.Json.null))
+  |> Belt.Array.map(_, ((k, _, v)) => (k, v))
 
 let optionFromJson = (decoder, json) =>
   switch Js.Json.decodeNull(json) {

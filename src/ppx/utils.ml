@@ -24,7 +24,7 @@ let mknoloc txt = mkloc txt Location.none
 
 let lid ?(loc = Location.none) s = mkloc (Longident.parse s) loc
 
-let make_ident_expr s = Exp.ident (mknoloc (longident_parse s))
+let make_ident_expr ?attrs s = Exp.ident ?attrs (mknoloc (longident_parse s))
 
 let tuple_or_singleton tuple l =
   match List.length l > 1 with true -> tuple l | false -> List.hd l
