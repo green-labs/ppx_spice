@@ -16,13 +16,13 @@ Jest.describe("record with @spice.key", (function (param) {
                 var encoded = Records.t_encode(sampleRecord);
                 return Jest.Expect.toEqual(sample, Jest.Expect.expect(encoded));
               }));
-        return Jest.test("decode", (function (param) {
-                      var decoded = Records.t_decode(sample);
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: sampleRecord
-                                }, Jest.Expect.expect(decoded));
-                    }));
+        Jest.test("decode", (function (param) {
+                var decoded = Records.t_decode(sample);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: sampleRecord
+                          }, Jest.Expect.expect(decoded));
+              }));
       }));
 
 Jest.describe("record without @spice.key", (function (param) {
@@ -37,13 +37,64 @@ Jest.describe("record without @spice.key", (function (param) {
                 var encoded = Records.t1_encode(sampleRecord);
                 return Jest.Expect.toEqual(sample, Jest.Expect.expect(encoded));
               }));
-        return Jest.test("decode", (function (param) {
-                      var decoded = Records.t1_decode(sample);
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: sampleRecord
-                                }, Jest.Expect.expect(decoded));
-                    }));
+        Jest.test("decode", (function (param) {
+                var decoded = Records.t1_decode(sample);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: sampleRecord
+                          }, Jest.Expect.expect(decoded));
+              }));
+      }));
+
+Jest.describe("record with optional field", (function (param) {
+        var sample1 = {};
+        sample1["label"] = "sample";
+        sample1["value"] = 1.0;
+        var sampleRecord1 = {
+          label: "sample",
+          value: 1
+        };
+        Jest.test("encode", (function (param) {
+                var encoded = Records.tOp_encode(sampleRecord1);
+                return Jest.Expect.toEqual(sample1, Jest.Expect.expect(encoded));
+              }));
+        Jest.test("decode", (function (param) {
+                var decoded = Records.tOp_decode(sample1);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: sampleRecord1
+                          }, Jest.Expect.expect(decoded));
+              }));
+        var sample2 = {};
+        sample2["label"] = "sample";
+        var sampleRecord2 = {
+          label: "sample"
+        };
+        Jest.test("encode omit optional field", (function (param) {
+                var encoded = Records.tOp_encode(sampleRecord2);
+                return Jest.Expect.toEqual(sample2, Jest.Expect.expect(encoded));
+              }));
+        Jest.test("decode omit optional field", (function (param) {
+                var decoded = Records.tOp_decode(sample2);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: sampleRecord2
+                          }, Jest.Expect.expect(decoded));
+              }));
+        var sample3 = {};
+        sample3["label"] = null;
+        var sampleRecord3 = {};
+        Jest.test("encode omit optional field with None field", (function (param) {
+                var encoded = Records.tOp_encode(sampleRecord3);
+                return Jest.Expect.toEqual(sample3, Jest.Expect.expect(encoded));
+              }));
+        Jest.test("decode omit optional field with None field", (function (param) {
+                var decoded = Records.tOp_decode(sample3);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: sampleRecord3
+                          }, Jest.Expect.expect(decoded));
+              }));
       }));
 
 /*  Not a pure module */

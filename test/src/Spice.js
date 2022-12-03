@@ -6,6 +6,8 @@ var Curry = require("rescript/lib/js/curry.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
 var Js_json = require("rescript/lib/js/js_json.js");
 var Js_math = require("rescript/lib/js/js_math.js");
+var Caml_obj = require("rescript/lib/js/caml_obj.js");
+var Js_array = require("rescript/lib/js/js_array.js");
 var Belt_Array = require("rescript/lib/js/belt_Array.js");
 var Caml_int64 = require("rescript/lib/js/caml_int64.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
@@ -166,14 +168,12 @@ function unitFromJson(param) {
         };
 }
 
-function arrayToJson(encoder, arr) {
-  return arr.map(Curry.__1(encoder));
-}
+var arrayToJson = Js_array.map;
 
 function arrayFromJson(decoder, json) {
   var arr = Js_json.decodeArray(json);
   if (arr !== undefined) {
-    return arr.reduce((function (acc, jsonI, i) {
+    return Js_array.reducei((function (acc, jsonI, i) {
                   var match = Curry._1(decoder, jsonI);
                   if (acc.TAG !== /* Ok */0) {
                     return acc;
@@ -181,7 +181,7 @@ function arrayFromJson(decoder, json) {
                   if (match.TAG === /* Ok */0) {
                     return {
                             TAG: /* Ok */0,
-                            _0: acc._0.concat([match._0])
+                            _0: Js_array.concat([match._0], acc._0)
                           };
                   }
                   var error = match._0;
@@ -196,7 +196,7 @@ function arrayFromJson(decoder, json) {
                 }), {
                 TAG: /* Ok */0,
                 _0: []
-              });
+              }, arr);
   } else {
     return {
             TAG: /* Error */1,
@@ -211,7 +211,7 @@ function arrayFromJson(decoder, json) {
 
 function listToJson(encoder, list) {
   var arr = $$Array.of_list(list);
-  return arr.map(Curry.__1(encoder));
+  return Js_array.map(encoder, arr);
 }
 
 function listFromJson(decoder, json) {
@@ -225,6 +225,18 @@ function optionToJson(encoder, opt) {
   } else {
     return null;
   }
+}
+
+function filterOptional(arr) {
+  var __x = Belt_Array.keep(arr, (function (param) {
+          return !(param[1] && Caml_obj.equal(param[2], null));
+        }));
+  return Belt_Array.map(__x, (function (param) {
+                return [
+                        param[0],
+                        param[2]
+                      ];
+              }));
 }
 
 function optionFromJson(decoder, json) {
@@ -426,6 +438,7 @@ exports.arrayFromJson = arrayFromJson;
 exports.listToJson = listToJson;
 exports.listFromJson = listFromJson;
 exports.optionToJson = optionToJson;
+exports.filterOptional = filterOptional;
 exports.optionFromJson = optionFromJson;
 exports.resultToJson = resultToJson;
 exports.resultFromJson = resultFromJson;
