@@ -20,13 +20,13 @@ Jest.describe("variants with @spice.as", (function (param) {
                             _0: /* One */0
                           }, Jest.Expect.expect(variantDecoded));
               }));
-        return Jest.test("decode 둘", (function (param) {
-                      var variantDecoded = Variants.t_decode("둘");
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: /* Two */1
-                                }, Jest.Expect.expect(variantDecoded));
-                    }));
+        Jest.test("decode 둘", (function (param) {
+                var variantDecoded = Variants.t_decode("둘");
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: /* Two */1
+                          }, Jest.Expect.expect(variantDecoded));
+              }));
       }));
 
 Jest.describe("variants without @spice.as", (function (param) {
@@ -45,13 +45,13 @@ Jest.describe("variants without @spice.as", (function (param) {
                             _0: /* One1 */0
                           }, Jest.Expect.expect(variantDecoded));
               }));
-        return Jest.test("decode [\"Two1\"]", (function (param) {
-                      var variantDecoded = Variants.t1_decode(["Two1"]);
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: /* Two1 */1
-                                }, Jest.Expect.expect(variantDecoded));
-                    }));
+        Jest.test("decode [\"Two1\"]", (function (param) {
+                var variantDecoded = Variants.t1_decode(["Two1"]);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: /* Two1 */1
+                          }, Jest.Expect.expect(variantDecoded));
+              }));
       }));
 
 Jest.describe("unboxed variants with @spice.as", (function (param) {
@@ -59,13 +59,13 @@ Jest.describe("unboxed variants with @spice.as", (function (param) {
                 var variantEncoded = Variants.t2_encode(0);
                 return Jest.Expect.toEqual(0.0, Jest.Expect.expect(variantEncoded));
               }));
-        return Jest.test("decode 하나", (function (param) {
-                      var variantDecoded = Variants.t2_decode(0.0);
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: 0
-                                }, Jest.Expect.expect(variantDecoded));
-                    }));
+        Jest.test("decode 하나", (function (param) {
+                var variantDecoded = Variants.t2_decode(0.0);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: 0
+                          }, Jest.Expect.expect(variantDecoded));
+              }));
       }));
 
 Jest.describe("unboxed variants without @spice.as", (function (param) {
@@ -73,13 +73,13 @@ Jest.describe("unboxed variants without @spice.as", (function (param) {
                 var variantEncoded = Variants.t3_encode(0);
                 return Jest.Expect.toEqual(0.0, Jest.Expect.expect(variantEncoded));
               }));
-        return Jest.test("decode 0", (function (param) {
-                      var variantDecoded = Variants.t3_decode(0.0);
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: 0
-                                }, Jest.Expect.expect(variantDecoded));
-                    }));
+        Jest.test("decode 0", (function (param) {
+                var variantDecoded = Variants.t3_decode(0.0);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: 0
+                          }, Jest.Expect.expect(variantDecoded));
+              }));
       }));
 
 /*  Not a pure module */

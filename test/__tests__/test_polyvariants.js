@@ -5,28 +5,28 @@ var Jest = require("@glennsl/bs-jest/src/jest.js");
 var Polyvariants = require("../src/Polyvariants.js");
 
 Jest.describe("polymorphic variants with attribute", (function (param) {
-        Jest.test("encode \xed\x95\x98\xeb\x82\x98", (function (param) {
+        Jest.test("encode 하나", (function (param) {
                 var polyvariantEncoded = Polyvariants.t_encode("one");
                 return Jest.Expect.toEqual("하나", Jest.Expect.expect(polyvariantEncoded));
               }));
-        Jest.test("encode \xeb\x91\x98", (function (param) {
+        Jest.test("encode 둘", (function (param) {
                 var polyvariantEncoded = Polyvariants.t_encode("two");
                 return Jest.Expect.toEqual("둘", Jest.Expect.expect(polyvariantEncoded));
               }));
-        Jest.test("decode \xed\x95\x98\xeb\x82\x98", (function (param) {
+        Jest.test("decode 하나", (function (param) {
                 var polyvariantDecoded = Polyvariants.t_decode("하나");
                 return Jest.Expect.toEqual({
                             TAG: /* Ok */0,
                             _0: "one"
                           }, Jest.Expect.expect(polyvariantDecoded));
               }));
-        return Jest.test("decode \xeb\x91\x98", (function (param) {
-                      var polyvariantDecoded = Polyvariants.t_decode("둘");
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: "two"
-                                }, Jest.Expect.expect(polyvariantDecoded));
-                    }));
+        Jest.test("decode 둘", (function (param) {
+                var polyvariantDecoded = Polyvariants.t_decode("둘");
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: "two"
+                          }, Jest.Expect.expect(polyvariantDecoded));
+              }));
       }));
 
 Jest.describe("polymorphic variants", (function (param) {
@@ -45,13 +45,13 @@ Jest.describe("polymorphic variants", (function (param) {
                             _0: "one"
                           }, Jest.Expect.expect(polyvariantDecoded));
               }));
-        return Jest.test("decode two", (function (param) {
-                      var polyvariantDecoded = Polyvariants.t1_decode(["two"]);
-                      return Jest.Expect.toEqual({
-                                  TAG: /* Ok */0,
-                                  _0: "two"
-                                }, Jest.Expect.expect(polyvariantDecoded));
-                    }));
+        Jest.test("decode two", (function (param) {
+                var polyvariantDecoded = Polyvariants.t1_decode(["two"]);
+                return Jest.Expect.toEqual({
+                            TAG: /* Ok */0,
+                            _0: "two"
+                          }, Jest.Expect.expect(polyvariantDecoded));
+              }));
       }));
 
 /*  Not a pure module */

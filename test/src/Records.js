@@ -7,16 +7,18 @@ var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 
 function t_encode(v) {
-  return Js_dict.fromArray([
-              [
-                "spice-label",
-                Spice.stringToJson(v.label)
-              ],
-              [
-                "spice-value",
-                Spice.intToJson(v.value)
-              ]
-            ]);
+  return Js_dict.fromArray(Spice.filterOptional([
+                  [
+                    "spice-label",
+                    false,
+                    Spice.stringToJson(v.label)
+                  ],
+                  [
+                    "spice-value",
+                    false,
+                    Spice.intToJson(v.value)
+                  ]
+                ]));
 }
 
 function t_decode(v) {
@@ -62,16 +64,18 @@ function t_decode(v) {
 }
 
 function t1_encode(v) {
-  return Js_dict.fromArray([
-              [
-                "label",
-                Spice.stringToJson(v.label)
-              ],
-              [
-                "value",
-                Spice.intToJson(v.value)
-              ]
-            ]);
+  return Js_dict.fromArray(Spice.filterOptional([
+                  [
+                    "label",
+                    false,
+                    Spice.stringToJson(v.label)
+                  ],
+                  [
+                    "value",
+                    false,
+                    Spice.intToJson(v.value)
+                  ]
+                ]));
 }
 
 function t1_decode(v) {
@@ -116,8 +120,67 @@ function t1_decode(v) {
         };
 }
 
+function tOp_encode(v) {
+  return Js_dict.fromArray(Spice.filterOptional([
+                  [
+                    "label",
+                    false,
+                    Spice.optionToJson(Spice.stringToJson, v.label)
+                  ],
+                  [
+                    "value",
+                    true,
+                    Spice.optionToJson(Spice.intToJson, v.value)
+                  ]
+                ]));
+}
+
+function tOp_decode(v) {
+  var dict = Js_json.classify(v);
+  if (typeof dict === "number") {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  if (dict.TAG !== /* JSONObject */2) {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  var dict$1 = dict._0;
+  var label = Spice.optionFromJson(Spice.stringFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "label"), null));
+  if (label.TAG === /* Ok */0) {
+    var value = Spice.optionFromJson(Spice.intFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "value"), null));
+    if (value.TAG === /* Ok */0) {
+      return {
+              TAG: /* Ok */0,
+              _0: {
+                label: label._0,
+                value: value._0
+              }
+            };
+    }
+    var e = value._0;
+    return {
+            TAG: /* Error */1,
+            _0: {
+              path: ".value" + e.path,
+              message: e.message,
+              value: e.value
+            }
+          };
+  }
+  var e$1 = label._0;
+  return {
+          TAG: /* Error */1,
+          _0: {
+            path: ".label" + e$1.path,
+            message: e$1.message,
+            value: e$1.value
+          }
+        };
+}
+
 exports.t_encode = t_encode;
 exports.t_decode = t_decode;
 exports.t1_encode = t1_encode;
 exports.t1_decode = t1_decode;
+exports.tOp_encode = tOp_encode;
+exports.tOp_decode = tOp_decode;
 /* No side effect */

@@ -3,6 +3,7 @@
 
 var Spice = require("./Spice.js");
 var Js_json = require("rescript/lib/js/js_json.js");
+var Js_array = require("rescript/lib/js/js_array.js");
 var Belt_Array = require("rescript/lib/js/belt_Array.js");
 
 function t_encode(v) {
@@ -57,7 +58,7 @@ function t1_decode(v) {
   if (json_arr$1.length === 0) {
     return Spice.error(undefined, "Expected polyvariant, found empty array", v);
   }
-  var tagged = json_arr$1.map(Js_json.classify);
+  var tagged = Js_array.map(Js_json.classify, json_arr$1);
   var match = Belt_Array.getExn(tagged, 0);
   if (typeof match !== "number" && match.TAG === /* JSONString */0) {
     switch (match._0) {

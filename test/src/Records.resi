@@ -9,3 +9,9 @@ type t1 = {
   label: string,
   value: int,
 }
+
+@spice
+type tOp = {
+  label: option<string>,
+  value?: int,
+}
