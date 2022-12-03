@@ -11,7 +11,15 @@ type parsed_decl = {
   field : expression;
   codecs : expression option * expression option;
   default : expression option;
+  is_optional : bool;
 }
+
+let optional_attr : Ppxlib.Parsetree.attribute =
+  {
+    attr_name = { txt = "ns.optional"; loc = Location.none };
+    attr_payload = PStr [];
+    attr_loc = Location.none;
+  }
 
 let generate_encoder decls unboxed =
   match unboxed with
@@ -22,11 +30,17 @@ let generate_encoder decls unboxed =
   | false ->
       let arrExpr =
         decls
-        |> List.map (fun { key; field; codecs = encoder, _ } ->
-               [%expr [%e key], [%e Option.get encoder] [%e field]])
+        |> List.map (fun { key; field; codecs = encoder, _; is_optional } ->
+               let is_optional =
+                 if is_optional then [%expr true] else [%expr false]
+               in
+               [%expr
+                 [%e key], [%e is_optional], [%e Option.get encoder] [%e field]])
         |> Exp.array
       in
-      [%expr [%e arrExpr] |> Js.Dict.fromArray |> Js.Json.object_]
+      [%expr
+        [%e arrExpr] |> Spice.filterOptional |> Js.Dict.fromArray
+        |> Js.Json.object_]
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
 
 let generate_dict_get { key; codecs = _, decoder; default } =
@@ -53,7 +67,10 @@ let generate_error_case { key } =
   }
 
 let generate_final_record_expr decls =
-  decls |> List.map (fun { name } -> (lid name, make_ident_expr name))
+  decls
+  |> List.map (fun { name; is_optional } ->
+         let attrs = if is_optional then [ optional_attr ] else [] in
+         (lid name, make_ident_expr ~attrs name))
   |> fun l -> [%expr Belt.Result.Ok [%e Exp.record l None]]
 
 let generate_success_case { name } success_expr =
@@ -113,12 +130,20 @@ let parse_decl generator_settings
     | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
     | Error s -> fail pld_loc s
   in
+  let optional_attrs = [ "ns.optional"; "res.optional" ] in
+  let is_optional =
+    optional_attrs
+    |> List.map (fun attr -> get_attribute_by_name pld_attributes attr)
+    |> List.exists (function Ok (Some _) -> true | _ -> false)
+  in
+
   {
     name = txt;
     key;
     field = Exp.field [%expr v] (lid txt);
-    codecs = Codecs.generate_codecs generator_settings pld_type;
+    codecs = Codecs.generate_codecs ~is_optional generator_settings pld_type;
     default;
+    is_optional;
   }
 
 let generate_codecs ({ do_encode; do_decode } as generator_settings) decls
