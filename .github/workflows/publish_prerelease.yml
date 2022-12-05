@@ -83,15 +83,52 @@ jobs:
           path: src/ppx.exe
           if-no-files-found: error
 
+  build_windows:
+    name: ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: src
+    strategy:
+      matrix:
+        os: [windows-latest]
+        ocaml-compiler:
+          - 4.12.1
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Use OCaml ${{ matrix.ocaml-compiler}}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - name: Install deps
+        run: opam install . --deps-only --with-test
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Copy built PPX file
+        run: |
+          mv ./_build/default/bin/bin.exe ppx.exe
+
+      - name: (only on release) Upload artifacts ${{ matrix.os }}
+        uses: actions/upload-artifact@master
+        with:
+          name: ${{ matrix.os }}
+          path: src/ppx.exe
+          if-no-files-found: error
+
   publish:
-    needs: [build_linux, build_macos]
+    needs: [build_linux, build_macos, build_windows]
     name: (only on release) Publish
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/setup-node@v3
         with:
-          node-version: "12.x"
+          node-version: 16
           registry-url: "https://registry.npmjs.org"
 
       - name: Download linux artifacts
@@ -108,12 +145,20 @@ jobs:
           name: macOS-latest
           path: binaries/darwin
 
+      - name: Download windows artifacts
+        if: success()
+        uses: actions/download-artifact@master
+        with:
+          name: windows-latest
+          path: binaries/windows
+
       - name: Move artifacts
         if: success()
         run: |
           mkdir -p bin
           mv binaries/linux/ppx.exe ppx-linux.exe
           mv binaries/darwin/ppx.exe ppx-osx.exe
+          mv binaries/windows/ppx.exe ppx-windows.exe
 
       - name: Change npm release version
         if: success()

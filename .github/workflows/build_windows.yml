@@ -3,8 +3,8 @@ name: ppx_spice build windows
 on: [workflow_dispatch]
 
 jobs:
-  build_macos:
-    name: ${{ matrix.os }}/node-${{ matrix.node-version }}
+  build_windows:
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
