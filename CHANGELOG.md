@@ -5,3 +5,4 @@
 #### :rocket: New Feature
 
 - Add support for the optional field record
+- Add Windows platform support
