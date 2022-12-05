@@ -22,7 +22,7 @@ jobs:
           - 4.12.1
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -59,7 +59,7 @@ jobs:
           - 4.12.1
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -96,7 +96,7 @@ jobs:
           - 4.12.1
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -122,10 +122,10 @@ jobs:
 
   publish:
     needs: [build_linux, build_macos, build_windows]
-    name: (only on release) Publish
+    name: (only on release) Publish (pre-release)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: 16
