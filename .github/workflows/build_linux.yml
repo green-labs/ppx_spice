@@ -15,6 +15,7 @@ jobs:
         ocaml-compiler:
           - 4.12.1
 
+    steps:
       - uses: actions/checkout@v2
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
