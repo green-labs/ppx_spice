@@ -4,48 +4,32 @@ on: [workflow_dispatch]
 
 jobs:
   build_linux:
-    name: ${{ matrix.os }}/node-${{ matrix.node-version }}
+    name: ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     defaults:
       run:
         working-directory: src
     strategy:
       matrix:
-        node-version: [12.x]
         os: [ubuntu-latest]
-    container:
-      image: alexfedoseev/alpine-node-yarn-esy:0.0.4
-    steps:
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
+        ocaml-compiler:
+          - 4.12.1
 
       - uses: actions/checkout@v2
 
-      - name: Add tar
-        run: apk add --no-cache tar
-
-      - name: Install
-        run: esy install
-
-      - name: Print esy cache
-        id: print_esy_cache
-        run: node ../.github/workflows/print_esy_cache.js
-
-      - name: Try to restore dependencies cache
-        uses: actions/cache@v2
-        id: deps-cache
+      - name: Use OCaml ${{ matrix.ocaml-compiler}}
+        uses: ocaml/setup-ocaml@v2
         with:
-          path: ${{ steps.print_esy_cache.outputs.esy_cache }}
-          key: build-${{ matrix.os }}-${{ hashFiles('**/index.json') }}
-          restore-keys: build-${{ matrix.os }}-
+          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+
+      - name: Install deps
+        run: opam install . --deps-only --with-test
 
       - name: Build
-        run: esy b
+        run: opam exec -- dune build
 
       - name: Build release-static
-        run: esy release-static
+        run: dune build --root . --only-packages '#{self.name}' --ignore-promoted-rules --no-config --profile release-static
 
       - name: Copy built PPX file
         run: |
