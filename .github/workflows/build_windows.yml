@@ -11,37 +11,21 @@ jobs:
         working-directory: src
     strategy:
       matrix:
-        node-version: [12.x]
         os: [windows-latest]
-    steps:
-      - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
+        ocaml-compiler:
+          - 4.12.1
 
+    steps:
       - uses: actions/checkout@v2
 
-      - name: Install esy
-        run: |
-          npm install -g esy
-
-      - name: Install
-        run: esy install
-
-      - name: Print esy cache
-        id: print_esy_cache
-        run: node ../.github/workflows/print_esy_cache.js
-
-      - name: Try to restore dependencies cache
-        id: deps-cache
-        uses: actions/cache@v2
-        with:
-          path: ${{ steps.print_esy_cache.outputs.esy_cache }}
-          key: build-${{ matrix.os }}-${{ hashFiles('**/index.json') }}
-          restore-keys: build-${{ matrix.os }}-
+      - name: Install deps
+        run: opam install . --deps-only --with-test
 
       - name: Build
-        run: esy b
+        run: opam exec -- dune build
+
+      - name: Build release-static
+        run: dune build --root . --only-packages '#{self.name}' --ignore-promoted-rules --no-config --profile release-static
 
       - name: Copy built PPX file
         run: |
