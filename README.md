@@ -138,38 +138,9 @@ yarn add -D @greenlabs/ppx-spice
 
 ## Development
 
-### With Esy
-
-1. Install dependencies
-
-```
-cd src
-esy install
-```
-
-2. Build
-
-```
-(make sure in /src directory)
-esy build
-```
-
-3. Test
-
-```
-cd test
-
-(install dependencies)
-yarn
-
-(build --watch)
-yarn res:clean && yarn res:watch
-
-(run test --watch)
-yarn test:watch
-```
-
 ### With Dune
+
+Make sure running the below commands in `/src`.
 
 1. Create a sandbox with opam
 
@@ -180,7 +151,7 @@ opam switch create spice 4.12.1
 2. Install dependencies
 
 ```
-opam install dune ppxlib ocaml-lsp-server ocamlformat ocp-indent
+opam install . --deps-only
 ```
 
 3. Build
@@ -190,6 +161,8 @@ dune build
 ```
 
 4. Test
+
+Make sure running tests in `/test`
 
 ```
 cd test
