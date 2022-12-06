@@ -136,12 +136,22 @@ let parse_decl generator_settings
     |> List.map (fun attr -> get_attribute_by_name pld_attributes attr)
     |> List.exists (function Ok (Some _) -> true | _ -> false)
   in
+  let codecs = Codecs.generate_codecs generator_settings pld_type in
+  let codecs =
+    if is_optional then
+      match codecs with
+      | Some encode, Some decode ->
+          ( Some [%expr Spice.optionToJson [%e encode]],
+            Some [%expr Spice.optionFromJson [%e decode]] )
+      | _ -> codecs
+    else codecs
+  in
 
   {
     name = txt;
     key;
     field = Exp.field [%expr v] (lid txt);
-    codecs = Codecs.generate_codecs ~is_optional generator_settings pld_type;
+    codecs;
     default;
     is_optional;
   }
