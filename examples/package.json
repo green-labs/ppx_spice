@@ -12,6 +12,6 @@
     "res:watch": "rescript build -w"
   },
   "dependencies": {
-    "@greenlabs/ppx-spice": "^0.1.8"
+    "@greenlabs/ppx-spice": "^0.1.9"
   }
 }

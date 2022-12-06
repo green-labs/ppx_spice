@@ -2,10 +2,10 @@
 # yarn lockfile v1
 
 
-"@greenlabs/ppx-spice@^0.1.8":
-  version "0.1.8"
-  resolved "https://registry.yarnpkg.com/@greenlabs/ppx-spice/-/ppx-spice-0.1.8.tgz#b3f6abc2d40f9d871316d43e122dcb56dfb80a77"
-  integrity sha512-/lXZefMT4jWtL50T2Gu8ch/JnZrNTCLNa1Hi6pU2W5GLNXlMqjBChL1r36sRTXrr3dnv4Z8cMCuTndTNhAMHXA==
+"@greenlabs/ppx-spice@^0.1.9":
+  version "0.1.9"
+  resolved "https://registry.yarnpkg.com/@greenlabs/ppx-spice/-/ppx-spice-0.1.9.tgz#6a6edd8fb65282c06a4cf94017c18b7e27997ae9"
+  integrity sha512-Dhx0dd+XDTVs8U9KQ0bm11tPRAE6J6phlXyNakR6qhujDrdgHl0eQj4p3toetMNyfDojVpbw+pMifqBuYF1Caw==
 
 rescript@^10.0.1:
   version "10.0.1"
