@@ -75,8 +75,7 @@ and generate_constr_codecs { do_encode; do_decode }
       )
   | Lapply (_, _) -> fail loc "Lapply syntax not yet handled by spice"
 
-and generate_codecs ?(is_optional = false)
-    ({ do_encode; do_decode } as generator_settings)
+and generate_codecs ({ do_encode; do_decode } as generator_settings)
     { ptyp_desc; ptyp_loc; ptyp_attributes } =
   match ptyp_desc with
   | Ptyp_any -> fail ptyp_loc "Can't generate codecs for `any` type"
@@ -85,7 +84,7 @@ and generate_codecs ?(is_optional = false)
   | Ptyp_package _ -> fail ptyp_loc "Can't generate codecs for module type"
   | Ptyp_tuple types ->
       let composite_codecs =
-        List.map (generate_codecs ~is_optional generator_settings) types
+        List.map (generate_codecs generator_settings) types
       in
       ( some_if_true do_encode
           (composite_codecs
@@ -114,15 +113,6 @@ and generate_codecs ?(is_optional = false)
                   let _, d = [%e expr] in
                   d] )
         | Error s -> fail ptyp_loc s
-      in
-      let encode, decode =
-        if is_optional then
-          match (encode, decode) with
-          | Some encode, Some decode ->
-              ( Some [%expr Spice.optionToJson [%e encode]],
-                Some [%expr Spice.optionFromJson [%e decode]] )
-          | _ -> (encode, decode)
-        else (encode, decode)
       in
       match List.length typeArgs = 0 with
       | true -> (encode, decode)
