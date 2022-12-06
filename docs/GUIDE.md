@@ -1,6 +1,6 @@
 # Ppx_spice Guide
 
-This document walks you through the basics of using ppx_spice. You can try with examples in the `/examples` directory.
+This document walks you through the basics of using ppx_spice. You can try with examples in the [`/examples` directory](examples).
 
 ## Guide Index
 
