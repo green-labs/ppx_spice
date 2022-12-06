@@ -1,8 +1,8 @@
 # CHANGELOG
 
-# 0.1.8-rc1
+# 0.1.8
 
-- Fix type error where using tuple constructor type, such as `array<int>` for optional field in the record.
+- Fix type error where using tuple constructor type, such as `array<int>` for optional field in the record. https://github.com/green-labs/ppx_spice/pull/32
 
 # 0.1.7
 
