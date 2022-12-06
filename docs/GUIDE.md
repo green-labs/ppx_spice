@@ -20,8 +20,6 @@ let data = %raw(`
   }
 `)
 
-let json = data->Js.Json.stringifyAny->Belt.Option.map(Js.Json.parseExn)->Belt.Option.getExn
-
 @spice
 type user = {
   id: int,
