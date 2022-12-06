@@ -1,6 +1,6 @@
 # CHANGELOG
 
-# 0.1.9-rc1
+# 0.1.9
 
 - Clean up npm publish files
 
