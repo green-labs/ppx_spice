@@ -1,0 +1,17 @@
+{
+  "name": "spice-ppx-examples",
+  "version": "1.0.0",
+  "description": "Examples for the Spice PPX",
+  "license": "MIT",
+  "devDependencies": {
+    "rescript": "^10.0.1"
+  },
+  "scripts": {
+    "res:build": "rescript",
+    "res:clean": "rescript clean",
+    "res:watch": "rescript build -w"
+  },
+  "dependencies": {
+    "@greenlabs/ppx-spice": "^0.1.8"
+  }
+}

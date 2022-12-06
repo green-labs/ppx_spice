@@ -118,6 +118,10 @@ let encoded = sampleRecord->Records.t_encode // sampleJson
 let decoded = sampleJson->Records.t_decode // Belt.Result.Ok(sampleRecord)
 ```
 
+## Getting Started
+
+Read our [Guide with examples](docs/GUIDE.md)
+
 ## Install
 
 ```sh
