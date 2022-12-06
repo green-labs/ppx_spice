@@ -1,0 +1,31 @@
+{
+  "name": "ppx-spice-examples",
+  "sources": [
+    {
+      "dir": "src",
+      "subdirs": true
+    }
+  ],
+  "package-specs": [
+    {
+      "module": "commonjs",
+      "in-source": true
+    }
+  ],
+  "bs-dependencies": [
+    "@greenlabs/ppx-spice"
+  ],
+  "bs-dev-dependencies": [],
+  "ppx-flags": [
+    "../ppx"
+  ],
+  "warnings": {
+    "error": true,
+    "number": "-48"
+  },
+  "generators": [],
+  "bsc-flags": [
+    "-bs-super-errors",
+    "-open Belt"
+  ]
+}
