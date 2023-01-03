@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.1.10
+
+- Build the executable with static linking for Linux
+
 # 0.1.9
 
 - Clean up npm publish files
