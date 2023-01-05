@@ -21,6 +21,9 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
+      - name: Opam init
+        run: opam init -y
+
       - name: Install deps
         run: opam install . --deps-only --with-test
 
