@@ -46,7 +46,7 @@ function t_decode(v) {
     return {
             TAG: /* Error */1,
             _0: {
-              path: ".spice-value" + e.path,
+              path: "." + ("spice-value" + e.path),
               message: e.message,
               value: e.value
             }
@@ -56,7 +56,7 @@ function t_decode(v) {
   return {
           TAG: /* Error */1,
           _0: {
-            path: ".spice-label" + e$1.path,
+            path: "." + ("spice-label" + e$1.path),
             message: e$1.message,
             value: e$1.value
           }

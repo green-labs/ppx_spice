@@ -143,7 +143,9 @@ let parse_decl generator_settings
       | Some encode, Some decode ->
           ( Some [%expr Spice.optionToJson [%e encode]],
             Some [%expr Spice.optionFromJson [%e decode]] )
-      | _ -> codecs
+      | Some encode, _ -> (Some [%expr Spice.optionToJson [%e encode]], None)
+      | _, Some decode -> (None, Some [%expr Spice.optionFromJson [%e decode]])
+      | None, None -> codecs
     else codecs
   in
 
@@ -159,5 +161,5 @@ let parse_decl generator_settings
 let generate_codecs ({ do_encode; do_decode } as generator_settings) decls
     unboxed =
   let parsed_decls = List.map (parse_decl generator_settings) decls in
-  ( some_if_true do_encode (generate_encoder parsed_decls unboxed),
-    some_if_true do_decode (generate_decoder parsed_decls unboxed) )
+  ( (if do_encode then Some (generate_encoder parsed_decls unboxed) else None),
+    if do_decode then Some (generate_decoder parsed_decls unboxed) else None )
