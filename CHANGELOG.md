@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.1.12
+
+- Fix build error where `@spice.encode`, `@spice.decode` are used
+
 # 0.1.11
 
 - Build the executable with static linking for Linux with musl
