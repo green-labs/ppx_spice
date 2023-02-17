@@ -188,11 +188,14 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
   in
 
   let encoder =
-    some_if_true do_encode
-      (parsed_decls
-      |> List.map (generate_encoder_case generator_settings unboxed has_attr_as)
-      |> Exp.match_ [%expr v]
-      |> Exp.fun_ Asttypes.Nolabel None [%pat? v])
+    if do_encode then
+      Some
+        (parsed_decls
+        |> List.map
+             (generate_encoder_case generator_settings unboxed has_attr_as)
+        |> Exp.match_ [%expr v]
+        |> Exp.fun_ Asttypes.Nolabel None [%pat? v])
+    else None
   in
 
   let decoder =

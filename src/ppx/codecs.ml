@@ -28,51 +28,57 @@ and generate_constr_codecs { do_encode; do_decode }
   let open Longident in
   match identifier with
   | Lident "string" ->
-      ( some_if_true do_encode [%expr Spice.stringToJson],
-        some_if_true do_decode [%expr Spice.stringFromJson] )
+      ( (if do_encode then Some [%expr Spice.stringToJson] else None),
+        if do_decode then Some [%expr Spice.stringFromJson] else None )
   | Lident "int" ->
-      ( some_if_true do_encode [%expr Spice.intToJson],
-        some_if_true do_decode [%expr Spice.intFromJson] )
+      ( (if do_encode then Some [%expr Spice.intToJson] else None),
+        if do_decode then Some [%expr Spice.intFromJson] else None )
   | Lident "int64" ->
-      ( some_if_true do_encode [%expr Spice.int64ToJson],
-        some_if_true do_decode [%expr Spice.int64FromJson] )
+      ( (if do_encode then Some [%expr Spice.int64ToJson] else None),
+        if do_decode then Some [%expr Spice.int64FromJson] else None )
   | Lident "float" ->
-      ( some_if_true do_encode [%expr Spice.floatToJson],
-        some_if_true do_decode [%expr Spice.floatFromJson] )
+      ( (if do_encode then Some [%expr Spice.floatToJson] else None),
+        if do_decode then Some [%expr Spice.floatFromJson] else None )
   | Lident "bool" ->
-      ( some_if_true do_encode [%expr Spice.boolToJson],
-        some_if_true do_decode [%expr Spice.boolFromJson] )
+      ( (if do_encode then Some [%expr Spice.boolToJson] else None),
+        if do_decode then Some [%expr Spice.boolFromJson] else None )
   | Lident "unit" ->
-      ( some_if_true do_encode [%expr Spice.unitToJson],
-        some_if_true do_decode [%expr Spice.unitFromJson] )
+      ( (if do_encode then Some [%expr Spice.unitToJson] else None),
+        if do_decode then Some [%expr Spice.unitFromJson] else None )
   | Lident "array" ->
-      ( some_if_true do_encode [%expr Spice.arrayToJson],
-        some_if_true do_decode [%expr Spice.arrayFromJson] )
+      ( (if do_encode then Some [%expr Spice.arrayToJson] else None),
+        if do_decode then Some [%expr Spice.arrayFromJson] else None )
   | Lident "list" ->
-      ( some_if_true do_encode [%expr Spice.listToJson],
-        some_if_true do_decode [%expr Spice.listFromJson] )
+      ( (if do_encode then Some [%expr Spice.listToJson] else None),
+        if do_decode then Some [%expr Spice.listFromJson] else None )
   | Lident "option" ->
-      ( some_if_true do_encode [%expr Spice.optionToJson],
-        some_if_true do_decode [%expr Spice.optionFromJson] )
+      ( (if do_encode then Some [%expr Spice.optionToJson] else None),
+        if do_decode then Some [%expr Spice.optionFromJson] else None )
   | Ldot (Ldot (Lident "Belt", "Result"), "t") ->
-      ( some_if_true do_encode [%expr Spice.resultToJson],
-        some_if_true do_decode [%expr Spice.resultFromJson] )
+      ( (if do_encode then Some [%expr Spice.resultToJson] else None),
+        if do_decode then Some [%expr Spice.resultFromJson] else None )
   | Ldot (Ldot (Lident "Js", "Dict"), "t") ->
-      ( some_if_true do_encode [%expr Spice.dictToJson],
-        some_if_true do_decode [%expr Spice.dictFromJson] )
+      ( (if do_encode then Some [%expr Spice.dictToJson] else None),
+        if do_decode then Some [%expr Spice.dictFromJson] else None )
   | Ldot (Ldot (Lident "Js", "Json"), "t") ->
-      ( some_if_true do_encode [%expr fun v -> v],
-        some_if_true do_decode [%expr fun v -> Belt.Result.Ok v] )
+      ( (if do_encode then Some [%expr fun v -> v] else None),
+        if do_decode then Some [%expr fun v -> Belt.Result.Ok v] else None )
   | Lident s ->
-      ( some_if_true do_encode (make_ident_expr (s ^ Utils.encoder_func_suffix)),
-        some_if_true do_decode (make_ident_expr (s ^ Utils.decoder_func_suffix))
-      )
+      ( (if do_encode then Some (make_ident_expr (s ^ Utils.encoder_func_suffix))
+        else None),
+        if do_decode then Some (make_ident_expr (s ^ Utils.decoder_func_suffix))
+        else None )
   | Ldot (left, right) ->
-      ( some_if_true do_encode
-          (Exp.ident (mknoloc (Ldot (left, right ^ Utils.encoder_func_suffix)))),
-        some_if_true do_decode
-          (Exp.ident (mknoloc (Ldot (left, right ^ Utils.decoder_func_suffix))))
-      )
+      ( (if do_encode then
+         Some
+           (Exp.ident
+              (mknoloc (Ldot (left, right ^ Utils.encoder_func_suffix))))
+        else None),
+        if do_decode then
+          Some
+            (Exp.ident
+               (mknoloc (Ldot (left, right ^ Utils.decoder_func_suffix))))
+        else None )
   | Lapply (_, _) -> fail loc "Lapply syntax not yet handled by spice"
 
 and generate_codecs ({ do_encode; do_decode } as generator_settings)
@@ -86,17 +92,23 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
       let composite_codecs =
         List.map (generate_codecs generator_settings) types
       in
-      ( some_if_true do_encode
-          (composite_codecs
-          |> List.map (fun (e, _) -> Option.get e)
-          |> Tuple.generate_encoder),
-        some_if_true do_decode
-          (composite_codecs
-          |> List.map (fun (_, d) -> Option.get d)
-          |> Tuple.generate_decoder) )
+      ( (if do_encode then
+         Some
+           (composite_codecs
+           |> List.map (fun (e, _) -> Option.get e)
+           |> Tuple.generate_encoder)
+        else None),
+        if do_decode then
+          Some
+            (composite_codecs
+            |> List.map (fun (_, d) -> Option.get d)
+            |> Tuple.generate_decoder)
+        else None )
   | Ptyp_var s ->
-      ( some_if_true do_encode (make_ident_expr (encoder_var_prefix ^ s)),
-        some_if_true do_decode (make_ident_expr (decoder_var_prefix ^ s)) )
+      ( (if do_encode then Some (make_ident_expr (encoder_var_prefix ^ s))
+        else None),
+        if do_decode then Some (make_ident_expr (decoder_var_prefix ^ s))
+        else None )
   | Ptyp_constr (constr, typeArgs) -> (
       let custom_codec = get_attribute_by_name ptyp_attributes "spice.codec" in
       let encode, decode =
@@ -104,14 +116,18 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
         | Ok None -> generate_constr_codecs generator_settings constr
         | Ok (Some attribute) ->
             let expr = get_expression_from_payload attribute in
-            ( some_if_true do_encode
-                [%expr
-                  let e, _ = [%e expr] in
-                  e],
-              some_if_true do_decode
-                [%expr
-                  let _, d = [%e expr] in
-                  d] )
+            ( (if do_encode then
+               Some
+                 [%expr
+                   let e, _ = [%e expr] in
+                   e]
+              else None),
+              if do_decode then
+                Some
+                  [%expr
+                    let _, d = [%e expr] in
+                    d]
+              else None )
         | Error s -> fail ptyp_loc s
       in
       match List.length typeArgs = 0 with

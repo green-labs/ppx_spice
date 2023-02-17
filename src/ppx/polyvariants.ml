@@ -219,12 +219,14 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
   in
 
   let encoder =
-    some_if_true do_encode
-      (List.map
-         (generate_encoder_case generator_settings unboxed has_attr_as)
-         parsed_fields
-      |> Exp.match_ [%expr v]
-      |> Exp.fun_ Asttypes.Nolabel None [%pat? v])
+    if do_encode then
+      Some
+        (List.map
+           (generate_encoder_case generator_settings unboxed has_attr_as)
+           parsed_fields
+        |> Exp.match_ [%expr v]
+        |> Exp.fun_ Asttypes.Nolabel None [%pat? v])
+    else None
   in
 
   let decoder =

@@ -3,27 +3,16 @@ open Parsetree
 open Ast_helper
 
 let annotation_name = "spice"
-
 let encoder_func_suffix = "_encode"
-
 let decoder_func_suffix = "_decode"
-
 let encoder_var_prefix = "encoder_"
-
 let decoder_var_prefix = "decoder_"
-
 let loc = !default_loc
-
 let fail loc message = Location.raise_errorf ~loc "%s" message
-
 let longident_parse = Longident.parse [@@ocaml.warning "-3"]
-
 let mkloc txt loc = { Location.txt; loc }
-
 let mknoloc txt = mkloc txt Location.none
-
 let lid ?(loc = Location.none) s = mkloc (Longident.parse s) loc
-
 let make_ident_expr ?attrs s = Exp.ident ?attrs (mknoloc (longident_parse s))
 
 let tuple_or_singleton tuple l =
@@ -113,5 +102,3 @@ let attr_warning expr =
     attr_payload = PStr [ { pstr_desc = Pstr_eval (expr, []); pstr_loc = loc } ];
     attr_loc = loc;
   }
-
-let some_if_true cond a = match cond with true -> Some a | false -> None
