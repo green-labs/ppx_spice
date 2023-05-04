@@ -16,7 +16,7 @@ type parsed_decl = {
 
 let optional_attr : Ppxlib.Parsetree.attribute =
   {
-    attr_name = { txt = "ns.optional"; loc = Location.none };
+    attr_name = { txt = "res.optional"; loc = Location.none };
     attr_payload = PStr [];
     attr_loc = Location.none;
   }
@@ -130,7 +130,7 @@ let parse_decl generator_settings
     | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
     | Error s -> fail pld_loc s
   in
-  let optional_attrs = [ "ns.optional"; "res.optional" ] in
+  let optional_attrs = [ "res.optional" ] in
   let is_optional =
     optional_attrs
     |> List.map (fun attr -> get_attribute_by_name pld_attributes attr)
