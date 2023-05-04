@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.1.14
+
+- Support both `ns.optional` and `res.optional` for backward compatability
+
 # 0.1.13
 
 - Rename the attribute used for optional records from `ns.optional` to `res.optional`.

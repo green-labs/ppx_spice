@@ -21,6 +21,13 @@ let optional_attr : Ppxlib.Parsetree.attribute =
     attr_loc = Location.none;
   }
 
+let optional_attr_old : Ppxlib.Parsetree.attribute =
+  {
+    attr_name = { txt = "ns.optional"; loc = Location.none };
+    attr_payload = PStr [];
+    attr_loc = Location.none;
+  }
+
 let generate_encoder decls unboxed =
   match unboxed with
   | true ->
@@ -69,7 +76,9 @@ let generate_error_case { key } =
 let generate_final_record_expr decls =
   decls
   |> List.map (fun { name; is_optional } ->
-         let attrs = if is_optional then [ optional_attr ] else [] in
+         let attrs =
+           if is_optional then [ optional_attr; optional_attr_old ] else []
+         in
          (lid name, make_ident_expr ~attrs name))
   |> fun l -> [%expr Belt.Result.Ok [%e Exp.record l None]]
 
@@ -130,7 +139,7 @@ let parse_decl generator_settings
     | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
     | Error s -> fail pld_loc s
   in
-  let optional_attrs = [ "res.optional" ] in
+  let optional_attrs = [ "ns.optional"; "res.optional" ] in
   let is_optional =
     optional_attrs
     |> List.map (fun attr -> get_attribute_by_name pld_attributes attr)
