@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.1.13
+
+- Rename the attribute used for optional records from `ns.optional` to `res.optional`.
+
 # 0.1.12
 
 - Fix build error where `@spice.encode`, `@spice.decode` are used
