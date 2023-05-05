@@ -1,10 +1,8 @@
-@spice
 type address = {
   street: string,
   number: int,
 }
 
-@spice
 type user = {
   name: string,
   address: address,

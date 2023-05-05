@@ -7,120 +7,6 @@ var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
-function address_encode(v) {
-  return Js_dict.fromArray(Spice.filterOptional([
-                  [
-                    "street",
-                    false,
-                    Spice.stringToJson(v.street)
-                  ],
-                  [
-                    "number",
-                    false,
-                    Spice.intToJson(v.number)
-                  ]
-                ]));
-}
-
-function address_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (dict.TAG !== /* JSONObject */2) {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  var dict$1 = dict._0;
-  var street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "street"), null));
-  if (street.TAG === /* Ok */0) {
-    var number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "number"), null));
-    if (number.TAG === /* Ok */0) {
-      return {
-              TAG: /* Ok */0,
-              _0: {
-                street: street._0,
-                number: number._0
-              }
-            };
-    }
-    var e = number._0;
-    return {
-            TAG: /* Error */1,
-            _0: {
-              path: ".number" + e.path,
-              message: e.message,
-              value: e.value
-            }
-          };
-  }
-  var e$1 = street._0;
-  return {
-          TAG: /* Error */1,
-          _0: {
-            path: ".street" + e$1.path,
-            message: e$1.message,
-            value: e$1.value
-          }
-        };
-}
-
-function user_encode(v) {
-  return Js_dict.fromArray(Spice.filterOptional([
-                  [
-                    "name",
-                    false,
-                    Spice.stringToJson(v.name)
-                  ],
-                  [
-                    "address",
-                    false,
-                    address_encode(v.address)
-                  ]
-                ]));
-}
-
-function user_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (dict.TAG !== /* JSONObject */2) {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  var dict$1 = dict._0;
-  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
-  if (name.TAG === /* Ok */0) {
-    var address = address_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address"), null));
-    if (address.TAG === /* Ok */0) {
-      return {
-              TAG: /* Ok */0,
-              _0: {
-                name: name._0,
-                address: address._0
-              }
-            };
-    }
-    var e = address._0;
-    return {
-            TAG: /* Error */1,
-            _0: {
-              path: ".address" + e.path,
-              message: e.message,
-              value: e.value
-            }
-          };
-  }
-  var e$1 = name._0;
-  return {
-          TAG: /* Error */1,
-          _0: {
-            path: ".name" + e$1.path,
-            message: e$1.message,
-            value: e$1.value
-          }
-        };
-}
-
 function userRaw_encode(v) {
   return Js_dict.fromArray(Spice.filterOptional([
                   [
@@ -220,10 +106,6 @@ var json = Belt_Result.map(data$1, (function (user) {
                   });
       }));
 
-exports.address_encode = address_encode;
-exports.address_decode = address_decode;
-exports.user_encode = user_encode;
-exports.user_decode = user_decode;
 exports.userRaw_encode = userRaw_encode;
 exports.userRaw_decode = userRaw_decode;
 exports.data = data$1;
