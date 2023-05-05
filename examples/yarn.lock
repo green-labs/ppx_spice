@@ -2,12 +2,12 @@
 # yarn lockfile v1
 
 
-"@greenlabs/ppx-spice@^0.1.9":
-  version "0.1.9"
-  resolved "https://registry.yarnpkg.com/@greenlabs/ppx-spice/-/ppx-spice-0.1.9.tgz#6a6edd8fb65282c06a4cf94017c18b7e27997ae9"
-  integrity sha512-Dhx0dd+XDTVs8U9KQ0bm11tPRAE6J6phlXyNakR6qhujDrdgHl0eQj4p3toetMNyfDojVpbw+pMifqBuYF1Caw==
+"@greenlabs/ppx-spice@^0.1.14":
+  version "0.1.14"
+  resolved "https://registry.yarnpkg.com/@greenlabs/ppx-spice/-/ppx-spice-0.1.14.tgz#0c531452233c5f55e5c631d13d22f86660cd1c32"
+  integrity sha512-2zP5E3+yWCRwYkvOl1A/VoRC1ixHdIa4CujsGD3uwbAzfJkrGc7KH83Zbc+Yw858+RNw2GKrNC35f0CNVMusHw==
 
-rescript@^10.0.1:
-  version "10.0.1"
-  resolved "https://registry.yarnpkg.com/rescript/-/rescript-10.0.1.tgz#5b2da8a8bcfb994bed1eb24820bf10cfb9d8c440"
-  integrity sha512-XwO1GPDtoEU4H03xQE5bp0/qtSVR6YLaJRPxWKrfFgKc+LI36ODOCie7o9UJfgzQdoMYkkZyiTGZ4N9OQEaiUw==
+rescript@^10.1.4:
+  version "10.1.4"
+  resolved "https://registry.yarnpkg.com/rescript/-/rescript-10.1.4.tgz#0f37710d371f32a704f17b4e804f66ce3c79a305"
+  integrity sha512-FFKlS9AG/XrLepWsyw7B+A9DtQBPWEPDPDKghV831Y2KGbie+eeFBOS0xtRHp0xbt7S0N2Dm6hhX+kTZQ/3Ybg==
