@@ -24,19 +24,19 @@ function address_encode(v) {
 
 function address_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var dict$1 = dict._0;
   var street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "street"), null));
-  if (street.TAG === /* Ok */0) {
+  if (street.TAG === "Ok") {
     var number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "number"), null));
-    if (number.TAG === /* Ok */0) {
+    if (number.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 street: street._0,
                 number: number._0
@@ -45,7 +45,7 @@ function address_decode(v) {
     }
     var e = number._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".number" + e.path,
               message: e.message,
@@ -55,7 +55,7 @@ function address_decode(v) {
   }
   var e$1 = street._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".street" + e$1.path,
             message: e$1.message,
@@ -81,19 +81,19 @@ function user_encode(v) {
 
 function user_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var dict$1 = dict._0;
   var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
-  if (name.TAG === /* Ok */0) {
+  if (name.TAG === "Ok") {
     var address = address_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address"), null));
-    if (address.TAG === /* Ok */0) {
+    if (address.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 name: name._0,
                 address: address._0
@@ -102,7 +102,7 @@ function user_decode(v) {
     }
     var e = address._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".address" + e.path,
               message: e.message,
@@ -112,7 +112,7 @@ function user_decode(v) {
   }
   var e$1 = name._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".name" + e$1.path,
             message: e$1.message,
@@ -143,9 +143,9 @@ function encoderUser(v) {
 
 function decoderUser(json) {
   var dict = Js_json.classify(json);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: "",
               message: "Expected JSONObject",
@@ -153,9 +153,9 @@ function decoderUser(json) {
             }
           };
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: "",
               message: "Expected JSONObject",
@@ -167,9 +167,9 @@ function decoderUser(json) {
   var name = Belt_Option.map(Js_dict.get(dict$1, "name"), Js_json.classify);
   var addressStreet = Belt_Option.map(Js_dict.get(dict$1, "address_street"), Js_json.classify);
   var addressNumber = Belt_Option.map(Js_dict.get(dict$1, "address_number"), Js_json.classify);
-  if (name !== undefined && typeof name !== "number" && name.TAG === /* JSONString */0 && addressStreet !== undefined && typeof addressStreet !== "number" && addressStreet.TAG === /* JSONString */0 && addressNumber !== undefined && typeof addressNumber !== "number" && addressNumber.TAG === /* JSONNumber */1) {
+  if (name !== undefined && typeof name === "object" && name.TAG === "JSONString" && addressStreet !== undefined && typeof addressStreet === "object" && addressStreet.TAG === "JSONString" && addressNumber !== undefined && typeof addressNumber === "object" && addressNumber.TAG === "JSONNumber") {
     return {
-            TAG: /* Ok */0,
+            TAG: "Ok",
             _0: {
               name: name._0,
               address: {
@@ -180,7 +180,7 @@ function decoderUser(json) {
           };
   }
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: "",
             message: "Expected name, street, number ",
@@ -204,16 +204,16 @@ function data_encode(v) {
 
 function data_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var user = decoderUser(Belt_Option.getWithDefault(Js_dict.get(dict._0, "user"), null));
-  if (user.TAG === /* Ok */0) {
+  if (user.TAG === "Ok") {
     return {
-            TAG: /* Ok */0,
+            TAG: "Ok",
             _0: {
               user: user._0
             }
@@ -221,7 +221,7 @@ function data_decode(v) {
   }
   var e = user._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".user" + e.path,
             message: e.message,

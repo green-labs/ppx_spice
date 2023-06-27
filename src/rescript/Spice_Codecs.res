@@ -6,7 +6,7 @@ let falseableEncode = (encoder, opt) =>
 let falseableDecode = (decoder, json) =>
   switch Js.Json.decodeBoolean(json) {
   | Some(false) => Belt.Result.Ok(None)
-  | _ => decoder(json) |> Belt.Result.map(_, v => Some(v))
+  | _ => Belt.Result.map(decoder(json), v => Some(v))
   }
 let falseable = (falseableEncode, falseableDecode)
 

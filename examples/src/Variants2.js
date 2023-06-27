@@ -10,18 +10,18 @@ var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
 function language_encode(v) {
-  if (typeof v !== "number") {
+  if (typeof v === "object") {
     return [
             "ReScript",
             Spice.stringToJson(v._0)
           ];
   }
   switch (v) {
-    case /* OCaml */0 :
+    case "OCaml" :
         return ["OCaml"];
-    case /* TypeScript */1 :
+    case "TypeScript" :
         return ["TypeScript"];
-    case /* JavaScript */2 :
+    case "JavaScript" :
         return ["JavaScript"];
     
   }
@@ -29,10 +29,10 @@ function language_encode(v) {
 
 function language_decode(v) {
   var json_arr = Js_json.classify(v);
-  if (typeof json_arr === "number") {
+  if (typeof json_arr !== "object") {
     return Spice.error(undefined, "Not a variant", v);
   }
-  if (json_arr.TAG !== /* JSONArray */3) {
+  if (json_arr.TAG !== "JSONArray") {
     return Spice.error(undefined, "Not a variant", v);
   }
   var json_arr$1 = json_arr._0;
@@ -41,15 +41,15 @@ function language_decode(v) {
   }
   var tagged = Js_array.map(Js_json.classify, json_arr$1);
   var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match !== "number" && match.TAG === /* JSONString */0) {
+  if (typeof match === "object" && match.TAG === "JSONString") {
     switch (match._0) {
       case "JavaScript" :
           if (tagged.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* JavaScript */2
+                    TAG: "Ok",
+                    _0: "JavaScript"
                   };
           }
       case "OCaml" :
@@ -57,8 +57,8 @@ function language_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* OCaml */0
+                    TAG: "Ok",
+                    _0: "OCaml"
                   };
           }
       case "ReScript" :
@@ -66,17 +66,18 @@ function language_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           }
           var v0 = Spice.stringFromJson(Belt_Array.getExn(json_arr$1, 1));
-          if (v0.TAG === /* Ok */0) {
+          if (v0.TAG === "Ok") {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* ReScript */{
+                    TAG: "Ok",
+                    _0: {
+                      TAG: "ReScript",
                       _0: v0._0
                     }
                   };
           }
           var e = v0._0;
           return {
-                  TAG: /* Error */1,
+                  TAG: "Error",
                   _0: {
                     path: "[0]" + e.path,
                     message: e.message,
@@ -88,8 +89,8 @@ function language_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* TypeScript */1
+                    TAG: "Ok",
+                    _0: "TypeScript"
                   };
           }
       default:
@@ -109,7 +110,9 @@ function user_encode(v) {
                   [
                     "nickname",
                     true,
-                    Spice.optionToJson(Spice.stringToJson, v.nickname)
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.stringToJson, extra);
+                        })(v.nickname)
                   ],
                   [
                     "language",
@@ -121,21 +124,23 @@ function user_encode(v) {
 
 function user_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var dict$1 = dict._0;
   var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "id"), null));
-  if (id.TAG === /* Ok */0) {
-    var nickname = Spice.optionFromJson(Spice.stringFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
-    if (nickname.TAG === /* Ok */0) {
+  if (id.TAG === "Ok") {
+    var nickname = (function (extra) {
+          return Spice.optionFromJson(Spice.stringFromJson, extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
+    if (nickname.TAG === "Ok") {
       var language = language_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "language"), null));
-      if (language.TAG === /* Ok */0) {
+      if (language.TAG === "Ok") {
         return {
-                TAG: /* Ok */0,
+                TAG: "Ok",
                 _0: {
                   id: id._0,
                   nickname: nickname._0,
@@ -145,7 +150,7 @@ function user_decode(v) {
       }
       var e = language._0;
       return {
-              TAG: /* Error */1,
+              TAG: "Error",
               _0: {
                 path: ".language" + e.path,
                 message: e.message,
@@ -155,7 +160,7 @@ function user_decode(v) {
     }
     var e$1 = nickname._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".nickname" + e$1.path,
               message: e$1.message,
@@ -165,7 +170,7 @@ function user_decode(v) {
   }
   var e$2 = id._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".id" + e$2.path,
             message: e$2.message,

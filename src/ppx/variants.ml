@@ -34,7 +34,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         |> List.map (Codecs.generate_codecs generator_settings)
         |> List.map (fun (encoder, _) -> Option.get encoder)
         |> List.mapi (fun i e ->
-               Exp.apply ~loc:pcd_loc e
+               Exp.apply ~attrs:[ Utils.attr_uapp ] ~loc:pcd_loc e
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
         |> List.append [ [%expr Js.Json.string [%e constructor_expr]] ]
       in
@@ -76,7 +76,7 @@ let generate_arg_decoder generator_settings args constructor_name =
        (args
        |> List.map (Codecs.generate_codecs generator_settings)
        |> List.mapi (fun i (_, decoder) ->
-              Exp.apply (Option.get decoder)
+              Exp.apply ~attrs:[ Utils.attr_uapp ] (Option.get decoder)
                 [
                   ( Asttypes.Nolabel,
                     (* +1 because index 0 is the constructor *)
@@ -156,9 +156,10 @@ let generate_unboxed_decode generator_settings
               let constructor = Exp.construct (lid name) (Some [%expr v]) in
 
               Some
-                [%expr
-                  fun v ->
-                    Belt.Result.map ([%e d] v) (fun v -> [%e constructor])]
+                (Utils.expr_func ~arity:1
+                   [%expr
+                     fun v ->
+                       Belt.Result.map ([%e d] v) (fun v -> [%e constructor])])
           | None -> None)
       | _ -> fail pcd_loc "Expected exactly one type argument")
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
@@ -221,11 +222,12 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
           in
 
           Some
-            [%expr
-              fun v ->
-                match Js.Json.classify v with
-                | Js.Json.JSONString str -> [%e decoder_switch]
-                | _ -> Spice.error "Not a JSONString" v]
+            (Utils.expr_func ~arity:1
+               [%expr
+                 fun v ->
+                   match Js.Json.classify v with
+                   | Js.Json.JSONString str -> [%e decoder_switch]
+                   | _ -> Spice.error "Not a JSONString" v])
         else
           let decoder_default_case =
             {
@@ -246,15 +248,16 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
           in
 
           Some
-            [%expr
-              fun v ->
-                match Js.Json.classify v with
-                | Js.Json.JSONArray [||] ->
-                    Spice.error "Expected variant, found empty array" v
-                | Js.Json.JSONArray json_arr ->
-                    let tagged = Js.Array.map Js.Json.classify json_arr in
-                    [%e decoder_switch]
-                | _ -> Spice.error "Not a variant" v]
+            (Utils.expr_func ~arity:1
+               [%expr
+                 fun v ->
+                   match Js.Json.classify v with
+                   | Js.Json.JSONArray [||] ->
+                       Spice.error "Expected variant, found empty array" v
+                   | Js.Json.JSONArray json_arr ->
+                       let tagged = Js.Array.map Js.Json.classify json_arr in
+                       [%e decoder_switch]
+                   | _ -> Spice.error "Not a variant" v])
   in
 
   (encoder, decoder)

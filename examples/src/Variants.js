@@ -9,13 +9,13 @@ var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
 function language_encode(v) {
   switch (v) {
-    case /* ReScript */0 :
+    case "ReScript" :
         return "ReScript";
-    case /* OCaml */1 :
+    case "OCaml" :
         return "OCaml";
-    case /* TypeScript */2 :
+    case "TypeScript" :
         return "TypeScript";
-    case /* JavaScript */3 :
+    case "JavaScript" :
         return "JavaScript";
     
   }
@@ -23,32 +23,32 @@ function language_encode(v) {
 
 function language_decode(v) {
   var str = Js_json.classify(v);
-  if (typeof str === "number") {
+  if (typeof str !== "object") {
     return Spice.error(undefined, "Not a JSONString", v);
   }
-  if (str.TAG !== /* JSONString */0) {
+  if (str.TAG !== "JSONString") {
     return Spice.error(undefined, "Not a JSONString", v);
   }
   var str$1 = str._0;
   if ("ReScript" === str$1) {
     return {
-            TAG: /* Ok */0,
-            _0: /* ReScript */0
+            TAG: "Ok",
+            _0: "ReScript"
           };
   } else if ("OCaml" === str$1) {
     return {
-            TAG: /* Ok */0,
-            _0: /* OCaml */1
+            TAG: "Ok",
+            _0: "OCaml"
           };
   } else if ("TypeScript" === str$1) {
     return {
-            TAG: /* Ok */0,
-            _0: /* TypeScript */2
+            TAG: "Ok",
+            _0: "TypeScript"
           };
   } else if ("JavaScript" === str$1) {
     return {
-            TAG: /* Ok */0,
-            _0: /* JavaScript */3
+            TAG: "Ok",
+            _0: "JavaScript"
           };
   } else {
     return Spice.error(undefined, "Not matched", v);
@@ -65,7 +65,9 @@ function user_encode(v) {
                   [
                     "nickname",
                     true,
-                    Spice.optionToJson(Spice.stringToJson, v.nickname)
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.stringToJson, extra);
+                        })(v.nickname)
                   ],
                   [
                     "language",
@@ -77,21 +79,23 @@ function user_encode(v) {
 
 function user_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var dict$1 = dict._0;
   var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "id"), null));
-  if (id.TAG === /* Ok */0) {
-    var nickname = Spice.optionFromJson(Spice.stringFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
-    if (nickname.TAG === /* Ok */0) {
+  if (id.TAG === "Ok") {
+    var nickname = (function (extra) {
+          return Spice.optionFromJson(Spice.stringFromJson, extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
+    if (nickname.TAG === "Ok") {
       var language = language_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "language"), null));
-      if (language.TAG === /* Ok */0) {
+      if (language.TAG === "Ok") {
         return {
-                TAG: /* Ok */0,
+                TAG: "Ok",
                 _0: {
                   id: id._0,
                   nickname: nickname._0,
@@ -101,7 +105,7 @@ function user_decode(v) {
       }
       var e = language._0;
       return {
-              TAG: /* Error */1,
+              TAG: "Error",
               _0: {
                 path: ".language" + e.path,
                 message: e.message,
@@ -111,7 +115,7 @@ function user_decode(v) {
     }
     var e$1 = nickname._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".nickname" + e$1.path,
               message: e$1.message,
@@ -121,7 +125,7 @@ function user_decode(v) {
   }
   var e$2 = id._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".id" + e$2.path,
             message: e$2.message,

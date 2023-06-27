@@ -54,7 +54,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
         |> List.map (Codecs.generate_codecs generator_settings)
         |> List.map (fun (encoder, _) -> Option.get encoder)
         |> List.mapi (fun i e ->
-               Exp.apply ~loc e
+               Exp.apply ~attrs:[ Utils.attr_uapp ] ~loc e
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
         |> List.append [ [%expr Js.Json.string [%e constructor_expr]] ]
       in
@@ -98,7 +98,7 @@ let generate_arg_decoder generator_settings args constructor_name =
        (args
        |> List.map (Codecs.generate_codecs generator_settings)
        |> List.mapi (fun i (_, decoder) ->
-              Exp.apply (Option.get decoder)
+              Exp.apply ~attrs:[ Utils.attr_uapp ] (Option.get decoder)
                 [
                   ( Asttypes.Nolabel,
                     (* +1 because index 0 is the constructor *)
@@ -181,9 +181,10 @@ let generate_unboxed_decode generator_settings { prf_desc } =
               let constructor = Exp.construct (lid txt) (Some [%expr v]) in
 
               Some
-                [%expr
-                  fun v ->
-                    Belt.Result.map ([%e d] v) (fun v -> [%e constructor])]
+                (Utils.expr_func ~arity:1
+                   [%expr
+                     fun v ->
+                       Belt.Result.map ([%e d] v) (fun v -> [%e constructor])])
           | None -> None)
       | _ -> fail loc "Expected exactly one type argument")
   | Rinherit coreType ->
@@ -251,11 +252,12 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
           in
 
           Some
-            [%expr
-              fun v ->
-                match Js.Json.classify v with
-                | Js.Json.JSONString str -> [%e decoder_switch]
-                | _ -> Spice.error "Not a JSONString" v]
+            (Utils.expr_func ~arity:1
+               [%expr
+                 fun v ->
+                   match Js.Json.classify v with
+                   | Js.Json.JSONString str -> [%e decoder_switch]
+                   | _ -> Spice.error "Not a JSONString" v])
         else
           let decoder_default_case =
             {
@@ -276,15 +278,16 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
           in
 
           Some
-            [%expr
-              fun v ->
-                match Js.Json.classify v with
-                | Js.Json.JSONArray [||] ->
-                    Spice.error "Expected polyvariant, found empty array" v
-                | Js.Json.JSONArray json_arr ->
-                    let tagged = Js.Array.map Js.Json.classify json_arr in
-                    [%e decoder_switch]
-                | _ -> Spice.error "Not a polyvariant" v]
+            (Utils.expr_func ~arity:1
+               [%expr
+                 fun v ->
+                   match Js.Json.classify v with
+                   | Js.Json.JSONArray [||] ->
+                       Spice.error "Expected polyvariant, found empty array" v
+                   | Js.Json.JSONArray json_arr ->
+                       let tagged = Js.Array.map Js.Json.classify json_arr in
+                       [%e decoder_switch]
+                   | _ -> Spice.error "Not a polyvariant" v])
   in
 
   (encoder, decoder)

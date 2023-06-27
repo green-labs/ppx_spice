@@ -102,3 +102,31 @@ let attr_warning expr =
     attr_payload = PStr [ { pstr_desc = Pstr_eval (expr, []); pstr_loc = loc } ];
     attr_loc = loc;
   }
+
+let attr_optional : Ppxlib.Parsetree.attribute =
+  {
+    attr_name = { txt = "res.optional"; loc = Location.none };
+    attr_payload = PStr [];
+    attr_loc = Location.none;
+  }
+
+let attr_partial : Ppxlib.Parsetree.attribute =
+  {
+    attr_name = { txt = "res.partial"; loc = Location.none };
+    attr_payload = PStr [];
+    attr_loc = Location.none;
+  }
+
+let attr_uapp : Ppxlib.Parsetree.attribute =
+  {
+    attr_name = { txt = "res.uapp"; loc = Location.none };
+    attr_payload = PStr [];
+    attr_loc = Location.none;
+  }
+
+let expr_func ?(loc = Location.none) ~arity e =
+  let attr_arity =
+    Attr.mk { txt = "res.arity"; loc }
+      (PStr [ Str.eval (Exp.constant (Const.int arity)) ])
+  in
+  Exp.construct ~attrs:[ attr_arity ] { txt = Lident "Function$"; loc } (Some e)

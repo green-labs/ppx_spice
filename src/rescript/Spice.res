@@ -24,7 +24,7 @@ let stringFromJson = j =>
   | None => Belt.Result.Error({path: "", message: "Not a string", value: j})
   }
 
-let intToJson = i => i |> float_of_int |> Js.Json.number
+let intToJson = i => Js.Json.number(float_of_int(i))
 let intFromJson = j =>
   switch Js.Json.decodeNumber(j) {
   | Some(f) =>
@@ -35,7 +35,7 @@ let intFromJson = j =>
   | _ => Belt.Result.Error({path: "", message: "Not a number", value: j})
   }
 
-let int64ToJson = i => i |> Int64.float_of_bits |> Js.Json.number
+let int64ToJson = i => Js.Json.number(Int64.float_of_bits(i))
 
 let int64FromJson = j =>
   switch Js.Json.decodeNumber(j) {
@@ -43,7 +43,7 @@ let int64FromJson = j =>
   | None => error("Not a number", j)
   }
 
-let int64ToJsonUnsafe = i => i |> Int64.to_float |> Js.Json.number
+let int64ToJsonUnsafe = i => Js.Json.number(Int64.to_float(i))
 
 let int64FromJsonUnsafe = j =>
   switch Js.Json.decodeNumber(j) {
@@ -51,14 +51,14 @@ let int64FromJsonUnsafe = j =>
   | None => error("Not a number", j)
   }
 
-let floatToJson = v => v |> Js.Json.number
+let floatToJson = v => Js.Json.number(v)
 let floatFromJson = j =>
   switch Js.Json.decodeNumber(j) {
   | Some(f) => Belt.Result.Ok(f)
   | None => Belt.Result.Error({path: "", message: "Not a number", value: j})
   }
 
-let boolToJson = v => v |> Js.Json.boolean
+let boolToJson = v => Js.Json.boolean(v)
 let boolFromJson = j =>
   switch Js.Json.decodeBoolean(j) {
   | Some(b) => Belt.Result.Ok(b)
@@ -68,7 +68,7 @@ let boolFromJson = j =>
 let unitToJson = () => Js.Json.number(0.0)
 let unitFromJson = _ => Belt.Result.Ok()
 
-let arrayToJson = (encoder, arr) => arr |> Js.Array.map(encoder) |> Js.Json.array
+let arrayToJson = (encoder, arr) => Js.Json.array(Js.Array.map(encoder, arr))
 
 let arrayFromJson = (decoder, json) =>
   switch Js.Json.decodeArray(json) {
@@ -87,10 +87,16 @@ let arrayFromJson = (decoder, json) =>
   | None => Belt.Result.Error({path: "", message: "Not an array", value: json})
   }
 
-let listToJson = (encoder, list) => list |> Array.of_list |> arrayToJson(encoder)
+let listToJson = (encoder, list) => arrayToJson(encoder, Belt.List.toArray(list))
 
 let listFromJson = (decoder, json) =>
-  json |> arrayFromJson(decoder) |> Belt.Result.map(_, Array.to_list)
+  Belt.Result.map(arrayFromJson(decoder, json), Belt.List.fromArray)
+
+let filterOptional = arr =>
+  Belt.Array.map(
+    Belt.Array.keep(arr, ((_, isOptional, x)) => !(isOptional && x == Js.Json.null)),
+    ((k, _, v)) => (k, v),
+  )
 
 let optionToJson = (encoder, opt) =>
   switch opt {
@@ -98,22 +104,19 @@ let optionToJson = (encoder, opt) =>
   | None => Js.Json.null
   }
 
-let filterOptional = arr =>
-  arr
-  |> Belt.Array.keep(_, ((_, isOptional, x)) => !(isOptional && x == Js.Json.null))
-  |> Belt.Array.map(_, ((k, _, v)) => (k, v))
-
 let optionFromJson = (decoder, json) =>
   switch Js.Json.decodeNull(json) {
   | Some(_) => Belt.Result.Ok(None)
-  | None => decoder(json) |> Belt.Result.map(_, v => Some(v))
+  | None => Belt.Result.map(decoder(json), v => Some(v))
   }
 
 let resultToJson = (okEncoder, errorEncoder, result) =>
-  switch result {
-  | Belt.Result.Ok(v) => [Js.Json.string("Ok"), okEncoder(v)]
-  | Belt.Result.Error(e) => [Js.Json.string("Error"), errorEncoder(e)]
-  } |> Js.Json.array
+  Js.Json.array(
+    switch result {
+    | Belt.Result.Ok(v) => [Js.Json.string("Ok"), okEncoder(v)]
+    | Belt.Result.Error(e) => [Js.Json.string("Error"), errorEncoder(e)]
+    },
+  )
 
 let resultFromJson = (okDecoder, errorDecoder, json) =>
   switch Js.Json.decodeArray(json) {
@@ -134,7 +137,7 @@ let resultFromJson = (okDecoder, errorDecoder, json) =>
   | None => error("Not an array", json)
   }
 
-let dictToJson = (encoder, dict) => dict->Js.Dict.map((. a) => encoder(a), _)->Js.Json.object_
+let dictToJson = (encoder, dict) => Js.Json.object_(Js.Dict.map(a => encoder(a), dict))
 
 let dictFromJson = (decoder, json) =>
   switch Js.Json.decodeObject(json) {

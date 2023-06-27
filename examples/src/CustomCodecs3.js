@@ -29,21 +29,21 @@ function userRaw_encode(v) {
 
 function userRaw_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var dict$1 = dict._0;
   var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
-  if (name.TAG === /* Ok */0) {
+  if (name.TAG === "Ok") {
     var address_street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address_street"), null));
-    if (address_street.TAG === /* Ok */0) {
+    if (address_street.TAG === "Ok") {
       var address_number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address_number"), null));
-      if (address_number.TAG === /* Ok */0) {
+      if (address_number.TAG === "Ok") {
         return {
-                TAG: /* Ok */0,
+                TAG: "Ok",
                 _0: {
                   name: name._0,
                   address_street: address_street._0,
@@ -53,7 +53,7 @@ function userRaw_decode(v) {
       }
       var e = address_number._0;
       return {
-              TAG: /* Error */1,
+              TAG: "Error",
               _0: {
                 path: ".address_number" + e.path,
                 message: e.message,
@@ -63,7 +63,7 @@ function userRaw_decode(v) {
     }
     var e$1 = address_street._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".address_street" + e$1.path,
               message: e$1.message,
@@ -73,7 +73,7 @@ function userRaw_decode(v) {
   }
   var e$2 = name._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".name" + e$2.path,
             message: e$2.message,
