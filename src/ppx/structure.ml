@@ -10,7 +10,7 @@ let add_params param_names expr =
       let pat = Pat.var (mknoloc s) in
       Exp.fun_ Asttypes.Nolabel None pat acc)
     param_names
-    [%expr fun v -> [%e expr] v]
+    (Utils.expr_func ~arity:1 [%expr fun v -> [%e expr] v])
 
 let generate_codec_decls type_name param_names (encoder, decoder) =
   let encoder_pat = Pat.var (mknoloc (type_name ^ Utils.encoder_func_suffix)) in
@@ -29,26 +29,14 @@ let generate_codec_decls type_name param_names (encoder, decoder) =
     match encoder with
     | None -> vbs
     | Some encoder ->
-        vbs
-        @ [
-            Vb.mk
-              ~attrs:[ attr_warning [%expr "-39"] ]
-              encoder_pat
-              (add_params encoder_param_names encoder);
-          ]
+        vbs @ [ Vb.mk encoder_pat (add_params encoder_param_names encoder) ]
   in
 
   let vbs =
     match decoder with
     | None -> vbs
     | Some decoder ->
-        vbs
-        @ [
-            Vb.mk
-              ~attrs:[ attr_warning [%expr "-4"]; attr_warning [%expr "-39"] ]
-              decoder_pat
-              (add_params decoder_param_names decoder);
-          ]
+        vbs @ [ Vb.mk decoder_pat (add_params decoder_param_names decoder) ]
   in
 
   vbs

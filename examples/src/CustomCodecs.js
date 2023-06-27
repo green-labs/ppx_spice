@@ -11,13 +11,13 @@ var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
 function status_encode(v) {
   switch (v) {
-    case /* WAITING */0 :
+    case "WAITING" :
         return ["WAITING"];
-    case /* PROCESSING */1 :
+    case "PROCESSING" :
         return ["PROCESSING"];
-    case /* SUCCESS */2 :
+    case "SUCCESS" :
         return ["SUCCESS"];
-    case /* FAIL */3 :
+    case "FAIL" :
         return ["FAIL"];
     
   }
@@ -25,10 +25,10 @@ function status_encode(v) {
 
 function status_decode(v) {
   var json_arr = Js_json.classify(v);
-  if (typeof json_arr === "number") {
+  if (typeof json_arr !== "object") {
     return Spice.error(undefined, "Not a variant", v);
   }
-  if (json_arr.TAG !== /* JSONArray */3) {
+  if (json_arr.TAG !== "JSONArray") {
     return Spice.error(undefined, "Not a variant", v);
   }
   var json_arr$1 = json_arr._0;
@@ -37,15 +37,15 @@ function status_decode(v) {
   }
   var tagged = Js_array.map(Js_json.classify, json_arr$1);
   var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match !== "number" && match.TAG === /* JSONString */0) {
+  if (typeof match === "object" && match.TAG === "JSONString") {
     switch (match._0) {
       case "FAIL" :
           if (tagged.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* FAIL */3
+                    TAG: "Ok",
+                    _0: "FAIL"
                   };
           }
       case "PROCESSING" :
@@ -53,8 +53,8 @@ function status_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* PROCESSING */1
+                    TAG: "Ok",
+                    _0: "PROCESSING"
                   };
           }
       case "SUCCESS" :
@@ -62,8 +62,8 @@ function status_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* SUCCESS */2
+                    TAG: "Ok",
+                    _0: "SUCCESS"
                   };
           }
       case "WAITING" :
@@ -71,8 +71,8 @@ function status_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* WAITING */0
+                    TAG: "Ok",
+                    _0: "WAITING"
                   };
           }
       default:
@@ -84,13 +84,13 @@ function status_decode(v) {
 
 function encoderStatus(v) {
   switch (v) {
-    case /* WAITING */0 :
+    case "WAITING" :
         return "waiting";
-    case /* PROCESSING */1 :
+    case "PROCESSING" :
         return "processing";
-    case /* SUCCESS */2 :
+    case "SUCCESS" :
         return "success";
-    case /* FAIL */3 :
+    case "FAIL" :
         return "fail";
     
   }
@@ -98,9 +98,9 @@ function encoderStatus(v) {
 
 function decoderStatus(json) {
   var str = Js_json.classify(json);
-  if (typeof str === "number") {
+  if (typeof str !== "object") {
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: "",
               message: "Expected JSONString",
@@ -108,9 +108,9 @@ function decoderStatus(json) {
             }
           };
   }
-  if (str.TAG !== /* JSONString */0) {
+  if (str.TAG !== "JSONString") {
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: "",
               message: "Expected JSONString",
@@ -121,27 +121,27 @@ function decoderStatus(json) {
   switch (str._0) {
     case "fail" :
         return {
-                TAG: /* Ok */0,
-                _0: /* FAIL */3
+                TAG: "Ok",
+                _0: "FAIL"
               };
     case "processing" :
         return {
-                TAG: /* Ok */0,
-                _0: /* PROCESSING */1
+                TAG: "Ok",
+                _0: "PROCESSING"
               };
     case "success" :
         return {
-                TAG: /* Ok */0,
-                _0: /* SUCCESS */2
+                TAG: "Ok",
+                _0: "SUCCESS"
               };
     case "waiting" :
         return {
-                TAG: /* Ok */0,
-                _0: /* WAITING */0
+                TAG: "Ok",
+                _0: "WAITING"
               };
     default:
       return {
-              TAG: /* Error */1,
+              TAG: "Error",
               _0: {
                 path: "",
                 message: "Expected JSONString",
@@ -166,16 +166,16 @@ function data_encode(v) {
 
 function data_decode(v) {
   var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (typeof dict !== "object") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (dict.TAG !== "JSONObject") {
     return Spice.error(undefined, "Not an object", v);
   }
   var status = decoderStatus(Belt_Option.getWithDefault(Js_dict.get(dict._0, "status"), null));
-  if (status.TAG === /* Ok */0) {
+  if (status.TAG === "Ok") {
     return {
-            TAG: /* Ok */0,
+            TAG: "Ok",
             _0: {
               status: status._0
             }
@@ -183,7 +183,7 @@ function data_decode(v) {
   }
   var e = status._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".status" + e.path,
             message: e.message,

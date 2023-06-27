@@ -15,13 +15,15 @@ let rec parameterize_codecs type_args encoder_func decoder_func
     | Some encoder_func ->
         sub_encoders
         |> List.map (fun e -> (Asttypes.Nolabel, Option.get e))
-        |> Exp.apply encoder_func |> Option.some),
+        |> Exp.apply ~attrs:[ attr_partial; attr_uapp ] encoder_func
+        |> Option.some),
     match decoder_func with
     | None -> None
     | Some decoder_func ->
         sub_decoders
         |> List.map (fun e -> (Asttypes.Nolabel, Option.get e))
-        |> Exp.apply decoder_func |> Option.some )
+        |> Exp.apply ~attrs:[ attr_partial; attr_uapp ] decoder_func
+        |> Option.some )
 
 and generate_constr_codecs { do_encode; do_decode }
     { Location.txt = identifier; loc } =
@@ -61,8 +63,11 @@ and generate_constr_codecs { do_encode; do_decode }
       ( (if do_encode then Some [%expr Spice.dictToJson] else None),
         if do_decode then Some [%expr Spice.dictFromJson] else None )
   | Ldot (Ldot (Lident "Js", "Json"), "t") ->
-      ( (if do_encode then Some [%expr fun v -> v] else None),
-        if do_decode then Some [%expr fun v -> Belt.Result.Ok v] else None )
+      ( (if do_encode then Some (Utils.expr_func ~arity:1 [%expr fun v -> v])
+        else None),
+        if do_decode then
+          Some (Utils.expr_func ~arity:1 [%expr fun v -> Belt.Result.Ok v])
+        else None )
   | Lident s ->
       ( (if do_encode then Some (make_ident_expr (s ^ Utils.encoder_func_suffix))
         else None),
