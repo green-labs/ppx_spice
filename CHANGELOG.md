@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.15
+
+### Patch Changes
+
+- 0e738ef: Support cli arg for uncurried mode
+
 ## 0.1.15-next.0
 
 ### Patch Changes
