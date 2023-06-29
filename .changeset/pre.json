@@ -1,0 +1,10 @@
+{
+  "mode": "pre",
+  "tag": "next",
+  "initialVersions": {
+    "@greenlabs/ppx-spice": "0.1.14"
+  },
+  "changesets": [
+    "seven-timers-hammer"
+  ]
+}

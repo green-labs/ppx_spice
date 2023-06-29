@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.1.15-next.0
+
+### Patch Changes
+
+- Support cli arg for uncurried mode
+
 # 0.1.14
 
 - Support both `ns.optional` and `res.optional` for backward compatability

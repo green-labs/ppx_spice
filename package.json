@@ -1,6 +1,6 @@
 {
   "name": "@greenlabs/ppx-spice",
-  "version": "0.1.14",
+  "version": "0.1.15-next.0",
   "description": "ReScript PPX which generate JSON (de)serializer",
   "license": "MIT",
   "author": "Greenlabs Dev <developer@greenlabs.co.kr>",
@@ -17,5 +17,8 @@
   ],
   "scripts": {
     "postinstall": "node ./postInstall.js"
+  },
+  "dependencies": {
+    "@changesets/cli": "^2.26.2"
   }
 }
