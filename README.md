@@ -136,9 +136,11 @@ yarn add -D @greenlabs/ppx-spice
 ],
 "ppx-flags": [
   ...,
-  "@greenlabs/ppx-spice/ppx"
+  ["@greenlabs/ppx-spice/ppx", "-uncurried"]
 ],
 ```
+
+> If you want to set it to uncurried mode, add `-uncurried`.
 
 ## Development
 
