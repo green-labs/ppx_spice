@@ -18,7 +18,7 @@
   "scripts": {
     "postinstall": "node ./postInstall.js"
   },
-  "dependencies": {
+  "devDependencies": {
     "@changesets/cli": "^2.26.2"
   }
 }
