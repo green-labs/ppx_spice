@@ -137,7 +137,7 @@ let resultFromJson = (okDecoder, errorDecoder, json) =>
   | None => error("Not an array", json)
   }
 
-let dictToJson = (encoder, dict) => Js.Json.object_(Js.Dict.map(a => encoder(a), dict))
+let dictToJson = (encoder, dict) => Js.Json.object_(Js.Dict.map((. a) => encoder(a), dict))
 
 let dictFromJson = (decoder, json) =>
   switch Js.Json.decodeObject(json) {
