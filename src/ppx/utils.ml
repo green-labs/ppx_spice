@@ -131,4 +131,5 @@ let expr_func ?(loc = Location.none) ~arity e =
   in
   Exp.construct ~attrs:[ attr_arity ] { txt = Lident "Function$"; loc } (Some e)
 
-let ctyp_json_t = Typ.constr (mknoloc [%lid Js.Json.t]) []
+let ctyp_json_t =
+  Typ.constr (mknoloc (Ldot (Ldot (Lident "Js", "Json"), "t"))) []
