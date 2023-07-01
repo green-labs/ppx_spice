@@ -74,6 +74,8 @@ type data = {
 
 There are many cases to parse and stringify the string data into (polymorphic) variants. Furthermore, the Unicode string needs to be handled with a variant. Currently, pattern matching is not working for the Unicode string in ReScript, the Spice is using `if ... then ... else` to compare the Unicode string in case of adding `@spice.as` attribute.
 
+3. Last but not least, Spice supports the latest ReScript compilers: v10's optional field record, v11's untagged variant, and more.
+
 ## Example
 
 1. Variant
