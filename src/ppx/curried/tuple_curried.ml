@@ -16,7 +16,10 @@ let generate_encoder composite_encoders =
     |> List.mapi (fun i _ -> Pat.var (mknoloc ("v" ^ string_of_int i)))
     |> Pat.tuple
   in
-  [%expr fun [%p deconstructor_pattern] -> Js.Json.array [%e arrExp]]
+  let return_exp =
+    Exp.constraint_ [%expr Js.Json.Array [%e arrExp]] Utils.ctyp_json_t
+  in
+  [%expr fun [%p deconstructor_pattern] -> [%e return_exp]]
 
 let generate_decode_success_case num_args =
   {
@@ -54,13 +57,14 @@ let generate_decoder composite_decoders =
     |> List.mapi (fun i _ -> Pat.var (mknoloc ("v" ^ string_of_int i)))
     |> Pat.array
   in
-  let match_pattern = [%pat? Js.Json.JSONArray [%p match_arr_pattern]] in
+  let match_pattern = [%pat? Js.Json.Array [%p match_arr_pattern]] in
   let outer_switch =
-    Exp.match_ [%expr Js.Json.classify json]
+    Exp.match_
+      (Exp.constraint_ [%expr json] Utils.ctyp_json_t)
       [
         Exp.case match_pattern (generate_decode_switch composite_decoders);
         Exp.case
-          [%pat? Js.Json.JSONArray _]
+          [%pat? Js.Json.Array _]
           [%expr Spice.error "Incorrect cardinality" json];
         Exp.case [%pat? _] [%expr Spice.error "Not a tuple" json];
       ]

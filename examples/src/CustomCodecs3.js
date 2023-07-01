@@ -3,7 +3,6 @@
 
 var Spice = require("@greenlabs/ppx-spice/src/rescript/Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
@@ -28,19 +27,17 @@ function userRaw_encode(v) {
 }
 
 function userRaw_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
+  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "name"), null));
   if (name.TAG === "Ok") {
-    var address_street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address_street"), null));
+    var address_street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "address_street"), null));
     if (address_street.TAG === "Ok") {
-      var address_number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address_number"), null));
+      var address_number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "address_number"), null));
       if (address_number.TAG === "Ok") {
         return {
                 TAG: "Ok",

@@ -10,16 +10,16 @@ let encoderStatus = v =>
   }->Js.Json.string
 
 let decoderStatus = json => {
-  switch json |> Js.Json.classify {
+  switch Js.Json.classify(json) {
   | Js.Json.JSONString(str) =>
     switch str {
     | "waiting" => WAITING->Ok
     | "processing" => PROCESSING->Ok
     | "success" => SUCCESS->Ok
     | "fail" => FAIL->Ok
-    | _ => Error({Spice.path: "", message: "Expected JSONString", value: json})
+    | _ => Error({Spice.path: "", message: "Expected Json String", value: json})
     }
-  | _ => Error({Spice.path: "", message: "Expected JSONString", value: json})
+  | _ => Error({Spice.path: "", message: "Expected Json String", value: json})
   }
 }
 

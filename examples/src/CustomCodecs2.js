@@ -23,17 +23,15 @@ function address_encode(v) {
 }
 
 function address_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "street"), null));
+  var street = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "street"), null));
   if (street.TAG === "Ok") {
-    var number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "number"), null));
+    var number = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "number"), null));
     if (number.TAG === "Ok") {
       return {
               TAG: "Ok",
@@ -80,17 +78,15 @@ function user_encode(v) {
 }
 
 function user_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
+  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "name"), null));
   if (name.TAG === "Ok") {
-    var address = address_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "address"), null));
+    var address = address_decode(Belt_Option.getWithDefault(Js_dict.get(v, "address"), null));
     if (address.TAG === "Ok") {
       return {
               TAG: "Ok",
@@ -148,7 +144,7 @@ function decoderUser(json) {
             TAG: "Error",
             _0: {
               path: "",
-              message: "Expected JSONObject",
+              message: "Expected Json Object",
               value: json
             }
           };
@@ -158,7 +154,7 @@ function decoderUser(json) {
             TAG: "Error",
             _0: {
               path: "",
-              message: "Expected JSONObject",
+              message: "Expected Json Object",
               value: json
             }
           };
@@ -203,14 +199,13 @@ function data_encode(v) {
 }
 
 function data_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var user = decoderUser(Belt_Option.getWithDefault(Js_dict.get(dict._0, "user"), null));
+  var user = decoderUser(Belt_Option.getWithDefault(Js_dict.get(v, "user"), null));
   if (user.TAG === "Ok") {
     return {
             TAG: "Ok",

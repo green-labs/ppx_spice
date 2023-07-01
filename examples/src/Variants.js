@@ -3,7 +3,6 @@
 
 var Spice = require("@greenlabs/ppx-spice/src/rescript/Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
@@ -22,30 +21,24 @@ function language_encode(v) {
 }
 
 function language_decode(v) {
-  var str = Js_json.classify(v);
-  if (typeof str !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" || typeof v !== "string") {
     return Spice.error(undefined, "Not a JSONString", v);
-  }
-  if (str.TAG !== "JSONString") {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
-  var str$1 = str._0;
-  if ("ReScript" === str$1) {
+  } else if ("ReScript" === v) {
     return {
             TAG: "Ok",
             _0: "ReScript"
           };
-  } else if ("OCaml" === str$1) {
+  } else if ("OCaml" === v) {
     return {
             TAG: "Ok",
             _0: "OCaml"
           };
-  } else if ("TypeScript" === str$1) {
+  } else if ("TypeScript" === v) {
     return {
             TAG: "Ok",
             _0: "TypeScript"
           };
-  } else if ("JavaScript" === str$1) {
+  } else if ("JavaScript" === v) {
     return {
             TAG: "Ok",
             _0: "JavaScript"
@@ -78,21 +71,19 @@ function user_encode(v) {
 }
 
 function user_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "id"), null));
+  var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "id"), null));
   if (id.TAG === "Ok") {
     var nickname = (function (extra) {
           return Spice.optionFromJson(Spice.stringFromJson, extra);
-        })(Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "nickname"), null));
     if (nickname.TAG === "Ok") {
-      var language = language_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "language"), null));
+      var language = language_decode(Belt_Option.getWithDefault(Js_dict.get(v, "language"), null));
       if (language.TAG === "Ok") {
         return {
                 TAG: "Ok",

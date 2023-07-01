@@ -36,7 +36,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         |> List.mapi (fun i e ->
                Exp.apply ~loc:pcd_loc e
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
-        |> List.append [ [%expr Js.Json.string [%e constructor_expr]] ]
+        |> List.append [ [%expr Js.Json.String [%e constructor_expr]] ]
       in
 
       {
@@ -44,8 +44,8 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         pc_guard = None;
         pc_rhs =
           (if unboxed then List.tl rhs_list |> List.hd
-          else if has_attr_as then [%expr Js.Json.string [%e constructor_expr]]
-          else [%expr Js.Json.array [%e rhs_list |> Exp.array]]);
+          else if has_attr_as then [%expr Js.Json.String [%e constructor_expr]]
+          else [%expr Js.Json.Array [%e rhs_list |> Exp.array]]);
       }
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
 
@@ -107,11 +107,11 @@ let generate_decoder_case generator_settings
       {
         pc_lhs =
           ( Pconst_string (name, Location.none, None) |> Pat.constant |> fun v ->
-            Some v |> Pat.construct (lid "Js.Json.JSONString") );
+            Some v |> Pat.construct (lid "Js.Json.String") );
         pc_guard = None;
         pc_rhs =
           [%expr
-            if Js.Array.length tagged <> [%e arg_len] then
+            if Js.Array.length json_arr <> [%e arg_len] then
               Spice.error "Invalid number of arguments to variant constructor" v
             else [%e decoded]];
       }
@@ -189,11 +189,14 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
 
   let encoder =
     if do_encode then
-      Some
-        (parsed_decls
+      let match_expr =
+        parsed_decls
         |> List.map
              (generate_encoder_case generator_settings unboxed has_attr_as)
         |> Exp.match_ [%expr v]
+      in
+      Some
+        (Exp.constraint_ match_expr Utils.ctyp_json_t
         |> Exp.fun_ Asttypes.Nolabel None [%pat? v])
     else None
   in
@@ -223,8 +226,8 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
           Some
             [%expr
               fun v ->
-                match Js.Json.classify v with
-                | Js.Json.JSONString str -> [%e decoder_switch]
+                match (v : Js.Json.t) with
+                | Js.Json.String str -> [%e decoder_switch]
                 | _ -> Spice.error "Not a JSONString" v]
         else
           let decoder_default_case =
@@ -242,18 +245,16 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
             constr_decls |> List.map (generate_decoder_case generator_settings)
             |> fun l ->
             l @ [ decoder_default_case ]
-            |> Exp.match_ [%expr Belt.Array.getExn tagged 0]
+            |> Exp.match_ [%expr Belt.Array.getExn json_arr 0]
           in
 
           Some
             [%expr
               fun v ->
-                match Js.Json.classify v with
-                | Js.Json.JSONArray [||] ->
+                match (v : Js.Json.t) with
+                | Js.Json.Array [||] ->
                     Spice.error "Expected variant, found empty array" v
-                | Js.Json.JSONArray json_arr ->
-                    let tagged = Js.Array.map Js.Json.classify json_arr in
-                    [%e decoder_switch]
+                | Js.Json.Array json_arr -> [%e decoder_switch]
                 | _ -> Spice.error "Not a variant" v]
   in
 

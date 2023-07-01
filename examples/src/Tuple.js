@@ -3,7 +3,6 @@
 
 var Spice = require("@greenlabs/ppx-spice/src/rescript/Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
@@ -15,32 +14,30 @@ function profile_encode(v) {
 }
 
 function profile_decode(v) {
-  var match = Js_json.classify(v);
-  if (typeof match !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not a tuple", v);
   }
-  if (match.TAG !== "JSONArray") {
+  if (!Array.isArray(v)) {
     return Spice.error(undefined, "Not a tuple", v);
   }
-  var match$1 = match._0;
-  if (match$1.length !== 2) {
+  if (v.length !== 2) {
     return Spice.error(undefined, "Incorrect cardinality", v);
   }
-  var v0 = match$1[0];
-  var v1 = match$1[1];
-  var match$2 = Spice.stringFromJson(v0);
-  var match$3 = Spice.intFromJson(v1);
-  if (match$2.TAG === "Ok") {
-    if (match$3.TAG === "Ok") {
+  var v0 = v[0];
+  var v1 = v[1];
+  var match = Spice.stringFromJson(v0);
+  var match$1 = Spice.intFromJson(v1);
+  if (match.TAG === "Ok") {
+    if (match$1.TAG === "Ok") {
       return {
               TAG: "Ok",
               _0: [
-                match$2._0,
-                match$3._0
+                match._0,
+                match$1._0
               ]
             };
     }
-    var e = match$3._0;
+    var e = match$1._0;
     return {
             TAG: "Error",
             _0: {
@@ -50,7 +47,7 @@ function profile_decode(v) {
             }
           };
   }
-  var e$1 = match$2._0;
+  var e$1 = match._0;
   return {
           TAG: "Error",
           _0: {
@@ -82,19 +79,17 @@ function user_encode(v) {
 }
 
 function user_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "id"), null));
+  var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "id"), null));
   if (id.TAG === "Ok") {
-    var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
+    var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "name"), null));
     if (name.TAG === "Ok") {
-      var profile = profile_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "profile"), null));
+      var profile = profile_decode(Belt_Option.getWithDefault(Js_dict.get(v, "profile"), null));
       if (profile.TAG === "Ok") {
         return {
                 TAG: "Ok",

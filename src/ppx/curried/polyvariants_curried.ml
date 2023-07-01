@@ -146,7 +146,7 @@ let generate_decoder_case_attr generator_settings row =
   match prf_desc with
   | Rtag ({ txt }, _, core_types) ->
       let args = get_args_from_polyvars ~loc core_types in
-      let alias_name, loc, delimit = get_string_from_expression alias in
+      let alias_name, _, delimit = get_string_from_expression alias in
       let decoded =
         match args with
         | [] ->

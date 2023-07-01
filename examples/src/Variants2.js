@@ -3,8 +3,6 @@
 
 var Spice = require("@greenlabs/ppx-spice/src/rescript/Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
-var Js_array = require("rescript/lib/js/js_array.js");
 var Belt_Array = require("rescript/lib/js/belt_Array.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
@@ -28,23 +26,20 @@ function language_encode(v) {
 }
 
 function language_decode(v) {
-  var json_arr = Js_json.classify(v);
-  if (typeof json_arr !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not a variant", v);
   }
-  if (json_arr.TAG !== "JSONArray") {
+  if (!Array.isArray(v)) {
     return Spice.error(undefined, "Not a variant", v);
   }
-  var json_arr$1 = json_arr._0;
-  if (json_arr$1.length === 0) {
+  if (v.length === 0) {
     return Spice.error(undefined, "Expected variant, found empty array", v);
   }
-  var tagged = Js_array.map(Js_json.classify, json_arr$1);
-  var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match === "object" && match.TAG === "JSONString") {
-    switch (match._0) {
+  var match = Belt_Array.getExn(v, 0);
+  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string") && typeof match === "string") {
+    switch (match) {
       case "JavaScript" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -53,7 +48,7 @@ function language_decode(v) {
                   };
           }
       case "OCaml" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -62,10 +57,10 @@ function language_decode(v) {
                   };
           }
       case "ReScript" :
-          if (tagged.length !== 2) {
+          if (v.length !== 2) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           }
-          var v0 = Spice.stringFromJson(Belt_Array.getExn(json_arr$1, 1));
+          var v0 = Spice.stringFromJson(Belt_Array.getExn(v, 1));
           if (v0.TAG === "Ok") {
             return {
                     TAG: "Ok",
@@ -85,7 +80,7 @@ function language_decode(v) {
                   }
                 };
       case "TypeScript" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -97,7 +92,7 @@ function language_decode(v) {
         
     }
   }
-  return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(json_arr$1, 0));
+  return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(v, 0));
 }
 
 function user_encode(v) {
@@ -123,21 +118,19 @@ function user_encode(v) {
 }
 
 function user_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "id"), null));
+  var id = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "id"), null));
   if (id.TAG === "Ok") {
     var nickname = (function (extra) {
           return Spice.optionFromJson(Spice.stringFromJson, extra);
-        })(Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "nickname"), null));
     if (nickname.TAG === "Ok") {
-      var language = language_decode(Belt_Option.getWithDefault(Js_dict.get(dict$1, "language"), null));
+      var language = language_decode(Belt_Option.getWithDefault(Js_dict.get(v, "language"), null));
       if (language.TAG === "Ok") {
         return {
                 TAG: "Ok",
