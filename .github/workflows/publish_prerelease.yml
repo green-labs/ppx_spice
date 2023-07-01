@@ -1,12 +1,6 @@
 name: ppx_spice publish prerelease
 
-on:
-  workflow_dispatch:
-    inputs:
-      release_version:
-        description: "change npm release version"
-        required: true
-        default: ""
+on: [workflow_dispatch]
 
 jobs:
   build_linux:
@@ -161,18 +155,12 @@ jobs:
           mv binaries/darwin/ppx.exe ppx-osx.exe
           mv binaries/windows/ppx.exe ppx-windows.exe
 
-      - name: Change npm release version
-        if: success()
-        uses: reedyuk/npm-version@1.1.1
-        with:
-          version: ${{ github.event.inputs.release_version }}
-
       - name: Pack package
         if: success()
         run: npm pack
 
       - name: Publish
         if: success()
-        run: npm publish greenlabs-ppx-spice-${{ github.event.inputs.release_version }}.tgz --tag next
+        run: npm publish --tag next
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
