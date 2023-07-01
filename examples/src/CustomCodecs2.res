@@ -34,7 +34,7 @@ let decoderUser = json =>
       | _ => Error({Spice.path: "", message: "Expected name, street, number ", value: json})
       }
     }
-  | _ => Error({Spice.path: "", message: "Expected JSONObject", value: json})
+  | _ => Error({Spice.path: "", message: "Expected Json Object", value: json})
   }
 
 let codecUser: Spice.codec<user> = (encoderUser, decoderUser)

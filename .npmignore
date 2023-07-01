@@ -9,3 +9,4 @@ src/dune
 src/dune-project
 src/dune-workspace
 src/ppx_spice.opam
+.changeset

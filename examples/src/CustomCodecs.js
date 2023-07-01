@@ -4,7 +4,6 @@
 var Spice = require("@greenlabs/ppx-spice/src/rescript/Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
 var Js_json = require("rescript/lib/js/js_json.js");
-var Js_array = require("rescript/lib/js/js_array.js");
 var Belt_Array = require("rescript/lib/js/belt_Array.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
@@ -24,23 +23,20 @@ function status_encode(v) {
 }
 
 function status_decode(v) {
-  var json_arr = Js_json.classify(v);
-  if (typeof json_arr !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not a variant", v);
   }
-  if (json_arr.TAG !== "JSONArray") {
+  if (!Array.isArray(v)) {
     return Spice.error(undefined, "Not a variant", v);
   }
-  var json_arr$1 = json_arr._0;
-  if (json_arr$1.length === 0) {
+  if (v.length === 0) {
     return Spice.error(undefined, "Expected variant, found empty array", v);
   }
-  var tagged = Js_array.map(Js_json.classify, json_arr$1);
-  var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match === "object" && match.TAG === "JSONString") {
-    switch (match._0) {
+  var match = Belt_Array.getExn(v, 0);
+  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string") && typeof match === "string") {
+    switch (match) {
       case "FAIL" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -49,7 +45,7 @@ function status_decode(v) {
                   };
           }
       case "PROCESSING" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -58,7 +54,7 @@ function status_decode(v) {
                   };
           }
       case "SUCCESS" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -67,7 +63,7 @@ function status_decode(v) {
                   };
           }
       case "WAITING" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
@@ -79,7 +75,7 @@ function status_decode(v) {
         
     }
   }
-  return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(json_arr$1, 0));
+  return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(v, 0));
 }
 
 function encoderStatus(v) {
@@ -103,7 +99,7 @@ function decoderStatus(json) {
             TAG: "Error",
             _0: {
               path: "",
-              message: "Expected JSONString",
+              message: "Expected Json String",
               value: json
             }
           };
@@ -113,7 +109,7 @@ function decoderStatus(json) {
             TAG: "Error",
             _0: {
               path: "",
-              message: "Expected JSONString",
+              message: "Expected Json String",
               value: json
             }
           };
@@ -144,7 +140,7 @@ function decoderStatus(json) {
               TAG: "Error",
               _0: {
                 path: "",
-                message: "Expected JSONString",
+                message: "Expected Json String",
                 value: json
               }
             };
@@ -165,14 +161,13 @@ function data_encode(v) {
 }
 
 function data_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict !== "object") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== "JSONObject") {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var status = decoderStatus(Belt_Option.getWithDefault(Js_dict.get(dict._0, "status"), null));
+  var status = decoderStatus(Belt_Option.getWithDefault(Js_dict.get(v, "status"), null));
   if (status.TAG === "Ok") {
     return {
             TAG: "Ok",

@@ -130,3 +130,5 @@ let expr_func ?(loc = Location.none) ~arity e =
       (PStr [ Str.eval (Exp.constant (Const.int arity)) ])
   in
   Exp.construct ~attrs:[ attr_arity ] { txt = Lident "Function$"; loc } (Some e)
+
+let ctyp_json_t = Typ.constr (mknoloc [%lid Js.Json.t]) []

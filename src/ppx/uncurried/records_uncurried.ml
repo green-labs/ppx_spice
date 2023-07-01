@@ -28,12 +28,19 @@ let generate_encoder decls unboxed =
                  if is_optional then [%expr true] else [%expr false]
                in
                [%expr
-                 [%e key], [%e is_optional], [%e Option.get encoder] [%e field]])
+                 [%e key],
+                   [%e is_optional],
+                   ([%e Option.get encoder] [%e field] [@res.uapp])])
         |> Exp.array
       in
-      [%expr
-        Js.Json.object_ (Js.Dict.fromArray (Spice.filterOptional [%e arrExpr]))]
+      Exp.constraint_
+        [%expr
+          Js.Json.Object
+            (Js.Dict.fromArray
+               (Spice.filterOptional [%e arrExpr] [@res.uapp]) [@res.uapp])]
+        Utils.ctyp_json_t
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
+      |> Utils.expr_func ~arity:1
 
 let generate_dict_get { key; codecs = _, decoder; default } =
   let decoder = Option.get decoder in
@@ -42,11 +49,13 @@ let generate_dict_get { key; codecs = _, decoder; default } =
       [%expr
         Belt.Option.getWithDefault
           (Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder])
-          (Belt.Result.Ok [%e default])]
+          (Belt.Result.Ok [%e default]) [@res.uapp]]
   | None ->
       [%expr
         [%e decoder]
-          (Belt.Option.getWithDefault (Js.Dict.get dict [%e key]) Js.Json.null)]
+          (Belt.Option.getWithDefault
+             (Js.Dict.get dict [%e key] [@res.uapp])
+             Js.Json.null [@res.uapp]) [@res.uapp]]
 
 let generate_error_case { key } =
   {
@@ -103,9 +112,9 @@ let generate_decoder decls unboxed =
       Utils.expr_func ~arity:1
         [%expr
           fun v ->
-            match Js.Json.classify v with
-            | Js.Json.JSONObject dict -> [%e generate_nested_switches decls]
-            | _ -> Spice.error "Not an object" v]
+            match (v : Js.Json.t) with
+            | Js.Json.Object dict -> [%e generate_nested_switches decls]
+            | _ -> Spice.error "Not an object" v [@res.uapp]]
 
 let parse_decl generator_settings
     { pld_name = { txt }; pld_loc; pld_type; pld_attributes } =

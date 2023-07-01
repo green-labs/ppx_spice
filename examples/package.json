@@ -4,7 +4,7 @@
   "description": "Examples for the Spice PPX",
   "license": "MIT",
   "devDependencies": {
-    "rescript": "^11.0.0-beta.2"
+    "rescript": "11.0.0-beta.3"
   },
   "scripts": {
     "res:build": "rescript",
@@ -12,6 +12,6 @@
     "res:watch": "rescript build -w"
   },
   "dependencies": {
-    "@greenlabs/ppx-spice": "next"
+    "@greenlabs/ppx-spice": "^0.1.15"
   }
 }
