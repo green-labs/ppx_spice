@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.2.0
+
+### Minor Changes
+
+- 9ce55bf: Compat the untagged variant
+
 ## 0.2.0-next.0
 
 ### Minor Changes
