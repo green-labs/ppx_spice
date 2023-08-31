@@ -126,6 +126,13 @@ Read our [Guide with examples](docs/GUIDE.md)
 
 ## Install
 
+### Versions
+
+|Compiler|Ppx_spice  |
+|--------|-----------|
+|v10     |~<= v0.1.15|
+|v11     |>= v0.2.0  |
+
 ```sh
 yarn add -D @greenlabs/ppx-spice
 ```
