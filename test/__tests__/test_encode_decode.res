@@ -17,7 +17,7 @@ describe("encode only", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->te_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 })
 
@@ -36,6 +36,6 @@ describe("decode only", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->td_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })

@@ -17,12 +17,12 @@ describe("optional field record", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->t0_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson->t0_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })
 
@@ -41,12 +41,12 @@ describe("optional field record: array<int>", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->t1_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson->t1_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })
 
@@ -65,12 +65,12 @@ describe("optional field record: array<variant>", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->t2_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson->t2_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })
 
@@ -88,11 +88,11 @@ describe("optional field record: omit array<variant>", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->t2_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson->t2_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })
