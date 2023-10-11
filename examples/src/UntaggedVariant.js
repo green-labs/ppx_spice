@@ -15,7 +15,7 @@ function t0_encode(v) {
 }
 
 function t0_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not a variant", v);
   }
   if (!Array.isArray(v)) {
@@ -25,7 +25,7 @@ function t0_decode(v) {
     return Spice.error(undefined, "Expected variant, found empty array", v);
   }
   var match = Belt_Array.getExn(v, 0);
-  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string") && typeof match === "string") {
+  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string" && typeof match !== "boolean") && typeof match === "string") {
     switch (match) {
       case "A" :
           if (v.length !== 1) {
@@ -68,7 +68,7 @@ function t1_encode(v) {
 }
 
 function t1_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
   if (!(typeof v === "object" && !Array.isArray(v))) {
@@ -115,7 +115,7 @@ function t2_encode(v) {
 }
 
 function t2_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not a tuple", v);
   }
   if (!Array.isArray(v)) {
