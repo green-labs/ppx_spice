@@ -133,3 +133,9 @@ let expr_func ?(loc = Location.none) ~arity e =
 
 let ctyp_json_t =
   Typ.constr (mknoloc (Ldot (Ldot (Lident "Js", "Json"), "t"))) []
+
+let ctyp_arrow ?(loc = Location.none) ~arity ctyp =
+  let arity = "Has_arity" ^ string_of_int arity in
+  Typ.constr ~loc
+    (mknoloc @@ Lident "function$")
+    [ ctyp; Typ.variant [ Rf.tag (mknoloc arity) true [] ] Closed None ]
