@@ -60,13 +60,13 @@ let floatFromJson = j =>
 
 let boolToJson = (v): Js.Json.t =>
   switch v {
-  | true => Js.Json.True
-  | false => Js.Json.False
+  | true => Js.Json.Boolean(true)
+  | false => Js.Json.Boolean(false)
   }
 let boolFromJson = j =>
   switch (j: Js.Json.t) {
-  | Js.Json.True => Belt.Result.Ok(true)
-  | Js.Json.False => Belt.Result.Ok(false)
+  | Js.Json.Boolean(true) => Belt.Result.Ok(true)
+  | Js.Json.Boolean(false) => Belt.Result.Ok(false)
   | _ => Belt.Result.Error({path: "", message: "Not a boolean", value: j})
   }
 
