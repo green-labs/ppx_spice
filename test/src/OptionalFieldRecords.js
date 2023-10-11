@@ -3,7 +3,6 @@
 
 var Spice = require("./Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 
 function t0_encode(v) {
@@ -16,26 +15,28 @@ function t0_encode(v) {
                   [
                     "b",
                     true,
-                    Spice.optionToJson(Spice.intToJson, v.b)
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.intToJson, extra);
+                        })(v.b)
                   ]
                 ]));
 }
 
 function t0_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var a = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "a"), null));
-  if (a.TAG === /* Ok */0) {
-    var b = Spice.optionFromJson(Spice.intFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "b"), null));
-    if (b.TAG === /* Ok */0) {
+  var a = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "a"), null));
+  if (a.TAG === "Ok") {
+    var b = (function (extra) {
+          return Spice.optionFromJson(Spice.intFromJson, extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "b"), null));
+    if (b.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 a: a._0,
                 b: b._0
@@ -44,7 +45,7 @@ function t0_decode(v) {
     }
     var e = b._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".b" + e.path,
               message: e.message,
@@ -54,7 +55,7 @@ function t0_decode(v) {
   }
   var e$1 = a._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".a" + e$1.path,
             message: e$1.message,
@@ -73,30 +74,32 @@ function t1_encode(v) {
                   [
                     "bs",
                     true,
-                    Spice.optionToJson((function (param) {
-                            return Spice.arrayToJson(Spice.intToJson, param);
-                          }), v.bs)
+                    (function (extra) {
+                          return Spice.optionToJson((function (extra) {
+                                        return Spice.arrayToJson(Spice.intToJson, extra);
+                                      }), extra);
+                        })(v.bs)
                   ]
                 ]));
 }
 
 function t1_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var a = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "a"), null));
-  if (a.TAG === /* Ok */0) {
-    var bs = Spice.optionFromJson((function (param) {
-            return Spice.arrayFromJson(Spice.intFromJson, param);
-          }), Belt_Option.getWithDefault(Js_dict.get(dict$1, "bs"), null));
-    if (bs.TAG === /* Ok */0) {
+  var a = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "a"), null));
+  if (a.TAG === "Ok") {
+    var bs = (function (extra) {
+          return Spice.optionFromJson((function (extra) {
+                        return Spice.arrayFromJson(Spice.intFromJson, extra);
+                      }), extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "bs"), null));
+    if (bs.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 a: a._0,
                 bs: bs._0
@@ -105,7 +108,7 @@ function t1_decode(v) {
     }
     var e = bs._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".bs" + e.path,
               message: e.message,
@@ -115,7 +118,7 @@ function t1_decode(v) {
   }
   var e$1 = a._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".a" + e$1.path,
             message: e$1.message,
@@ -126,39 +129,33 @@ function t1_decode(v) {
 
 function b_encode(v) {
   switch (v) {
-    case /* B0 */0 :
+    case "B0" :
         return "B0";
-    case /* B1 */1 :
+    case "B1" :
         return "B1";
-    case /* B2 */2 :
+    case "B2" :
         return "B2";
     
   }
 }
 
 function b_decode(v) {
-  var str = Js_json.classify(v);
-  if (typeof str === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean" || typeof v !== "string") {
     return Spice.error(undefined, "Not a JSONString", v);
-  }
-  if (str.TAG !== /* JSONString */0) {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
-  var str$1 = str._0;
-  if ("B0" === str$1) {
+  } else if ("B0" === v) {
     return {
-            TAG: /* Ok */0,
-            _0: /* B0 */0
+            TAG: "Ok",
+            _0: "B0"
           };
-  } else if ("B1" === str$1) {
+  } else if ("B1" === v) {
     return {
-            TAG: /* Ok */0,
-            _0: /* B1 */1
+            TAG: "Ok",
+            _0: "B1"
           };
-  } else if ("B2" === str$1) {
+  } else if ("B2" === v) {
     return {
-            TAG: /* Ok */0,
-            _0: /* B2 */2
+            TAG: "Ok",
+            _0: "B2"
           };
   } else {
     return Spice.error(undefined, "Not matched", v);
@@ -175,30 +172,32 @@ function t2_encode(v) {
                   [
                     "bs",
                     true,
-                    Spice.optionToJson((function (param) {
-                            return Spice.arrayToJson(b_encode, param);
-                          }), v.bs)
+                    (function (extra) {
+                          return Spice.optionToJson((function (extra) {
+                                        return Spice.arrayToJson(b_encode, extra);
+                                      }), extra);
+                        })(v.bs)
                   ]
                 ]));
 }
 
 function t2_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var a = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "a"), null));
-  if (a.TAG === /* Ok */0) {
-    var bs = Spice.optionFromJson((function (param) {
-            return Spice.arrayFromJson(b_decode, param);
-          }), Belt_Option.getWithDefault(Js_dict.get(dict$1, "bs"), null));
-    if (bs.TAG === /* Ok */0) {
+  var a = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "a"), null));
+  if (a.TAG === "Ok") {
+    var bs = (function (extra) {
+          return Spice.optionFromJson((function (extra) {
+                        return Spice.arrayFromJson(b_decode, extra);
+                      }), extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "bs"), null));
+    if (bs.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 a: a._0,
                 bs: bs._0
@@ -207,7 +206,7 @@ function t2_decode(v) {
     }
     var e = bs._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".bs" + e.path,
               message: e.message,
@@ -217,7 +216,7 @@ function t2_decode(v) {
   }
   var e$1 = a._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".a" + e$1.path,
             message: e$1.message,
