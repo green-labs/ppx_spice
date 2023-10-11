@@ -16,21 +16,21 @@ function t_encode(v) {
 
 function t_decode(v) {
   var str = Js_json.classify(v);
-  if (typeof str === "number") {
+  if (typeof str !== "object") {
     return Spice.error(undefined, "Not a JSONString", v);
   }
-  if (str.TAG !== /* JSONString */0) {
+  if (str.TAG !== "JSONString") {
     return Spice.error(undefined, "Not a JSONString", v);
   }
   var str$1 = str._0;
   if ("하나" === str$1) {
     return {
-            TAG: /* Ok */0,
+            TAG: "Ok",
             _0: "one"
           };
   } else if ("둘" === str$1) {
     return {
-            TAG: /* Ok */0,
+            TAG: "Ok",
             _0: "two"
           };
   } else {
@@ -48,10 +48,10 @@ function t1_encode(v) {
 
 function t1_decode(v) {
   var json_arr = Js_json.classify(v);
-  if (typeof json_arr === "number") {
+  if (typeof json_arr !== "object") {
     return Spice.error(undefined, "Not a polyvariant", v);
   }
-  if (json_arr.TAG !== /* JSONArray */3) {
+  if (json_arr.TAG !== "JSONArray") {
     return Spice.error(undefined, "Not a polyvariant", v);
   }
   var json_arr$1 = json_arr._0;
@@ -60,14 +60,14 @@ function t1_decode(v) {
   }
   var tagged = Js_array.map(Js_json.classify, json_arr$1);
   var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match !== "number" && match.TAG === /* JSONString */0) {
+  if (typeof match === "object" && match.TAG === "JSONString") {
     switch (match._0) {
       case "one" :
           if (tagged.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
+                    TAG: "Ok",
                     _0: "one"
                   };
           }
@@ -76,7 +76,7 @@ function t1_decode(v) {
             return Spice.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
+                    TAG: "Ok",
                     _0: "two"
                   };
           }

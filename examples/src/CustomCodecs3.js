@@ -27,7 +27,7 @@ function userRaw_encode(v) {
 }
 
 function userRaw_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
   if (!(typeof v === "object" && !Array.isArray(v))) {

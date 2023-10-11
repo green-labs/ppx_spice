@@ -17,12 +17,12 @@ describe("record with @spice.key", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->Records.t_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson->Records.t_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })
 
@@ -41,12 +41,12 @@ describe("record without @spice.key", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord->t1_encode
-    expect(encoded) |> toEqual(sampleJson)
+    expect(encoded)->toEqual(sampleJson)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson->Records.t1_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
   })
 })
 
@@ -65,12 +65,12 @@ describe("record with optional field", _ => {
 
   test(`encode`, _ => {
     let encoded = sampleRecord1->tOp_encode
-    expect(encoded) |> toEqual(sampleJson1)
+    expect(encoded)->toEqual(sampleJson1)
   })
 
   test(`decode`, _ => {
     let decoded = sampleJson1->Records.tOp_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord1))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord1))
   })
 
   let sample2 = Js.Dict.empty()
@@ -83,12 +83,12 @@ describe("record with optional field", _ => {
 
   test(`encode omit optional field`, _ => {
     let encoded = sampleRecord2->tOp_encode
-    expect(encoded) |> toEqual(sampleJson2)
+    expect(encoded)->toEqual(sampleJson2)
   })
 
   test(`decode omit optional field`, _ => {
     let decoded = sampleJson2->Records.tOp_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord2))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord2))
   })
 
   let sample3 = Js.Dict.empty()
@@ -101,11 +101,11 @@ describe("record with optional field", _ => {
 
   test(`encode omit optional field with None field`, _ => {
     let encoded = sampleRecord3->tOp_encode
-    expect(encoded) |> toEqual(sampleJson3)
+    expect(encoded)->toEqual(sampleJson3)
   })
 
   test(`decode omit optional field with None field`, _ => {
     let decoded = sampleJson3->Records.tOp_decode
-    expect(decoded) |> toEqual(Belt.Result.Ok(sampleRecord3))
+    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord3))
   })
 })

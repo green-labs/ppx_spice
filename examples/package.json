@@ -4,7 +4,7 @@
   "description": "Examples for the Spice PPX",
   "license": "MIT",
   "devDependencies": {
-    "rescript": "11.0.0-beta.3"
+    "rescript": "^11.0.0-rc.4"
   },
   "scripts": {
     "res:build": "rescript",

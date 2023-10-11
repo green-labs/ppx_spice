@@ -2,37 +2,29 @@
 'use strict';
 
 var Spice = require("./Spice.js");
-var Js_json = require("rescript/lib/js/js_json.js");
-var Js_array = require("rescript/lib/js/js_array.js");
 var Belt_Array = require("rescript/lib/js/belt_Array.js");
 var Belt_Result = require("rescript/lib/js/belt_Result.js");
 
 function t_encode(v) {
-  if (v) {
-    return "둘";
-  } else {
+  if (v === "One") {
     return "하나";
+  } else {
+    return "둘";
   }
 }
 
 function t_decode(v) {
-  var str = Js_json.classify(v);
-  if (typeof str === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean" || typeof v !== "string") {
     return Spice.error(undefined, "Not a JSONString", v);
-  }
-  if (str.TAG !== /* JSONString */0) {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
-  var str$1 = str._0;
-  if ("하나" === str$1) {
+  } else if ("하나" === v) {
     return {
-            TAG: /* Ok */0,
-            _0: /* One */0
+            TAG: "Ok",
+            _0: "One"
           };
-  } else if ("둘" === str$1) {
+  } else if ("둘" === v) {
     return {
-            TAG: /* Ok */0,
-            _0: /* Two */1
+            TAG: "Ok",
+            _0: "Two"
           };
   } else {
     return Spice.error(undefined, "Not matched", v);
@@ -40,55 +32,54 @@ function t_decode(v) {
 }
 
 function t1_encode(v) {
-  if (v) {
-    return ["Two1"];
-  } else {
+  if (v === "One1") {
     return ["One1"];
+  } else {
+    return ["Two1"];
   }
 }
 
 function t1_decode(v) {
-  var json_arr = Js_json.classify(v);
-  if (typeof json_arr === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not a variant", v);
   }
-  if (json_arr.TAG !== /* JSONArray */3) {
+  if (!Array.isArray(v)) {
     return Spice.error(undefined, "Not a variant", v);
   }
-  var json_arr$1 = json_arr._0;
-  if (json_arr$1.length === 0) {
+  if (v.length === 0) {
     return Spice.error(undefined, "Expected variant, found empty array", v);
   }
-  var tagged = Js_array.map(Js_json.classify, json_arr$1);
-  var match = Belt_Array.getExn(tagged, 0);
-  if (typeof match !== "number" && match.TAG === /* JSONString */0) {
-    switch (match._0) {
+  var match = Belt_Array.getExn(v, 0);
+  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string" && typeof match !== "boolean") && typeof match === "string") {
+    switch (match) {
       case "One1" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* One1 */0
+                    TAG: "Ok",
+                    _0: "One1"
                   };
           }
       case "Two1" :
-          if (tagged.length !== 1) {
+          if (v.length !== 1) {
             return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
           } else {
             return {
-                    TAG: /* Ok */0,
-                    _0: /* Two1 */1
+                    TAG: "Ok",
+                    _0: "Two1"
                   };
           }
       default:
         
     }
   }
-  return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(json_arr$1, 0));
+  return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(v, 0));
 }
 
-var t2_encode = Spice.intToJson;
+function t2_encode(v) {
+  return Spice.intToJson(v);
+}
 
 function t2_decode(v) {
   return Belt_Result.map(Spice.intFromJson(v), (function (v) {
@@ -96,7 +87,9 @@ function t2_decode(v) {
               }));
 }
 
-var t3_encode = Spice.intToJson;
+function t3_encode(v) {
+  return Spice.intToJson(v);
+}
 
 function t3_decode(v) {
   return Belt_Result.map(Spice.intFromJson(v), (function (v) {

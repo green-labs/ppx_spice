@@ -10,7 +10,7 @@ function language_encode(v) {
 }
 
 function language_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" || typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean" || typeof v !== "string") {
     return Spice.error(undefined, "Not a JSONString", v);
   } else if ("ReScript" === v) {
     return {
@@ -35,7 +35,7 @@ function profile_encode(v) {
 }
 
 function profile_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
   if (!(typeof v === "object" && !Array.isArray(v))) {
@@ -74,7 +74,7 @@ function user_encode(v) {
 }
 
 function user_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
   if (!(typeof v === "object" && !Array.isArray(v))) {

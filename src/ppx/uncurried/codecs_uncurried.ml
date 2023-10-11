@@ -64,21 +64,21 @@ and generate_constr_codecs { do_encode; do_decode }
         if do_decode then Some [%expr Spice.dictFromJson] else None )
   | Ldot (Ldot (Lident "Js", "Json"), "t") ->
       ( (if do_encode then Some (Utils.expr_func ~arity:1 [%expr fun v -> v])
-        else None),
+         else None),
         if do_decode then
           Some (Utils.expr_func ~arity:1 [%expr fun v -> Belt.Result.Ok v])
         else None )
   | Lident s ->
       ( (if do_encode then Some (make_ident_expr (s ^ Utils.encoder_func_suffix))
-        else None),
+         else None),
         if do_decode then Some (make_ident_expr (s ^ Utils.decoder_func_suffix))
         else None )
   | Ldot (left, right) ->
       ( (if do_encode then
-         Some
-           (Exp.ident
-              (mknoloc (Ldot (left, right ^ Utils.encoder_func_suffix))))
-        else None),
+           Some
+             (Exp.ident
+                (mknoloc (Ldot (left, right ^ Utils.encoder_func_suffix))))
+         else None),
         if do_decode then
           Some
             (Exp.ident
@@ -98,11 +98,11 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
         List.map (generate_codecs generator_settings) types
       in
       ( (if do_encode then
-         Some
-           (composite_codecs
-           |> List.map (fun (e, _) -> Option.get e)
-           |> Tuple.generate_encoder)
-        else None),
+           Some
+             (composite_codecs
+             |> List.map (fun (e, _) -> Option.get e)
+             |> Tuple.generate_encoder)
+         else None),
         if do_decode then
           Some
             (composite_codecs
@@ -111,7 +111,7 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
         else None )
   | Ptyp_var s ->
       ( (if do_encode then Some (make_ident_expr (encoder_var_prefix ^ s))
-        else None),
+         else None),
         if do_decode then Some (make_ident_expr (decoder_var_prefix ^ s))
         else None )
   | Ptyp_constr (constr, typeArgs) -> (
@@ -122,11 +122,11 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
         | Ok (Some attribute) ->
             let expr = get_expression_from_payload attribute in
             ( (if do_encode then
-               Some
-                 [%expr
-                   let e, _ = [%e expr] in
-                   e]
-              else None),
+                 Some
+                   [%expr
+                     let e, _ = [%e expr] in
+                     e]
+               else None),
               if do_decode then
                 Some
                   [%expr

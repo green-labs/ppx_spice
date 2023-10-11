@@ -16,12 +16,21 @@
     }
   ],
   "bs-dependencies": [],
-  "bs-dev-dependencies": ["@glennsl/bs-jest"],
-  "ppx-flags": ["../ppx"],
+  "bs-dev-dependencies": [
+    "@glennsl/rescript-jest"
+  ],
+  "ppx-flags": [
+    [
+      "../ppx",
+      "-uncurried"
+    ]
+  ],
   "warnings": {
     "error": true,
     "number": "-48"
   },
   "generators": [],
-  "bsc-flags": ["-bs-super-errors"]
+  "bsc-flags": [
+    "-bs-super-errors"
+  ]
 }

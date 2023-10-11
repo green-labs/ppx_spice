@@ -1441,10 +1441,10 @@ require-main-filename@^2.0.0:
   resolved "https://registry.yarnpkg.com/require-main-filename/-/require-main-filename-2.0.0.tgz#d0b329ecc7cc0f61649f62215be69af54aa8989b"
   integrity sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==
 
-rescript@11.0.0-beta.3:
-  version "11.0.0-beta.3"
-  resolved "https://registry.yarnpkg.com/rescript/-/rescript-11.0.0-beta.3.tgz#f883a19aa8cb2ab162fd2c9f3d46d2c05cc5710b"
-  integrity sha512-j3YT3VdWMoHgwL4RydKJm9O/VIpN3NTI6keP18rZVJ8ansRKgkHYGLaIwoG6iVqSYYwBjb6d8l8oZ1Jz0fmTeQ==
+rescript@^11.0.0-rc.4:
+  version "11.0.0-rc.4"
+  resolved "https://registry.yarnpkg.com/rescript/-/rescript-11.0.0-rc.4.tgz#a7db18239a342dcda586c6f65ba5e6e4298d8d72"
+  integrity sha512-yh82o30J2/B/IwyPZjM+mc82FdyPkXRjXxlsUVEoyc5Z/snlq3Za2PhJhlfacwk+ui5lcOZsH8SndWPiI21vXg==
 
 resolve-from@^5.0.0:
   version "5.0.0"

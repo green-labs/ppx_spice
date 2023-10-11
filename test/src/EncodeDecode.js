@@ -3,7 +3,6 @@
 
 var Spice = require("./Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 
 function te_encode(v) {
@@ -16,26 +15,28 @@ function te_encode(v) {
                   [
                     "nickname",
                     true,
-                    Spice.optionToJson(Spice.stringToJson, v.nickname)
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.stringToJson, extra);
+                        })(v.nickname)
                   ]
                 ]));
 }
 
 function td_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "name"), null));
-  if (name.TAG === /* Ok */0) {
-    var nickname = Spice.optionFromJson(Spice.stringFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "nickname"), null));
-    if (nickname.TAG === /* Ok */0) {
+  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "name"), null));
+  if (name.TAG === "Ok") {
+    var nickname = (function (extra) {
+          return Spice.optionFromJson(Spice.stringFromJson, extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "nickname"), null));
+    if (nickname.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 name: name._0,
                 nickname: nickname._0
@@ -44,7 +45,7 @@ function td_decode(v) {
     }
     var e = nickname._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".nickname" + e.path,
               message: e.message,
@@ -54,7 +55,7 @@ function td_decode(v) {
   }
   var e$1 = name._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".name" + e$1.path,
             message: e$1.message,

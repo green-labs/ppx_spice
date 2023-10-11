@@ -3,7 +3,6 @@
 
 var Spice = require("./Spice.js");
 var Js_dict = require("rescript/lib/js/js_dict.js");
-var Js_json = require("rescript/lib/js/js_json.js");
 var Belt_Option = require("rescript/lib/js/belt_Option.js");
 
 function t_encode(v) {
@@ -22,20 +21,18 @@ function t_encode(v) {
 }
 
 function t_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var label = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "spice-label"), null));
-  if (label.TAG === /* Ok */0) {
-    var value = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "spice-value"), null));
-    if (value.TAG === /* Ok */0) {
+  var label = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "spice-label"), null));
+  if (label.TAG === "Ok") {
+    var value = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "spice-value"), null));
+    if (value.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 label: label._0,
                 value: value._0
@@ -44,7 +41,7 @@ function t_decode(v) {
     }
     var e = value._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: "." + ("spice-value" + e.path),
               message: e.message,
@@ -54,7 +51,7 @@ function t_decode(v) {
   }
   var e$1 = label._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: "." + ("spice-label" + e$1.path),
             message: e$1.message,
@@ -79,20 +76,18 @@ function t1_encode(v) {
 }
 
 function t1_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var label = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "label"), null));
-  if (label.TAG === /* Ok */0) {
-    var value = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(dict$1, "value"), null));
-    if (value.TAG === /* Ok */0) {
+  var label = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "label"), null));
+  if (label.TAG === "Ok") {
+    var value = Spice.intFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "value"), null));
+    if (value.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 label: label._0,
                 value: value._0
@@ -101,7 +96,7 @@ function t1_decode(v) {
     }
     var e = value._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".value" + e.path,
               message: e.message,
@@ -111,7 +106,7 @@ function t1_decode(v) {
   }
   var e$1 = label._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".label" + e$1.path,
             message: e$1.message,
@@ -125,31 +120,37 @@ function tOp_encode(v) {
                   [
                     "label",
                     false,
-                    Spice.optionToJson(Spice.stringToJson, v.label)
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.stringToJson, extra);
+                        })(v.label)
                   ],
                   [
                     "value",
                     true,
-                    Spice.optionToJson(Spice.intToJson, v.value)
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.intToJson, extra);
+                        })(v.value)
                   ]
                 ]));
 }
 
 function tOp_decode(v) {
-  var dict = Js_json.classify(v);
-  if (typeof dict === "number") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
-  if (dict.TAG !== /* JSONObject */2) {
+  if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var dict$1 = dict._0;
-  var label = Spice.optionFromJson(Spice.stringFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "label"), null));
-  if (label.TAG === /* Ok */0) {
-    var value = Spice.optionFromJson(Spice.intFromJson, Belt_Option.getWithDefault(Js_dict.get(dict$1, "value"), null));
-    if (value.TAG === /* Ok */0) {
+  var label = (function (extra) {
+        return Spice.optionFromJson(Spice.stringFromJson, extra);
+      })(Belt_Option.getWithDefault(Js_dict.get(v, "label"), null));
+  if (label.TAG === "Ok") {
+    var value = (function (extra) {
+          return Spice.optionFromJson(Spice.intFromJson, extra);
+        })(Belt_Option.getWithDefault(Js_dict.get(v, "value"), null));
+    if (value.TAG === "Ok") {
       return {
-              TAG: /* Ok */0,
+              TAG: "Ok",
               _0: {
                 label: label._0,
                 value: value._0
@@ -158,7 +159,7 @@ function tOp_decode(v) {
     }
     var e = value._0;
     return {
-            TAG: /* Error */1,
+            TAG: "Error",
             _0: {
               path: ".value" + e.path,
               message: e.message,
@@ -168,7 +169,7 @@ function tOp_decode(v) {
   }
   var e$1 = label._0;
   return {
-          TAG: /* Error */1,
+          TAG: "Error",
           _0: {
             path: ".label" + e$1.path,
             message: e$1.message,

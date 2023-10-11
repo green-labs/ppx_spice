@@ -26,7 +26,7 @@ function language_encode(v) {
 }
 
 function language_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not a variant", v);
   }
   if (!Array.isArray(v)) {
@@ -36,7 +36,7 @@ function language_decode(v) {
     return Spice.error(undefined, "Expected variant, found empty array", v);
   }
   var match = Belt_Array.getExn(v, 0);
-  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string") && typeof match === "string") {
+  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string" && typeof match !== "boolean") && typeof match === "string") {
     switch (match) {
       case "JavaScript" :
           if (v.length !== 1) {
@@ -118,7 +118,7 @@ function user_encode(v) {
 }
 
 function user_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not an object", v);
   }
   if (!(typeof v === "object" && !Array.isArray(v))) {
