@@ -36,6 +36,6 @@ describe("decode only", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->td_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })

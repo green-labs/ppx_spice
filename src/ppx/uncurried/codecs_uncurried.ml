@@ -66,7 +66,7 @@ and generate_constr_codecs { do_encode; do_decode }
       ( (if do_encode then Some (Utils.expr_func ~arity:1 [%expr fun v -> v])
          else None),
         if do_decode then
-          Some (Utils.expr_func ~arity:1 [%expr fun v -> Belt.Result.Ok v])
+          Some (Utils.expr_func ~arity:1 [%expr fun v -> Ok v])
         else None )
   | Lident s ->
       ( (if do_encode then Some (make_ident_expr (s ^ Utils.encoder_func_suffix))

@@ -22,7 +22,7 @@ describe("optional field record", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->t0_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })
 
@@ -46,7 +46,7 @@ describe("optional field record: array<int>", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->t1_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })
 
@@ -70,7 +70,7 @@ describe("optional field record: array<variant>", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->t2_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })
 
@@ -93,6 +93,6 @@ describe("optional field record: omit array<variant>", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->t2_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })

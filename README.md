@@ -92,7 +92,7 @@ let t_decode = ...
 
 let encoded = One->t_encode // Js.Json.string(`하나`)
 
-let decoded = Js.Json.string(`second`)->t_decode // Belt.Result.Ok(Two)
+let decoded = Js.Json.string(`second`)->t_decode // Ok(Two)
 ```
 
 2. Record
@@ -117,7 +117,7 @@ let sampleRecord: t = {
 
 let encoded = sampleRecord->Records.t_encode // sampleJson
 
-let decoded = sampleJson->Records.t_decode // Belt.Result.Ok(sampleRecord)
+let decoded = sampleJson->Records.t_decode // Ok(sampleRecord)
 ```
 
 ## Getting Started

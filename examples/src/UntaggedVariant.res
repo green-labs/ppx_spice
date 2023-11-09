@@ -25,13 +25,13 @@ let t0_decode = v =>
           if Js.Array.length(json_arr) != 1 {
             Spice.error("Invalid number of arguments to variant constructor", v)
           } else {
-            Belt.Result.Ok(A)
+            Ok(A)
           }
         | Js.Json.String("B") =>
           if Js.Array.length(json_arr) != 1 {
             Spice.error("Invalid number of arguments to variant constructor", v)
           } else {
-            Belt.Result.Ok(B)
+            Ok(B)
           }
         | _ => Spice.error("Invalid variant constructor", Belt.Array.getExn(json_arr, 0))
         }
@@ -59,16 +59,16 @@ let t1_decode = v =>
         switch Spice.stringFromJson(
           Belt.Option.getWithDefault(Js.Dict.get(dict, "a"), Js.Json.Null),
         ) {
-        | Belt.Result.Ok(a) =>
+        | Ok(a) =>
           switch Spice.intFromJson(
             Belt.Option.getWithDefault(Js.Dict.get(dict, "b"), Js.Json.null),
           ) {
-          | Belt.Result.Ok(b) => Belt.Result.Ok({a, b})
-          | Belt.Result.Error(e: Spice.decodeError) =>
-            Belt.Result.Error({...e, path: "." ++ "b" ++ e.path})
+          | Ok(b) => Ok({a, b})
+          | Error(e: Spice.decodeError) =>
+            Error({...e, path: "." ++ "b" ++ e.path})
           }
-        | Belt.Result.Error(e: Spice.decodeError) =>
-          Belt.Result.Error({...e, path: "." ++ "a" ++ e.path})
+        | Error(e: Spice.decodeError) =>
+          Error({...e, path: "." ++ "a" ++ e.path})
         }
       | _ => Spice.error("Not an object", v)
       }
@@ -83,11 +83,11 @@ let t2_decode = v =>
       switch (json: Js.Json.t) {
       | Js.Json.Array([v0, v1]) =>
         switch (Spice.stringFromJson(v0), Spice.intFromJson(v1)) {
-        | (Belt.Result.Ok(v0), Belt.Result.Ok(v1)) => Belt.Result.Ok((v0, v1))
-        | (Belt.Result.Error(e: Spice.decodeError), _) =>
-          Belt.Result.Error({...e, path: "[0]" ++ e.path})
-        | (_, Belt.Result.Error(e: Spice.decodeError)) =>
-          Belt.Result.Error({...e, path: "[1]" ++ e.path})
+        | (Ok(v0), Ok(v1)) => Ok((v0, v1))
+        | (Error(e: Spice.decodeError), _) =>
+          Error({...e, path: "[0]" ++ e.path})
+        | (_, Error(e: Spice.decodeError)) =>
+          Error({...e, path: "[1]" ++ e.path})
         }
       | Js.Json.Array(_) => Spice.error("Incorrect cardinality", json)
       | _ => Spice.error("Not a tuple", json)
