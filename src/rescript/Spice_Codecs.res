@@ -5,10 +5,10 @@ let falseableEncode = (encoder, opt) =>
   }
 let falseableDecode = (decoder, json) =>
   switch json {
-  | Js.Json.Boolean(false) => Belt.Result.Ok(None)
+  | Js.Json.Boolean(false) => Ok(None)
   | _ => Belt.Result.map(decoder(json), v => Some(v))
   }
 let falseable = (falseableEncode, falseableDecode)
 
-let magicDecode = j => Belt.Result.Ok(Obj.magic(j))
+let magicDecode = j => Ok(Obj.magic(j))
 let magic = (Obj.magic, magicDecode)

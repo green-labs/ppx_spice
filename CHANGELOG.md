@@ -4,6 +4,7 @@
 
 - a190663 Utilize Js.Json.Boolean(bool) instead oif Js.Json.True, False https://github.com/green-labs/ppx_spice/pull/58
 - a190663 Add support of uncurried mode for interface(*.resi) https://github.com/green-labs/ppx_spice/pull/58
+- Support the compiler v11-rc.5 https://github.com/green-labs/ppx_spice/pull/61
 
 ## 0.2.0
 

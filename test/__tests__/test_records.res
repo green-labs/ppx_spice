@@ -22,7 +22,7 @@ describe("record with @spice.key", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->Records.t_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })
 
@@ -46,7 +46,7 @@ describe("record without @spice.key", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson->Records.t1_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord))
+    expect(decoded)->toEqual(Ok(sampleRecord))
   })
 })
 
@@ -70,7 +70,7 @@ describe("record with optional field", _ => {
 
   test(`decode`, _ => {
     let decoded = sampleJson1->Records.tOp_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord1))
+    expect(decoded)->toEqual(Ok(sampleRecord1))
   })
 
   let sample2 = Js.Dict.empty()
@@ -88,7 +88,7 @@ describe("record with optional field", _ => {
 
   test(`decode omit optional field`, _ => {
     let decoded = sampleJson2->Records.tOp_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord2))
+    expect(decoded)->toEqual(Ok(sampleRecord2))
   })
 
   let sample3 = Js.Dict.empty()
@@ -106,6 +106,6 @@ describe("record with optional field", _ => {
 
   test(`decode omit optional field with None field`, _ => {
     let decoded = sampleJson3->Records.tOp_decode
-    expect(decoded)->toEqual(Belt.Result.Ok(sampleRecord3))
+    expect(decoded)->toEqual(Ok(sampleRecord3))
   })
 })
