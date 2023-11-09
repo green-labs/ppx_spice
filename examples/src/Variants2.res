@@ -20,7 +20,7 @@ let data = %raw(`
   }
 `)
 
-let user: Belt.Result.t<user, Spice.decodeError> = data->user_decode
+let user: result<user, Spice.decodeError> = data->user_decode
 
 let json: Js.Json.t = user->Result.getExn->user_encode
 
