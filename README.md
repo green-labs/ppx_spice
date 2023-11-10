@@ -126,12 +126,12 @@ Read our [Guide with examples](docs/GUIDE.md)
 
 ## Install
 
-### Versions
+### Compatibility on the compiler versions
 
-|Compiler|Ppx_spice  |
-|--------|-----------|
-|v10     |~<= v0.1.15|
-|v11     |>= v0.2.0  |
+| Compiler | Ppx_spice      |
+| -------- | -------------- |
+| v11      | >= v0.2.1-rc.1 |
+| v10      | ~<= v0.1.15    |
 
 ```sh
 yarn add -D @greenlabs/ppx-spice
