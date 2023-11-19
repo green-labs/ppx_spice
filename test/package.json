@@ -4,15 +4,18 @@
   "description": "Test spice ppx",
   "license": "MIT",
   "devDependencies": {
-    "@glennsl/rescript-jest": "^0.10.0",
-    "jest": "^27.3.1",
-    "rescript": "^11.0.0-rc.5"
+    "@dusty-phillips/rescript-zora": "^4.0.0",
+    "onchange": "^7.1.0",
+    "pta": "^1.2.0",
+    "rescript": "^11.0.0-rc.5",
+    "tap-difflet": "^0.7.2",
+    "zora": "^5.2.0"
   },
   "scripts": {
     "res:build": "rescript",
     "res:clean": "rescript clean",
     "res:watch": "rescript build -w",
-    "test": "jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "onchange --initial '{test,src}/**/*.mjs' -- pta 'test/__tests__/**/*.mjs' | tap-difflet",
+    "test": "pta './test/__tests__/Index.mjs' | tap-difflet"
   }
 }

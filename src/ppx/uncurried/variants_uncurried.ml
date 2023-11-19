@@ -11,12 +11,17 @@ type parsed_decl = {
 }
 
 let generate_encoder_case generator_settings unboxed has_attr_as
-    { name; alias; constr_decl = { pcd_args; pcd_loc } } =
+    { name; alias = constructor_expr; constr_decl = { pcd_args; pcd_loc } } =
   match pcd_args with
   | Pcstr_tuple args ->
-      let alias_name, _, delimit = get_string_from_expression alias in
-      let constructor_expr =
-        Exp.constant (Pconst_string (alias_name, Location.none, delimit))
+      let json_expr =
+        match constructor_expr with
+        | { pexp_desc = Pexp_constant const; pexp_loc } -> (
+            match const with
+            | Pconst_string _ -> [%expr Js.Json.String [%e constructor_expr]]
+            | Pconst_float _ -> [%expr Js.Json.Number [%e constructor_expr]]
+            | _ -> fail pexp_loc "cannot find a name??")
+        | { pexp_loc } -> fail pexp_loc "cannot find a name??"
       in
       let lhs_vars =
         match args with
@@ -36,7 +41,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         |> List.mapi (fun i e ->
                Exp.apply ~attrs:[ Utils.attr_uapp ] ~loc:pcd_loc e
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
-        |> List.append [ [%expr Js.Json.String [%e constructor_expr]] ]
+        |> List.append [ json_expr ]
       in
 
       {
@@ -44,8 +49,8 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         pc_guard = None;
         pc_rhs =
           (if unboxed then List.tl rhs_list |> List.hd
-          else if has_attr_as then [%expr Js.Json.String [%e constructor_expr]]
-          else [%expr Js.Json.Array [%e rhs_list |> Exp.array]]);
+           else if has_attr_as then json_expr
+           else [%expr Js.Json.Array [%e rhs_list |> Exp.array]]);
       }
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
 
@@ -118,11 +123,14 @@ let generate_decoder_case generator_settings
       }
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
 
-let generate_decoder_case_attr generator_settings
+let generate_decoder_case_attr ~is_string generator_settings
     { name; alias; constr_decl = { pcd_args; pcd_loc } } =
   match pcd_args with
   | Pcstr_tuple args ->
-      let alias_name, _, delimit = get_string_from_expression alias in
+      let const =
+        if is_string then get_string_from_expression alias
+        else get_float_from_expression alias
+      in
       let decoded =
         match args with
         | [] ->
@@ -134,10 +142,8 @@ let generate_decoder_case_attr generator_settings
       let if' =
         Exp.apply (make_ident_expr "=")
           [
-            ( Asttypes.Nolabel,
-              Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
-            );
-            (Asttypes.Nolabel, [%expr str]);
+            (Asttypes.Nolabel, Exp.constant const);
+            (Asttypes.Nolabel, [%expr str_or_num]);
           ]
       in
       let then' = [%expr [%e decoded]] in
@@ -221,7 +227,14 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
 
           let decoder_switch =
             List.map
-              (generate_decoder_case_attr generator_settings)
+              (generate_decoder_case_attr ~is_string:true generator_settings)
+              parsed_decls
+            |> make_ifthenelse
+          in
+
+          let decoder_switch_num =
+            List.map
+              (generate_decoder_case_attr ~is_string:false generator_settings)
               parsed_decls
             |> make_ifthenelse
           in
@@ -231,7 +244,8 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
                [%expr
                  fun v ->
                    match (v : Js.Json.t) with
-                   | Js.Json.String str -> [%e decoder_switch]
+                   | Js.Json.String str_or_num -> [%e decoder_switch]
+                   | Js.Json.Number str_or_num -> [%e decoder_switch_num]
                    | _ -> Spice.error "Not a JSONString" v [@res.uapp]])
         else
           let decoder_default_case =

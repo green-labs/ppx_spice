@@ -1,10 +1,12 @@
-open Jest
-open Expect
-// open Belt
+open Zora
+open EncodeDecode
 
-describe("encode only", _ => {
-  open EncodeDecode
+let testEqual = (t, name, lhs, rhs) =>
+  t->test(name, async t => {
+    t->equal(lhs, rhs, name)
+  })
 
+zoraBlock("encode only", t => {
   let sample = Js.Dict.empty()
   sample->Js.Dict.set("name", Js.Json.string("Alice"))
   sample->Js.Dict.set("nickname", Js.Json.string("Ecila"))
@@ -15,15 +17,12 @@ describe("encode only", _ => {
     nickname: "Ecila",
   }
 
-  test(`encode`, _ => {
-    let encoded = sampleRecord->te_encode
-    expect(encoded)->toEqual(sampleJson)
-  })
+  let encoded = sampleRecord->te_encode
+
+  t->testEqual("encode", encoded, sampleJson)
 })
 
-describe("decode only", _ => {
-  open EncodeDecode
-
+zoraBlock("decode only", t => {
   let sample = Js.Dict.empty()
   sample->Js.Dict.set("name", Js.Json.string("Alice"))
   sample->Js.Dict.set("nickname", Js.Json.string("Ecila"))
@@ -34,8 +33,7 @@ describe("decode only", _ => {
     nickname: "Ecila",
   }
 
-  test(`decode`, _ => {
-    let decoded = sampleJson->td_decode
-    expect(decoded)->toEqual(Ok(sampleRecord))
-  })
+  let decoded = sampleJson->td_decode
+
+  t->testEqual("decode", decoded, Ok(sampleRecord))
 })

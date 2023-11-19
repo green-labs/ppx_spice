@@ -2,22 +2,25 @@
   "name": "spice-ppx",
   "sources": [
     {
-      "dir": "__tests__",
-      "type": "dev"
+      "dir": "test",
+      "type": "dev",
+      "subdirs": true
     },
     {
-      "dir": "src"
+      "dir": "src",
+      "subdirs": true
     }
   ],
   "package-specs": [
     {
-      "module": "commonjs",
+      "module": "es6",
       "in-source": true
     }
   ],
+  "suffix": ".mjs",
   "bs-dependencies": [],
   "bs-dev-dependencies": [
-    "@glennsl/rescript-jest"
+    "@dusty-phillips/rescript-zora"
   ],
   "ppx-flags": [
     [

@@ -28,12 +28,17 @@ let get_args_from_polyvars ~loc coreTypes =
          wrong"
 
 let generate_encoder_case generator_settings unboxed has_attr_as row =
-  let { name; alias; row_field = { prf_desc } } = row in
+  let { name; alias = constructor_expr; row_field = { prf_desc } } = row in
   match prf_desc with
   | Rtag (_, _attributes, core_types) ->
-      let alias_name, _, delimit = get_string_from_expression alias in
-      let constructor_expr =
-        Exp.constant (Pconst_string (alias_name, Location.none, delimit))
+      let json_expr =
+        match constructor_expr with
+        | { pexp_desc = Pexp_constant const; pexp_loc } -> (
+            match const with
+            | Pconst_string _ -> [%expr Js.Json.String [%e constructor_expr]]
+            | Pconst_float _ -> [%expr Js.Json.Number [%e constructor_expr]]
+            | _ -> fail pexp_loc "cannot find a name??")
+        | { pexp_loc } -> fail pexp_loc "cannot find a name??"
       in
       let args = get_args_from_polyvars ~loc core_types in
 
@@ -56,7 +61,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
         |> List.mapi (fun i e ->
                Exp.apply ~attrs:[ Utils.attr_uapp ] ~loc e
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
-        |> List.append [ [%expr Js.Json.string [%e constructor_expr]] ]
+        |> List.append [ json_expr ]
       in
 
       {
@@ -64,8 +69,8 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
         pc_guard = None;
         pc_rhs =
           (if unboxed then List.tl rhs_list |> List.hd (* diff *)
-          else if has_attr_as then [%expr Js.Json.string [%e constructor_expr]]
-          else [%expr Js.Json.array [%e rhs_list |> Exp.array]]);
+           else if has_attr_as then json_expr
+           else [%expr Js.Json.array [%e rhs_list |> Exp.array]]);
       }
   (* We don't have enough information to generate a encoder *)
   | Rinherit arg ->
@@ -85,8 +90,7 @@ let generate_decode_success_case num_args constructor_name =
       |> Array.to_list
       |> tuple_or_singleton Exp.tuple
       |> fun v ->
-        Some v |> Exp.variant constructor_name |> fun e ->
-        [%expr Ok [%e e]] );
+        Some v |> Exp.variant constructor_name |> fun e -> [%expr Ok [%e e]] );
   }
 
 let generate_arg_decoder generator_settings args constructor_name =
@@ -141,12 +145,15 @@ let generate_decoder_case generator_settings { prf_desc } =
   | Rinherit core_type ->
       fail core_type.ptyp_loc "This syntax is not yet implemented by spice"
 
-let generate_decoder_case_attr generator_settings row =
+let generate_decoder_case_attr ~is_string generator_settings row =
   let { alias; row_field = { prf_desc } } = row in
   match prf_desc with
   | Rtag ({ txt }, _, core_types) ->
       let args = get_args_from_polyvars ~loc core_types in
-      let alias_name, _, delimit = get_string_from_expression alias in
+      let const =
+        if is_string then get_string_from_expression alias
+        else get_float_from_expression alias
+      in
       let decoded =
         match args with
         | [] ->
@@ -158,10 +165,8 @@ let generate_decoder_case_attr generator_settings row =
       let if' =
         Exp.apply (make_ident_expr "=")
           [
-            ( Asttypes.Nolabel,
-              Pconst_string (alias_name, Location.none, delimit) |> Exp.constant
-            );
-            (Asttypes.Nolabel, [%expr str]);
+            (Asttypes.Nolabel, Exp.constant const);
+            (Asttypes.Nolabel, [%expr str_or_num]);
           ]
       in
       let then' = [%expr [%e decoded]] in
@@ -247,7 +252,15 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
 
           let decoder_switch =
             parsed_fields
-            |> List.map (generate_decoder_case_attr generator_settings)
+            |> List.map
+                 (generate_decoder_case_attr ~is_string:true generator_settings)
+            |> make_ifthenelse
+          in
+
+          let decoder_switch_num =
+            parsed_fields
+            |> List.map
+                 (generate_decoder_case_attr ~is_string:false generator_settings)
             |> make_ifthenelse
           in
 
@@ -256,7 +269,8 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
                [%expr
                  fun v ->
                    match Js.Json.classify v with
-                   | Js.Json.JSONString str -> [%e decoder_switch]
+                   | Js.Json.JSONString str_or_num -> [%e decoder_switch]
+                   | Js.Json.JSONNumber str_or_num -> [%e decoder_switch_num]
                    | _ -> Spice.error "Not a JSONString" v])
         else
           let decoder_default_case =
