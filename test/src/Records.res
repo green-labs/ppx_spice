@@ -26,7 +26,7 @@ type tOp = {
 //       switch (Spice.optionFromJson(Spice.intFromJson, ...))(
 //         Belt.Option.getWithDefault(Js.Dict.get(dict, "value"), Js.Json.null),
 //       ) {
-//       | Ok(value1) => Ok({label, value: ?value1})
+//       | Ok(value) => Ok({label, value: ?value})
 //       | Error(e: Spice.decodeError) => Error(e)
 //       }
 //     | Error(e: Spice.decodeError) => Error(e)
