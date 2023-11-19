@@ -71,7 +71,19 @@ let get_string_from_expression { pexp_desc; pexp_loc } =
   match pexp_desc with
   | Pexp_constant const -> (
       match const with
-      | Pconst_string (name, loc, delimit) -> (name, loc, delimit)
+      | Pconst_string _ -> const
+      | Pconst_float (name, Some c) ->
+          Pconst_string (name ^ String.make 1 c, pexp_loc, None)
+      | Pconst_float (name, None) -> Pconst_string (name, pexp_loc, None)
+      | _ -> fail pexp_loc "cannot find a name??")
+  | _ -> fail pexp_loc "cannot find a name??"
+
+let get_float_from_expression { pexp_desc; pexp_loc } =
+  match pexp_desc with
+  | Pexp_constant const -> (
+      match const with
+      | Pconst_string (name, _, _) -> Pconst_float (name, None)
+      | Pconst_float _ -> const
       | _ -> fail pexp_loc "cannot find a name??")
   | _ -> fail pexp_loc "cannot find a name??"
 

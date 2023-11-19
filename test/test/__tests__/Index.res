@@ -1,0 +1,5 @@
+include Encode_decode_test
+include Optional_field_records_test
+include Polyvariants_test
+include Records_test
+include Variants_test
