@@ -163,24 +163,7 @@ function b_decode(v) {
           return Spice.error(undefined, "Not matched", v);
         }
     case "number" :
-        if (B0 === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "B0"
-                };
-        } else if (B1 === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "B1"
-                };
-        } else if (B2 === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "B2"
-                };
-        } else {
-          return Spice.error(undefined, "Not matched", v);
-        }
+        return Spice.error(undefined, "Not matched", v);
     default:
       return Spice.error(undefined, "Not a JSONString", v);
   }

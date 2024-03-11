@@ -1,6 +1,7 @@
 {
   "name": "spice-ppx-examples",
   "version": "1.0.0",
+  "packageManager": "pnpm@8.8.0",
   "description": "Examples for the Spice PPX",
   "license": "MIT",
   "devDependencies": {

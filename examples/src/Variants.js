@@ -21,30 +21,38 @@ function language_encode(v) {
 }
 
 function language_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean" || typeof v !== "string") {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
     return Spice.error(undefined, "Not a JSONString", v);
-  } else if ("ReScript" === v) {
-    return {
-            TAG: "Ok",
-            _0: "ReScript"
-          };
-  } else if ("OCaml" === v) {
-    return {
-            TAG: "Ok",
-            _0: "OCaml"
-          };
-  } else if ("TypeScript" === v) {
-    return {
-            TAG: "Ok",
-            _0: "TypeScript"
-          };
-  } else if ("JavaScript" === v) {
-    return {
-            TAG: "Ok",
-            _0: "JavaScript"
-          };
-  } else {
-    return Spice.error(undefined, "Not matched", v);
+  }
+  switch (typeof v) {
+    case "string" :
+        if ("ReScript" === v) {
+          return {
+                  TAG: "Ok",
+                  _0: "ReScript"
+                };
+        } else if ("OCaml" === v) {
+          return {
+                  TAG: "Ok",
+                  _0: "OCaml"
+                };
+        } else if ("TypeScript" === v) {
+          return {
+                  TAG: "Ok",
+                  _0: "TypeScript"
+                };
+        } else if ("JavaScript" === v) {
+          return {
+                  TAG: "Ok",
+                  _0: "JavaScript"
+                };
+        } else {
+          return Spice.error(undefined, "Not matched", v);
+        }
+    case "number" :
+        return Spice.error(undefined, "Not matched", v);
+    default:
+      return Spice.error(undefined, "Not a JSONString", v);
   }
 }
 

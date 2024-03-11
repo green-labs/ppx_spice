@@ -15,8 +15,8 @@ devDependencies:
     specifier: ^1.2.0
     version: 1.2.0(zora@5.2.0)
   rescript:
-    specifier: ^11.0.0-rc.5
-    version: 11.0.0-rc.5
+    specifier: ^11.0.0
+    version: 11.0.1
   tap-difflet:
     specifier: ^0.7.2
     version: 0.7.2
@@ -664,8 +664,8 @@ packages:
       is-finite: 1.1.0
     dev: true
 
-  /rescript@11.0.0-rc.5:
-    resolution: {integrity: sha512-7tiOmhOJ0myaIM9/AEYxiKXha2mn+9AGdkiy5PNOaBjuGxF2Le7qnr/cyOiTTpPq4fYXxZhwpaBF1AKNl5LUPg==}
+  /rescript@11.0.1:
+    resolution: {integrity: sha512-7T4PRp/d0+CBNnY6PYKffFqo9tGZlvnZpboF/n+8SKS+JZ6VvXJO7W538VPZXf3EYx1COGAWWvkF9e/HgSAqHg==}
     engines: {node: '>=10'}
     hasBin: true
     requiresBuild: true

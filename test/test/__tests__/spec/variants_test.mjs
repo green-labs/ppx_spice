@@ -11,10 +11,10 @@ function testEqual(t, name, lhs, rhs) {
 
 Zora.test("variants with @spice.as", (function (t) {
         var variantEncoded = Variants.t_encode("One");
-        testEqual(t, "encode 하나", variantEncoded, "하나");
+        testEqual(t, "encode 하나", variantEncoded, 1);
         var variantEncoded$1 = Variants.t_encode("Two");
         testEqual(t, "encode 둘", variantEncoded$1, "둘");
-        var variantDecoded = Variants.t_decode("하나");
+        var variantDecoded = Variants.t_decode(1);
         testEqual(t, "decode 하나", variantDecoded, {
               TAG: "Ok",
               _0: "One"
