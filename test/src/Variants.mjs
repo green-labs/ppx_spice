@@ -6,7 +6,7 @@ import * as Belt_Result from "rescript/lib/es6/belt_Result.js";
 
 function t_encode(v) {
   if (v === "One") {
-    return "하나";
+    return 1;
   } else {
     return "둘";
   }
@@ -18,12 +18,7 @@ function t_decode(v) {
   }
   switch (typeof v) {
     case "string" :
-        if ("하나" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "One"
-                };
-        } else if ("둘" === v) {
+        if ("둘" === v) {
           return {
                   TAG: "Ok",
                   _0: "Two"
@@ -32,15 +27,10 @@ function t_decode(v) {
           return Spice.error(undefined, "Not matched", v);
         }
     case "number" :
-        if (하나 === v) {
+        if (1 === v) {
           return {
                   TAG: "Ok",
                   _0: "One"
-                };
-        } else if (둘 === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "Two"
                 };
         } else {
           return Spice.error(undefined, "Not matched", v);
@@ -130,19 +120,7 @@ function t4_decode(v) {
   }
   switch (typeof v) {
     case "string" :
-        if ("1.0" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "One"
-                };
-        } else if ("2.0" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "Two"
-                };
-        } else {
-          return Spice.error(undefined, "Not matched", v);
-        }
+        return Spice.error(undefined, "Not matched", v);
     case "number" :
         if (1.0 === v) {
           return {

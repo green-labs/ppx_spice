@@ -20,8 +20,9 @@ let generate_encoder_case generator_settings unboxed has_attr_as
             match const with
             | Pconst_string _ -> [%expr Js.Json.String [%e constructor_expr]]
             | Pconst_float _ -> [%expr Js.Json.Number [%e constructor_expr]]
-            | _ -> fail pexp_loc "cannot find a name??")
-        | { pexp_loc } -> fail pexp_loc "cannot find a name??"
+            | Pconst_integer _ -> [%expr Js.Json.Number [%e constructor_expr]]
+            | _ -> fail pexp_loc "cannot find a name??!")
+        | { pexp_loc } -> fail pexp_loc "cannot find a name???"
       in
       let lhs_vars =
         match args with
@@ -126,7 +127,7 @@ let generate_decoder_case generator_settings
 let generate_decoder_case_attr ~is_string generator_settings
     { name; alias; constr_decl = { pcd_args; pcd_loc } } =
   match pcd_args with
-  | Pcstr_tuple args ->
+  | Pcstr_tuple args -> (
       let const =
         if is_string then get_string_from_expression alias
         else get_float_from_expression alias
@@ -139,16 +140,19 @@ let generate_decoder_case_attr ~is_string generator_settings
         | _ -> generate_arg_decoder generator_settings args name
       in
 
-      let if' =
-        Exp.apply (make_ident_expr "=")
-          [
-            (Asttypes.Nolabel, Exp.constant const);
-            (Asttypes.Nolabel, [%expr str_or_num]);
-          ]
-      in
-      let then' = [%expr [%e decoded]] in
+      match const with
+      | Some const ->
+          let if' =
+            Exp.apply (make_ident_expr "=")
+              [
+                (Asttypes.Nolabel, Exp.constant const);
+                (Asttypes.Nolabel, [%expr str_or_num]);
+              ]
+          in
+          let then' = [%expr [%e decoded]] in
 
-      (if', then')
+          Some (if', then')
+      | None -> None)
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
 
 let generate_unboxed_decode generator_settings
@@ -226,14 +230,14 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
           in
 
           let decoder_switch =
-            List.map
+            List.filter_map
               (generate_decoder_case_attr ~is_string:true generator_settings)
               parsed_decls
             |> make_ifthenelse
           in
 
           let decoder_switch_num =
-            List.map
+            List.filter_map
               (generate_decoder_case_attr ~is_string:false generator_settings)
               parsed_decls
             |> make_ifthenelse

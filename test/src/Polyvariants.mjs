@@ -35,20 +35,7 @@ function t_decode(v) {
           return Spice.error(undefined, "Not matched", v);
         }
     case "JSONNumber" :
-        var str_or_num$2 = str_or_num._0;
-        if (하나 === str_or_num$2) {
-          return {
-                  TAG: "Ok",
-                  _0: "one"
-                };
-        } else if (둘 === str_or_num$2) {
-          return {
-                  TAG: "Ok",
-                  _0: "two"
-                };
-        } else {
-          return Spice.error(undefined, "Not matched", v);
-        }
+        return Spice.error(undefined, "Not matched", v);
     default:
       return Spice.error(undefined, "Not a JSONString", v);
   }
@@ -118,28 +105,15 @@ function t2_decode(v) {
   }
   switch (str_or_num.TAG) {
     case "JSONString" :
-        var str_or_num$1 = str_or_num._0;
-        if ("1.0" === str_or_num$1) {
-          return {
-                  TAG: "Ok",
-                  _0: "one"
-                };
-        } else if ("2.0" === str_or_num$1) {
-          return {
-                  TAG: "Ok",
-                  _0: "two"
-                };
-        } else {
-          return Spice.error(undefined, "Not matched", v);
-        }
+        return Spice.error(undefined, "Not matched", v);
     case "JSONNumber" :
-        var str_or_num$2 = str_or_num._0;
-        if (1.0 === str_or_num$2) {
+        var str_or_num$1 = str_or_num._0;
+        if (1.0 === str_or_num$1) {
           return {
                   TAG: "Ok",
                   _0: "one"
                 };
-        } else if (2.0 === str_or_num$2) {
+        } else if (2.0 === str_or_num$1) {
           return {
                   TAG: "Ok",
                   _0: "two"

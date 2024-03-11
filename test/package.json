@@ -7,7 +7,7 @@
     "@dusty-phillips/rescript-zora": "^4.0.0",
     "onchange": "^7.1.0",
     "pta": "^1.2.0",
-    "rescript": "^11.0.0-rc.5",
+    "rescript": "^11.0.0",
     "tap-difflet": "^0.7.2",
     "zora": "^5.2.0"
   },

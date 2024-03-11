@@ -148,7 +148,7 @@ let generate_decoder_case generator_settings { prf_desc } =
 let generate_decoder_case_attr ~is_string generator_settings row =
   let { alias; row_field = { prf_desc } } = row in
   match prf_desc with
-  | Rtag ({ txt }, _, core_types) ->
+  | Rtag ({ txt }, _, core_types) -> (
       let args = get_args_from_polyvars ~loc core_types in
       let const =
         if is_string then get_string_from_expression alias
@@ -162,16 +162,19 @@ let generate_decoder_case_attr ~is_string generator_settings row =
         | _ -> generate_arg_decoder generator_settings args txt
       in
 
-      let if' =
-        Exp.apply (make_ident_expr "=")
-          [
-            (Asttypes.Nolabel, Exp.constant const);
-            (Asttypes.Nolabel, [%expr str_or_num]);
-          ]
-      in
-      let then' = [%expr [%e decoded]] in
+      match const with
+      | Some const ->
+          let if' =
+            Exp.apply (make_ident_expr "=")
+              [
+                (Asttypes.Nolabel, Exp.constant const);
+                (Asttypes.Nolabel, [%expr str_or_num]);
+              ]
+          in
+          let then' = [%expr [%e decoded]] in
 
-      (if', then')
+          Some (if', then')
+      | None -> None)
   | Rinherit core_type ->
       fail core_type.ptyp_loc "This syntax is not yet implemented by spice"
 
@@ -252,14 +255,14 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
 
           let decoder_switch =
             parsed_fields
-            |> List.map
+            |> List.filter_map
                  (generate_decoder_case_attr ~is_string:true generator_settings)
             |> make_ifthenelse
           in
 
           let decoder_switch_num =
             parsed_fields
-            |> List.map
+            |> List.filter_map
                  (generate_decoder_case_attr ~is_string:false generator_settings)
             |> make_ifthenelse
           in
