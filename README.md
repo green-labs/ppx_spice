@@ -183,11 +183,11 @@ Make sure running tests in `/test`
 cd test
 
 (install dependencies)
-yarn
+pnpm install
 
 (build --watch)
-yarn res:clean && yarn res:watch
+pnpm res:clean && pnpm res:watch
 
 (run test --watch)
-yarn test:watch
+pnpm test:watch
 ```
