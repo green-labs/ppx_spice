@@ -16,6 +16,9 @@ type tOp = {
   value?: int,
 }
 
+@spice
+type t2 = {nullable?: string}
+
 // let de = v =>
 //   switch (v: Js.Json.t) {
 //   | Js.Json.Object(dict) =>

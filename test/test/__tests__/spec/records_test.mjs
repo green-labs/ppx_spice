@@ -70,6 +70,21 @@ Zora.test("record with optional field", (function (t) {
         testEqual(t, "encode omit optional field with None field", encoded$2, sample3);
       }));
 
+Zora.test("record with null", (function (t) {
+        var sample = {};
+        sample["nullable"] = null;
+        var sampleRecord = {
+          nullable: null
+        };
+        var encoded = Records.t2_encode(sampleRecord);
+        testEqual(t, "encode", encoded, sample);
+        var decoded = Records.t2_decode(sample);
+        testEqual(t, "decode", decoded, {
+              TAG: "Ok",
+              _0: sampleRecord
+            });
+      }));
+
 export {
   testEqual ,
 }

@@ -15,3 +15,6 @@ type tOp = {
   label: option<string>,
   value?: int,
 }
+
+@spice
+type t2 = {nullable?: string}

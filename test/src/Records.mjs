@@ -177,6 +177,45 @@ function tOp_decode(v) {
         };
 }
 
+function t2_encode(v) {
+  return Js_dict.fromArray(Spice.filterOptional([[
+                    "nullable",
+                    true,
+                    (function (extra) {
+                          return Spice.optionToJson(Spice.stringToJson, extra);
+                        })(v.nullable)
+                  ]]));
+}
+
+function t2_decode(v) {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  if (!(typeof v === "object" && !Array.isArray(v))) {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  var nullable = (function (extra) {
+        return Spice.optionFromJson(Spice.stringFromJson, extra);
+      })(Belt_Option.getWithDefault(Js_dict.get(v, "nullable"), null));
+  if (nullable.TAG === "Ok") {
+    return {
+            TAG: "Ok",
+            _0: {
+              nullable: nullable._0
+            }
+          };
+  }
+  var e = nullable._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".nullable" + e.path,
+            message: e.message,
+            value: e.value
+          }
+        };
+}
+
 export {
   t_encode ,
   t_decode ,
@@ -184,5 +223,7 @@ export {
   t1_decode ,
   tOp_encode ,
   tOp_decode ,
+  t2_encode ,
+  t2_decode ,
 }
 /* No side effect */

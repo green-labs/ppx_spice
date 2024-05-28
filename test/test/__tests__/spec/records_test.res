@@ -88,3 +88,19 @@ zoraBlock("record with optional field", t => {
   // let decoded = sampleJson3->Records.tOp_decode
   // t->testEqual(`decode omit optional field with None field`, decoded, Ok(sampleRecord3))
 })
+
+zoraBlock("record with null", t => {
+  let sample = Js.Dict.empty()
+  sample->Js.Dict.set("nullable", Js.Json.null)
+  let sampleJson = sample->Js.Json.object_
+
+  let sampleRecord: Records.t2 = {
+    nullable: Obj.magic(Js.Null),
+  }
+
+  let encoded = sampleRecord->Records.t2_encode
+  t->testEqual(`encode`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t2_decode
+  t->testEqual(`decode`, decoded, Ok(sampleRecord))
+})
