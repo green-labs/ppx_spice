@@ -51,9 +51,10 @@ let generate_dict_get { key; codecs = _, decoder; default } =
   match default with
   | Some default ->
       [%expr
-        Belt.Option.getWithDefault
-          (Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder])
-          (Ok [%e default]) [@res.uapp]]
+        Some
+          (Belt.Option.getWithDefault
+             (Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder])
+             (Ok [%e default]) [@res.uapp])]
   | None ->
       [%expr
         Belt.Option.map

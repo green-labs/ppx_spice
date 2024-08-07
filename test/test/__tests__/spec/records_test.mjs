@@ -87,6 +87,24 @@ Zora.test("record with null", (function (t) {
             });
       }));
 
+Zora.test("record with spice.default", (function (t) {
+        var sample = {};
+        var sample2 = {};
+        sample2["value"] = 0.0;
+        sample2["value2"] = 1.0;
+        var sampleRecord = {
+          value: 0,
+          value2: 1
+        };
+        var encoded = Records.t3_encode(sampleRecord);
+        testEqual(t, "encode", encoded, sample2);
+        var decoded = Records.t3_decode(sample);
+        testEqual(t, "decode", decoded, {
+              TAG: "Ok",
+              _0: sampleRecord
+            });
+      }));
+
 export {
   testEqual ,
 }

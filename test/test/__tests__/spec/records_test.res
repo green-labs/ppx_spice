@@ -106,3 +106,24 @@ zoraBlock("record with null", t => {
   let decoded = sampleJson->Records.t2_decode
   t->testEqual(`decode`, decoded, Ok(sampleRecord))
 })
+
+zoraBlock("record with spice.default", t => {
+  let sample = Js.Dict.empty()
+  let sampleJson = sample->Js.Json.object_
+
+  let sample2 = Js.Dict.empty()
+  sample2->Js.Dict.set("value", Js.Json.number(0.0))
+  sample2->Js.Dict.set("value2", Js.Json.number(1.0))
+  let sampleJson2 = sample2->Js.Json.object_
+
+  let sampleRecord: Records.t3 = {
+    value: 0,
+    value2: 1
+  }
+
+  let encoded = sampleRecord->Records.t3_encode
+  t->testEqual(`encode`, encoded, sampleJson2)
+
+  let decoded = sampleJson->Records.t3_decode
+  t->testEqual(`decode`, decoded, Ok(sampleRecord))
+})

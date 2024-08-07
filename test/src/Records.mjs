@@ -437,6 +437,67 @@ function t2_decode(v) {
         };
 }
 
+function t3_encode(v) {
+  return Js_dict.fromArray(Spice.filterOptional([
+                  [
+                    "value",
+                    Spice.intToJson(v.value)
+                  ],
+                  [
+                    "value2",
+                    Spice.optionToJson(Spice.intToJson, v.value2)
+                  ]
+                ]));
+}
+
+function t3_decode(v) {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  if (!(typeof v === "object" && !Array.isArray(v))) {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  var match = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value"), Spice.intFromJson), {
+        TAG: "Ok",
+        _0: 0
+      });
+  if (match.TAG === "Ok") {
+    var match$1 = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value2"), (function (param) {
+                return Spice.optionFromJson(Spice.intFromJson, param);
+              })), {
+          TAG: "Ok",
+          _0: 1
+        });
+    if (match$1.TAG === "Ok") {
+      return {
+              TAG: "Ok",
+              _0: {
+                value: match._0,
+                value2: match$1._0
+              }
+            };
+    }
+    var e = match$1._0;
+    return {
+            TAG: "Error",
+            _0: {
+              path: ".value2" + e.path,
+              message: e.message,
+              value: e.value
+            }
+          };
+  }
+  var e$1 = match._0;
+  return {
+          TAG: "Error",
+          _0: {
+            path: ".value" + e$1.path,
+            message: e$1.message,
+            value: e$1.value
+          }
+        };
+}
+
 export {
   t_encode ,
   t_decode ,
@@ -446,5 +507,7 @@ export {
   tOp_decode ,
   t2_encode ,
   t2_decode ,
+  t3_encode ,
+  t3_decode ,
 }
 /* No side effect */

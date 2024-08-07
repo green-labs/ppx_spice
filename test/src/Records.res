@@ -23,3 +23,9 @@ type t2 = {
   on?: Js.null<string>,
   n2: Js.Null.t<string>
 }
+
+@spice
+type t3 = {
+  @spice.default(0) value: int
+  @spice.default(Some(1)) value2?: int
+}
