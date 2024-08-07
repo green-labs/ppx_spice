@@ -149,3 +149,8 @@ let ctyp_arrow ?(loc = Location.none) ~arity ctyp =
   Typ.constr ~loc
     (mknoloc @@ Lident "function$")
     [ ctyp; Typ.variant [ Rf.tag (mknoloc arity) true [] ] Closed None ]
+
+let check_option_type { ptyp_desc } =
+  match ptyp_desc with
+  | Ptyp_constr ({ txt = Lident "option" }, [ _ ]) -> true
+  | _ -> false

@@ -56,6 +56,9 @@ and generate_constr_codecs { do_encode; do_decode }
   | Lident "option" ->
       ( (if do_encode then Some [%expr Spice.optionToJson] else None),
         if do_decode then Some [%expr Spice.optionFromJson] else None )
+  | Ldot (Lident "Js", "null") | Ldot (Ldot (Lident "Js", "Null"), "t") ->
+      ( (if do_encode then Some [%expr Spice.nullToJson] else None),
+        if do_decode then Some [%expr Spice.nullFromJson] else None )
   | Ldot (Ldot (Lident "Belt", "Result"), "t") ->
       ( (if do_encode then Some [%expr Spice.resultToJson] else None),
         if do_decode then Some [%expr Spice.resultFromJson] else None )
@@ -65,8 +68,7 @@ and generate_constr_codecs { do_encode; do_decode }
   | Ldot (Ldot (Lident "Js", "Json"), "t") ->
       ( (if do_encode then Some (Utils.expr_func ~arity:1 [%expr fun v -> v])
          else None),
-        if do_decode then
-          Some (Utils.expr_func ~arity:1 [%expr fun v -> Ok v])
+        if do_decode then Some (Utils.expr_func ~arity:1 [%expr fun v -> Ok v])
         else None )
   | Lident s ->
       ( (if do_encode then Some (make_ident_expr (s ^ Utils.encoder_func_suffix))

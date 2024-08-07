@@ -12,6 +12,7 @@ type parsed_decl = {
   codecs : expression option * expression option;
   default : expression option;
   is_optional : bool;
+  is_option : bool;
 }
 
 let generate_encoder decls unboxed =
@@ -23,12 +24,16 @@ let generate_encoder decls unboxed =
   | false ->
       let arrExpr =
         decls
-        |> List.map (fun { key; field; codecs = encoder, _; is_optional } ->
-               let is_optional =
-                 if is_optional then [%expr true] else [%expr false]
-               in
-               [%expr
-                 [%e key], [%e is_optional], [%e Option.get encoder] [%e field]])
+        |> List.map
+             (fun { key; field; codecs = encoder, _; is_optional; is_option } ->
+               if is_optional || is_option then
+                 [%expr [%e key], [%e Option.get encoder] [%e field]]
+               else
+                 [%expr
+                   [%e key],
+                     (* The Encoder for option `Spice.optionToJson` returns option type.
+                        So, encoder for other types return with Some to match type of encoder. *)
+                     Some ([%e Option.get encoder] [%e field])])
         |> Exp.array
       in
       Exp.constraint_
@@ -46,49 +51,80 @@ let generate_dict_get { key; codecs = _, decoder; default } =
         Belt.Option.getWithDefault
           (Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder])
           (Ok [%e default])]
-  | None ->
-      [%expr
-        [%e decoder]
-          (Belt.Option.getWithDefault (Js.Dict.get dict [%e key]) Js.Json.null)]
+  | None -> [%expr Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder]]
 
 let generate_error_case { key } =
   {
-    pc_lhs = [%pat? Error (e : Spice.decodeError)];
+    pc_lhs = [%pat? Some (Error (e : Spice.decodeError))];
     pc_guard = None;
     pc_rhs = [%expr Error { e with path = "." ^ [%e key] ^ e.path }];
   }
 
-let generate_final_record_expr decls =
+let generate_error_case2 { key } =
+  {
+    pc_lhs = [%pat? None];
+    pc_guard = None;
+    pc_rhs = [%expr Spice.error ([%e key] ^ " missing") v];
+  }
+
+let generate_final_record_expr path decls =
   decls
   |> List.map (fun { name; is_optional } ->
          let attrs = if is_optional then [ Utils.attr_optional ] else [] in
-         (lid name, make_ident_expr ~attrs name))
+         let is_opt = List.assoc_opt name path in
+         match is_opt with
+         | Some true -> (lid name, make_ident_expr ~attrs name)
+         | Some false -> (lid name, Exp.construct ~attrs (lid "None") None)
+         | None -> assert false)
   |> fun l -> [%expr Ok [%e Exp.record l None]]
 
 let generate_success_case { name } success_expr =
   {
-    pc_lhs = (mknoloc name |> Pat.var |> fun p -> [%pat? Ok [%p p]]);
+    pc_lhs = (mknoloc name |> Pat.var |> fun p -> [%pat? Some (Ok [%p p])]);
     pc_guard = None;
     pc_rhs = success_expr;
   }
 
-let rec generate_nested_switches_recurse all_decls remaining_decls =
-  let current, success_expr =
+let generate_success_case2 success_expr =
+  { pc_lhs = [%pat? None]; pc_guard = None; pc_rhs = success_expr }
+
+let rec generate_nested_switches_recurse path all_decls remaining_decls =
+  let ({ is_optional; is_option } as current), success_expr, success_expr2 =
     match remaining_decls with
     | [] -> failwith "Spice internal error: [] not expected"
-    | [ last ] -> (last, generate_final_record_expr all_decls)
-    | first :: tail -> (first, generate_nested_switches_recurse all_decls tail)
+    | [ ({ name } as last) ] ->
+        ( last,
+          generate_final_record_expr
+            (List.rev_append path [ (name, true) ])
+            all_decls,
+          generate_final_record_expr
+            (List.rev_append path [ (name, false) ])
+            all_decls )
+    | ({ name } as first) :: tail ->
+        ( first,
+          generate_nested_switches_recurse
+            (List.rev_append path [ (name, true) ])
+            all_decls tail,
+          generate_nested_switches_recurse
+            (List.rev_append path [ (name, false) ])
+            all_decls tail )
   in
-  [ generate_error_case current ]
-  |> List.append [ generate_success_case current success_expr ]
-  |> Exp.match_ (generate_dict_get current)
-  [@@ocaml.doc
-    " Recursively generates an expression containing nested switches, first\n\
-    \ *  decoding the first record items, then (if successful) the second, \
-     etc. "]
+  if is_optional || is_option then
+    [ generate_error_case current ]
+    |> List.append [ generate_success_case2 success_expr2 ]
+    |> List.append [ generate_success_case current success_expr ]
+    |> Exp.match_ (generate_dict_get current)
+  else
+    [ generate_error_case current ]
+    |> List.append [ generate_error_case2 current ]
+    |> List.append [ generate_success_case current success_expr ]
+    |> Exp.match_ (generate_dict_get current)
+[@@ocaml.doc
+  " Recursively generates an expression containing nested switches, first\n\
+  \ *  decoding the first record items, then (if successful) the second, etc. "]
 
 let generate_nested_switches decls =
-  generate_nested_switches_recurse decls decls
+  generate_nested_switches_recurse [] decls decls
 
 let generate_decoder decls unboxed =
   match unboxed with
@@ -128,6 +164,7 @@ let parse_decl generator_settings
     |> List.map (fun attr -> get_attribute_by_name pld_attributes attr)
     |> List.exists (function Ok (Some _) -> true | _ -> false)
   in
+  let is_option = Utils.check_option_type pld_type in
   let codecs = Codecs.generate_codecs generator_settings pld_type in
   let codecs =
     if is_optional then
@@ -148,6 +185,7 @@ let parse_decl generator_settings
     codecs;
     default;
     is_optional;
+    is_option;
   }
 
 let generate_codecs ({ do_encode; do_decode } as generator_settings) decls

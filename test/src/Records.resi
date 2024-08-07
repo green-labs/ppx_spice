@@ -17,4 +17,9 @@ type tOp = {
 }
 
 @spice
-type t2 = {nullable?: string}
+type t2 = {
+  o: option<string>,
+  n: Js.null<string>,
+  on?: Js.null<string>,
+  n2: Js.Null.t<string>
+}
