@@ -15,3 +15,17 @@ type tOp = {
   label: option<string>,
   value?: int,
 }
+
+@spice
+type t2 = {
+  o: option<string>,
+  n: Js.null<string>,
+  on?: Js.null<string>,
+  n2: Js.Null.t<string>
+}
+
+@spice
+type t3 = {
+  @spice.default(0) value: int
+  @spice.default(Some(1)) value2?: int
+}

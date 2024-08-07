@@ -74,7 +74,6 @@ zoraBlock("record with optional field", t => {
   // t->testEqual(`decode omit optional field`, decoded, Ok(sampleRecord2))
 
   let sample3 = Js.Dict.empty()
-  sample3->Js.Dict.set("label", Js.Json.null)
   let sampleJson3 = sample3->Js.Json.object_
 
   let sampleRecord3: Records.tOp = {
@@ -87,4 +86,44 @@ zoraBlock("record with optional field", t => {
   // FIXME: https://github.com/rescript-lang/rescript-compiler/issues/6485
   // let decoded = sampleJson3->Records.tOp_decode
   // t->testEqual(`decode omit optional field with None field`, decoded, Ok(sampleRecord3))
+})
+
+zoraBlock("record with null", t => {
+  let sample = Js.Dict.empty()
+  sample->Js.Dict.set("n", Js.Json.null)
+  sample->Js.Dict.set("n2", Js.Json.string("n2"))
+  let sampleJson = sample->Js.Json.object_
+
+  let sampleRecord: Records.t2 = {
+    o: None,
+    n: Js.null,
+    n2: Js.Null.return("n2")
+  }
+
+  let encoded = sampleRecord->Records.t2_encode
+  t->testEqual(`encode`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t2_decode
+  t->testEqual(`decode`, decoded, Ok(sampleRecord))
+})
+
+zoraBlock("record with spice.default", t => {
+  let sample = Js.Dict.empty()
+  let sampleJson = sample->Js.Json.object_
+
+  let sample2 = Js.Dict.empty()
+  sample2->Js.Dict.set("value", Js.Json.number(0.0))
+  sample2->Js.Dict.set("value2", Js.Json.number(1.0))
+  let sampleJson2 = sample2->Js.Json.object_
+
+  let sampleRecord: Records.t3 = {
+    value: 0,
+    value2: 1
+  }
+
+  let encoded = sampleRecord->Records.t3_encode
+  t->testEqual(`encode`, encoded, sampleJson2)
+
+  let decoded = sampleJson->Records.t3_decode
+  t->testEqual(`decode`, decoded, Ok(sampleRecord))
 })

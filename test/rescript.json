@@ -13,7 +13,7 @@
   ],
   "package-specs": [
     {
-      "module": "es6",
+      "module": "esmodule",
       "in-source": true
     }
   ],
@@ -23,10 +23,7 @@
     "@dusty-phillips/rescript-zora"
   ],
   "ppx-flags": [
-    [
-      "../ppx",
-      "-uncurried"
-    ]
+    "../ppx"
   ],
   "warnings": {
     "error": true,
@@ -35,5 +32,6 @@
   "generators": [],
   "bsc-flags": [
     "-bs-super-errors"
-  ]
+  ],
+  "uncurried": false
 }

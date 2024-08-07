@@ -65,9 +65,44 @@ Zora.test("record with optional field", (function (t) {
             });
         testEqual(t, "encode omit optional field", encoded$1, sample2);
         var sample3 = {};
-        sample3["label"] = null;
         var encoded$2 = Records.tOp_encode({});
         testEqual(t, "encode omit optional field with None field", encoded$2, sample3);
+      }));
+
+Zora.test("record with null", (function (t) {
+        var sample = {};
+        sample["n"] = null;
+        sample["n2"] = "n2";
+        var sampleRecord_n = null;
+        var sampleRecord = {
+          n: sampleRecord_n,
+          n2: "n2"
+        };
+        var encoded = Records.t2_encode(sampleRecord);
+        testEqual(t, "encode", encoded, sample);
+        var decoded = Records.t2_decode(sample);
+        testEqual(t, "decode", decoded, {
+              TAG: "Ok",
+              _0: sampleRecord
+            });
+      }));
+
+Zora.test("record with spice.default", (function (t) {
+        var sample = {};
+        var sample2 = {};
+        sample2["value"] = 0.0;
+        sample2["value2"] = 1.0;
+        var sampleRecord = {
+          value: 0,
+          value2: 1
+        };
+        var encoded = Records.t3_encode(sampleRecord);
+        testEqual(t, "encode", encoded, sample2);
+        var decoded = Records.t3_decode(sample);
+        testEqual(t, "decode", decoded, {
+              TAG: "Ok",
+              _0: sampleRecord
+            });
       }));
 
 export {

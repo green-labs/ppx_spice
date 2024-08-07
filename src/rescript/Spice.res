@@ -98,21 +98,33 @@ let listFromJson = (decoder, json) =>
   Belt.Result.map(arrayFromJson(decoder, json), Belt.List.fromArray)
 
 let filterOptional = arr =>
-  Belt.Array.map(
-    Belt.Array.keep(arr, ((_, isOptional, x)) => !(isOptional && x == Js.Json.null)),
-    ((k, _, v)) => (k, v),
-  )
+  Belt.Array.keepMap(arr, ((k, v)) => switch v {
+    | Some(v) => Some(k, v)
+    | None => None
+  })
 
-let optionToJson = (encoder, opt): Js.Json.t =>
+let optionToJson = (encoder, opt): option<Js.Json.t> =>
   switch opt {
-  | Some(x) => encoder(x)
-  | None => Js.Json.Null
+  | Some(x) => Some(encoder(x))
+  | None => None
   }
 
 let optionFromJson = (decoder, json) =>
   switch (json: Js.Json.t) {
   | Js.Json.Null => Ok(None)
   | _ => Belt.Result.map(decoder(json), v => Some(v))
+  }
+
+let nullToJson = (encoder, opt): Js.Json.t =>
+  switch opt {
+  | Js.Null.Value(x) => encoder(x)
+  | Null => Js.Json.Null
+  }
+
+let nullFromJson = (decoder, json) =>
+  switch (json: Js.Json.t) {
+  | Js.Json.Null => Ok(Js.Null.Null)
+  | _ => Belt.Result.map(decoder(json), v => Js.Null.Value(v))
   }
 
 let resultToJson = (okEncoder, errorEncoder, result): Js.Json.t => Js.Json.Array(

@@ -8,15 +8,11 @@ function te_encode(v) {
   return Js_dict.fromArray(Spice.filterOptional([
                   [
                     "name",
-                    false,
                     Spice.stringToJson(v.name)
                   ],
                   [
                     "nickname",
-                    true,
-                    (function (extra) {
-                          return Spice.optionToJson(Spice.stringToJson, extra);
-                        })(v.nickname)
+                    Spice.optionToJson(Spice.stringToJson, v.nickname)
                   ]
                 ]));
 }
@@ -28,21 +24,33 @@ function td_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  var name = Spice.stringFromJson(Belt_Option.getWithDefault(Js_dict.get(v, "name"), null));
-  if (name.TAG === "Ok") {
-    var nickname = (function (extra) {
-          return Spice.optionFromJson(Spice.stringFromJson, extra);
-        })(Belt_Option.getWithDefault(Js_dict.get(v, "nickname"), null));
-    if (nickname.TAG === "Ok") {
+  var match = Belt_Option.map(Js_dict.get(v, "name"), Spice.stringFromJson);
+  if (match === undefined) {
+    return Spice.error(undefined, "name missing", v);
+  }
+  if (match.TAG === "Ok") {
+    var name = match._0;
+    var match$1 = Belt_Option.map(Js_dict.get(v, "nickname"), (function (param) {
+            return Spice.optionFromJson(Spice.stringFromJson, param);
+          }));
+    if (match$1 === undefined) {
       return {
               TAG: "Ok",
               _0: {
-                name: name._0,
-                nickname: nickname._0
+                name: name
               }
             };
     }
-    var e = nickname._0;
+    if (match$1.TAG === "Ok") {
+      return {
+              TAG: "Ok",
+              _0: {
+                name: name,
+                nickname: match$1._0
+              }
+            };
+    }
+    var e = match$1._0;
     return {
             TAG: "Error",
             _0: {
@@ -52,7 +60,7 @@ function td_decode(v) {
             }
           };
   }
-  var e$1 = name._0;
+  var e$1 = match._0;
   return {
           TAG: "Error",
           _0: {

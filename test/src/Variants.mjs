@@ -86,9 +86,7 @@ function t1_decode(v) {
   return Spice.error(undefined, "Invalid variant constructor", Belt_Array.getExn(v, 0));
 }
 
-function t2_encode(v) {
-  return Spice.intToJson(v);
-}
+var t2_encode = Spice.intToJson;
 
 function t2_decode(v) {
   return Belt_Result.map(Spice.intFromJson(v), (function (v) {
@@ -96,9 +94,7 @@ function t2_decode(v) {
               }));
 }
 
-function t3_encode(v) {
-  return Spice.intToJson(v);
-}
+var t3_encode = Spice.intToJson;
 
 function t3_decode(v) {
   return Belt_Result.map(Spice.intFromJson(v), (function (v) {
