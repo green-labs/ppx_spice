@@ -2,6 +2,8 @@
 
 ## 0.2.2 (unreleased)
 
+- Support Null https://github.com/green-labs/ppx_spice/pull/80
+
 ## 0.2.1
 
 - a190663 Utilize Js.Json.Boolean(bool) instead oif Js.Json.True, False https://github.com/green-labs/ppx_spice/pull/58
