@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.2.2 (unreleased)
+## 0.2.3 (unreleased)
+
+## 0.2.2
 
 - Support Null https://github.com/green-labs/ppx_spice/pull/80
 
