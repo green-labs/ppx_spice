@@ -35,17 +35,9 @@ let intFromJson = j =>
   | _ => Error({path: "", message: "Not a number", value: j})
   }
 
-let int64ToJson = (i): Js.Json.t => Js.Json.Number(BigInt.toFloat(i))
+let bigintToJson = (i): Js.Json.t => Js.Json.Number(BigInt.toFloat(i))
 
-let int64FromJson = j =>
-  switch (j: Js.Json.t) {
-  | Js.Json.Number(n) => Ok(BigInt.fromFloat(n))
-  | _ => error("Not a number", j)
-  }
-
-let int64ToJsonUnsafe = (i): Js.Json.t => Js.Json.number(BigInt.toFloat(i))
-
-let int64FromJsonUnsafe = j =>
+let bigintFromJson = j =>
   switch (j: Js.Json.t) {
   | Js.Json.Number(n) => Ok(BigInt.fromFloat(n))
   | _ => error("Not a number", j)
@@ -178,7 +170,7 @@ module Codecs = {
   include Spice_Codecs
   let string = (stringToJson, stringFromJson)
   let int = (intToJson, intFromJson)
-  let int64Unsafe = (int64ToJsonUnsafe, int64FromJsonUnsafe)
+  let bigint = (bigintToJson, bigintFromJson)
   let float = (floatToJson, floatFromJson)
   let bool = (boolToJson, boolFromJson)
   let array = (arrayToJson, arrayFromJson)

@@ -105,6 +105,23 @@ Zora.test("record with spice.default", t => {
   });
 });
 
+Zora.test("record with bigint", t => {
+  let sample = {};
+  sample["a"] = 0.0;
+  sample["b"] = 1.0;
+  let sampleRecord = {
+    a: 0n,
+    b: 1n
+  };
+  let encoded = Records.t4_encode(sampleRecord);
+  testEqual(t, "encode", encoded, sample);
+  let decoded = Records.t4_decode(sample);
+  testEqual(t, "decode", decoded, {
+    TAG: "Ok",
+    _0: sampleRecord
+  });
+});
+
 export {
   testEqual,
 }

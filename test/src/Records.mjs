@@ -473,6 +473,121 @@ function t3_decode(v) {
   };
 }
 
+function t4_encode(v) {
+  let extra = v.b;
+  let extra$1 = v.c;
+  return Js_dict.fromArray(Spice.filterOptional([
+    [
+      "a",
+      Spice.bigintToJson(v.a)
+    ],
+    [
+      "b",
+      Spice.optionToJson(Spice.bigintToJson, extra)
+    ],
+    [
+      "c",
+      Spice.optionToJson(Spice.bigintToJson, extra$1)
+    ]
+  ]));
+}
+
+function t4_decode(v) {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  if (!(typeof v === "object" && !Array.isArray(v))) {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  let match = Belt_Option.map(Js_dict.get(v, "a"), Spice.bigintFromJson);
+  if (match === undefined) {
+    return Spice.error(undefined, "a" + " missing", v);
+  }
+  if (match.TAG === "Ok") {
+    let a = match._0;
+    let match$1 = Belt_Option.map(Js_dict.get(v, "b"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra));
+    if (match$1 !== undefined) {
+      if (match$1.TAG === "Ok") {
+        let b = match$1._0;
+        let match$2 = Belt_Option.map(Js_dict.get(v, "c"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra));
+        if (match$2 === undefined) {
+          return {
+            TAG: "Ok",
+            _0: {
+              a: a,
+              b: b
+            }
+          };
+        }
+        if (match$2.TAG === "Ok") {
+          return {
+            TAG: "Ok",
+            _0: {
+              a: a,
+              b: b,
+              c: match$2._0
+            }
+          };
+        }
+        let e = match$2._0;
+        return {
+          TAG: "Error",
+          _0: {
+            path: "." + ("c" + e.path),
+            message: e.message,
+            value: e.value
+          }
+        };
+      }
+      let e$1 = match$1._0;
+      return {
+        TAG: "Error",
+        _0: {
+          path: "." + ("b" + e$1.path),
+          message: e$1.message,
+          value: e$1.value
+        }
+      };
+    }
+    let match$3 = Belt_Option.map(Js_dict.get(v, "c"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra));
+    if (match$3 === undefined) {
+      return {
+        TAG: "Ok",
+        _0: {
+          a: a
+        }
+      };
+    }
+    if (match$3.TAG === "Ok") {
+      return {
+        TAG: "Ok",
+        _0: {
+          a: a,
+          c: match$3._0
+        }
+      };
+    }
+    let e$2 = match$3._0;
+    return {
+      TAG: "Error",
+      _0: {
+        path: "." + ("c" + e$2.path),
+        message: e$2.message,
+        value: e$2.value
+      }
+    };
+  }
+  let e$3 = match._0;
+  return {
+    TAG: "Error",
+    _0: {
+      path: "." + ("a" + e$3.path),
+      message: e$3.message,
+      value: e$3.value
+    }
+  };
+}
+
 export {
   t_encode,
   t_decode,
@@ -484,5 +599,7 @@ export {
   t2_decode,
   t3_encode,
   t3_decode,
+  t4_encode,
+  t4_decode,
 }
 /* No side effect */

@@ -29,3 +29,10 @@ type t3 = {
   @spice.default(0) value: int
   @spice.default(Some(1)) value2?: int
 }
+
+@spice
+type t4 = {
+  a: bigint,
+  b?: bigint,
+  c: option<bigint>,
+}
