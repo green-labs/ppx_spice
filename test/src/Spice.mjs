@@ -74,26 +74,11 @@ function intFromJson(j) {
   }
 }
 
-function int64ToJson(i) {
+function bigintToJson(i) {
   return Number(i);
 }
 
-function int64FromJson(j) {
-  if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "number") {
-    return error(undefined, "Not a number", j);
-  } else {
-    return {
-      TAG: "Ok",
-      _0: BigInt(j)
-    };
-  }
-}
-
-function int64ToJsonUnsafe(i) {
-  return Number(i);
-}
-
-function int64FromJsonUnsafe(j) {
+function bigintFromJson(j) {
   if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "number") {
     return error(undefined, "Not a number", j);
   } else {
@@ -381,9 +366,9 @@ let int = [
   intFromJson
 ];
 
-let int64Unsafe = [
-  int64ToJsonUnsafe,
-  int64FromJsonUnsafe
+let bigint = [
+  bigintToJson,
+  bigintFromJson
 ];
 
 let float = [
@@ -424,7 +409,7 @@ let Codecs = {
   magic: Spice_Codecs.magic,
   string: string,
   int: int,
-  int64Unsafe: int64Unsafe,
+  bigint: bigint,
   float: float,
   bool: bool,
   array: array,
@@ -439,10 +424,8 @@ export {
   stringFromJson,
   intToJson,
   intFromJson,
-  int64ToJson,
-  int64FromJson,
-  int64ToJsonUnsafe,
-  int64FromJsonUnsafe,
+  bigintToJson,
+  bigintFromJson,
   floatToJson,
   floatFromJson,
   boolToJson,

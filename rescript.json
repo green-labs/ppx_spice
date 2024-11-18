@@ -3,17 +3,20 @@
   "sources": [
     {
       "dir": "src",
-      "subdirs": ["rescript"]
+      "subdirs": [
+        "rescript"
+      ]
     },
     {
       "dir": "test",
       "type": "dev"
     }
   ],
-  "refmt": 3,
-  "ppx-flags": ["./ppx"],
+  "ppx-flags": [
+    "./ppx"
+  ],
   "warnings": {
     "number": "+A-9-40-42"
   },
-  "bsc-flags": ["-bs-super-errors"]
+  "bsc-flags": []
 }

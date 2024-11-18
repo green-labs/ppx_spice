@@ -33,9 +33,9 @@ and generate_constr_codecs { do_encode; do_decode }
   | Lident "int" ->
       ( (if do_encode then Some [%expr Spice.intToJson] else None),
         if do_decode then Some [%expr Spice.intFromJson] else None )
-  | Lident "int64" ->
-      ( (if do_encode then Some [%expr Spice.int64ToJson] else None),
-        if do_decode then Some [%expr Spice.int64FromJson] else None )
+  | Lident "bigint" ->
+      ( (if do_encode then Some [%expr Spice.bigintToJson] else None),
+        if do_decode then Some [%expr Spice.bigintFromJson] else None )
   | Lident "float" ->
       ( (if do_encode then Some [%expr Spice.floatToJson] else None),
         if do_decode then Some [%expr Spice.floatFromJson] else None )

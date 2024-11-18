@@ -127,3 +127,22 @@ zoraBlock("record with spice.default", t => {
   let decoded = sampleJson->Records.t3_decode
   t->testEqual(`decode`, decoded, Ok(sampleRecord))
 })
+
+zoraBlock("record with bigint", t => {
+  let sample = Js.Dict.empty()
+  sample->Js.Dict.set("a", Js.Json.number(0.0))
+  sample->Js.Dict.set("b", Js.Json.number(1.0))
+  let sampleJson = sample->Js.Json.object_
+
+  let sampleRecord: Records.t4 = {
+    a: 0n,
+    b: 1n,
+    c: None,
+  }
+
+  let encoded = sampleRecord->Records.t4_encode
+  t->testEqual(`encode`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t4_decode
+  t->testEqual(`decode`, decoded, Ok(sampleRecord))
+})
