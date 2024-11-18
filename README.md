@@ -161,7 +161,7 @@ Make sure running the below commands in `/src`.
 1. Create a sandbox with opam
 
 ```
-opam switch create spice 4.12.1
+opam switch create spice 4.14.0
 ```
 
 2. Install dependencies
