@@ -177,7 +177,8 @@ let parse_decl _generator_settings
   let alias, has_attr_as =
     match get_attribute_by_name pcd_attributes "spice.as" with
     | Ok (Some attribute) -> (get_expression_from_payload attribute, true)
-    | Ok None -> (Exp.constant (Pconst_string (txt, Location.none, None)), false)
+    | Ok None ->
+        (Exp.constant (Pconst_string (txt, Location.none, Some "*j")), false)
     | Error s -> (fail pcd_loc s, false)
   in
 

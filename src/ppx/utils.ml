@@ -86,7 +86,7 @@ let get_float_from_expression { pexp_desc; pexp_loc } =
   | _ -> fail pexp_loc "cannot find a name??"
 
 let index_const i =
-  Pconst_string ("[" ^ string_of_int i ^ "]", Location.none, None)
+  Pconst_string ("[" ^ string_of_int i ^ "]", Location.none, Some "*j")
   |> Exp.constant
 
 let rec is_identifier_used_in_core_type type_name { ptyp_desc; ptyp_loc } =
@@ -123,13 +123,6 @@ let attr_optional : Ppxlib.Parsetree.attribute =
 let attr_partial : Ppxlib.Parsetree.attribute =
   {
     attr_name = { txt = "res.partial"; loc = Location.none };
-    attr_payload = PStr [];
-    attr_loc = Location.none;
-  }
-
-let attr_uapp : Ppxlib.Parsetree.attribute =
-  {
-    attr_name = { txt = "res.uapp"; loc = Location.none };
     attr_payload = PStr [];
     attr_loc = Location.none;
   }

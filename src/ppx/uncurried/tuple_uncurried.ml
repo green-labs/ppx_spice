@@ -8,7 +8,7 @@ let generate_encoder composite_encoders =
     composite_encoders
     |> List.mapi (fun i e ->
            let vExp = Exp.ident (lid ("v" ^ string_of_int i)) in
-           [%expr [%e e] [%e vExp] [@res.uapp]])
+           [%expr [%e e] [%e vExp]])
     |> Exp.array
   in
   let deconstructor_pattern =
@@ -42,7 +42,7 @@ let generate_decode_switch composite_decoders =
     composite_decoders
     |> List.mapi (fun i d ->
            let ident = make_ident_expr ("v" ^ string_of_int i) in
-           [%expr [%e d] [%e ident] [@res.uapp]])
+           [%expr [%e d] [%e ident]])
     |> Exp.tuple
   in
   composite_decoders
@@ -66,8 +66,8 @@ let generate_decoder composite_decoders =
         Exp.case match_pattern (generate_decode_switch composite_decoders);
         Exp.case
           [%pat? Js.Json.Array _]
-          [%expr Spice.error "Incorrect cardinality" json [@res.uapp]];
-        Exp.case [%pat? _] [%expr Spice.error "Not a tuple" json [@res.uapp]];
+          [%expr Spice.error "Incorrect cardinality" json];
+        Exp.case [%pat? _] [%expr Spice.error "Not a tuple" json];
       ]
   in
   Utils.expr_func ~arity:1 [%expr fun json -> [%e outer_switch]]

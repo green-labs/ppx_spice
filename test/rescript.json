@@ -23,15 +23,12 @@
     "@dusty-phillips/rescript-zora"
   ],
   "ppx-flags": [
-    "../ppx"
+    "../ppx -uncurried"
   ],
   "warnings": {
     "error": true,
     "number": "-48"
   },
   "generators": [],
-  "bsc-flags": [
-    "-bs-super-errors"
-  ],
-  "uncurried": false
+  "bsc-flags": []
 }

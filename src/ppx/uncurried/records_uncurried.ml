@@ -27,21 +27,19 @@ let generate_encoder decls unboxed =
         |> List.map
              (fun { key; field; codecs = encoder, _; is_optional; is_option } ->
                if is_optional || is_option then
-                 [%expr
-                   [%e key], ([%e Option.get encoder] [%e field] [@res.uapp])]
+                 Exp.tuple
+                   [ key; Exp.apply (Option.get encoder) [ (Nolabel, field) ] ]
                else
                  [%expr
                    [%e key],
                      (* The Encoder for option `Spice.optionToJson` returns option type.
                         So, encoder for other types return with Some to match type of encoder. *)
-                     Some ([%e Option.get encoder] [%e field] [@res.uapp])])
+                     Some ([%e Option.get encoder] [%e field])])
         |> Exp.array
       in
       Exp.constraint_
         [%expr
-          Js.Json.Object
-            (Js.Dict.fromArray
-               (Spice.filterOptional [%e arrExpr] [@res.uapp]) [@res.uapp])]
+          Js.Json.Object (Js.Dict.fromArray (Spice.filterOptional [%e arrExpr]))]
         Utils.ctyp_json_t
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
       |> Utils.expr_func ~arity:1
@@ -54,12 +52,8 @@ let generate_dict_get { key; codecs = _, decoder; default } =
         Some
           (Belt.Option.getWithDefault
              (Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder])
-             (Ok [%e default]) [@res.uapp])]
-  | None ->
-      [%expr
-        Belt.Option.map
-          (Js.Dict.get dict [%e key] [@res.uapp])
-          [%e decoder] [@res.uapp]]
+             (Ok [%e default]))]
+  | None -> [%expr Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder]]
 
 let generate_error_case { key } =
   {
@@ -72,7 +66,7 @@ let generate_error_case2 { key } =
   {
     pc_lhs = [%pat? None];
     pc_guard = None;
-    pc_rhs = [%expr Spice.error ([%e key] ^ " missing") v [@res.uapp]];
+    pc_rhs = [%expr Spice.error ([%e key] ^ " missing") v];
   }
 
 let generate_final_record_expr path decls =
@@ -152,7 +146,7 @@ let generate_decoder decls unboxed =
           fun v ->
             match (v : Js.Json.t) with
             | Js.Json.Object dict -> [%e generate_nested_switches decls]
-            | _ -> Spice.error "Not an object" v [@res.uapp]]
+            | _ -> Spice.error "Not an object" v]
 
 let parse_decl generator_settings
     { pld_name = { txt }; pld_loc; pld_type; pld_attributes } =
@@ -165,7 +159,7 @@ let parse_decl generator_settings
   let key =
     match get_attribute_by_name pld_attributes "spice.key" with
     | Ok (Some attribute) -> get_expression_from_payload attribute
-    | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
+    | Ok None -> Exp.constant (Pconst_string (txt, Location.none, Some "*j"))
     | Error s -> fail pld_loc s
   in
   let optional_attrs = [ "ns.optional"; "res.optional" ] in
@@ -182,24 +176,20 @@ let parse_decl generator_settings
       match codecs with
       | Some encode, Some decode ->
           ( Some
-              (add_attrs
-                 [ Utils.attr_partial; Utils.attr_uapp ]
+              (add_attrs [ Utils.attr_partial ]
                  [%expr Spice.optionToJson [%e encode]]),
             Some
-              (add_attrs
-                 [ Utils.attr_partial; Utils.attr_uapp ]
+              (add_attrs [ Utils.attr_partial ]
                  [%expr Spice.optionFromJson [%e decode]]) )
       | Some encode, _ ->
           ( Some
-              (add_attrs
-                 [ Utils.attr_partial; Utils.attr_uapp ]
+              (add_attrs [ Utils.attr_partial ]
                  [%expr Spice.optionToJson [%e encode]]),
             None )
       | _, Some decode ->
           ( None,
             Some
-              (add_attrs
-                 [ Utils.attr_partial; Utils.attr_uapp ]
+              (add_attrs [ Utils.attr_partial ]
                  [%expr Spice.optionFromJson [%e decode]]) )
       | None, None -> codecs
     else codecs
