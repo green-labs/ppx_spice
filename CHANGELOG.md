@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.2.3 (unreleased)
+## 0.2.4 (unreleased)
+
+## 0.2.3
 
 - Support the compiler v12-alpha.4
 
