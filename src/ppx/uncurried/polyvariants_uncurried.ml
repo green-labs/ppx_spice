@@ -133,7 +133,7 @@ let generate_decoder_case generator_settings { prf_desc } =
       {
         pc_lhs =
           ( Pconst_string (txt, Location.none, None) |> Pat.constant |> fun v ->
-            Some v |> Pat.construct (lid "Js.Json.JSONString") );
+            Some ([], v) |> Pat.construct (lid "Js.Json.JSONString") );
         pc_guard = None;
         pc_rhs =
           [%expr
