@@ -15,14 +15,14 @@ let rec parameterize_codecs type_args encoder_func decoder_func
     | Some encoder_func ->
         sub_encoders
         |> List.map (fun e -> (Asttypes.Nolabel, Option.get e))
-        |> Exp.apply ~attrs:[ attr_partial; attr_uapp ] encoder_func
+        |> Exp.apply ~attrs:[ attr_partial ] encoder_func
         |> Option.some),
     match decoder_func with
     | None -> None
     | Some decoder_func ->
         sub_decoders
         |> List.map (fun e -> (Asttypes.Nolabel, Option.get e))
-        |> Exp.apply ~attrs:[ attr_partial; attr_uapp ] decoder_func
+        |> Exp.apply ~attrs:[ attr_partial ] decoder_func
         |> Option.some )
 
 and generate_constr_codecs { do_encode; do_decode }

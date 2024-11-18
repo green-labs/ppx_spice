@@ -133,7 +133,7 @@ let generate_decoder_case generator_settings { prf_desc } =
       {
         pc_lhs =
           ( Pconst_string (txt, Location.none, None) |> Pat.constant |> fun v ->
-            Some v |> Pat.construct (lid "Js.Json.JSONString") );
+            Some ([], v) |> Pat.construct (lid "Js.Json.JSONString") );
         pc_guard = None;
         pc_rhs =
           [%expr
@@ -207,7 +207,8 @@ let parse_decl ({ prf_desc; prf_loc; prf_attributes } as row_field) =
   let alias, has_attr_as =
     match get_attribute_by_name prf_attributes "spice.as" with
     | Ok (Some attribute) -> (get_expression_from_payload attribute, true)
-    | Ok None -> (Exp.constant (Pconst_string (txt, Location.none, None)), false)
+    | Ok None ->
+        (Exp.constant (Pconst_string (txt, Location.none, Some "*j")), false)
     | Error s -> (fail prf_loc s, false)
   in
 

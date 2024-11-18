@@ -40,7 +40,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         |> List.map (Codecs.generate_codecs generator_settings)
         |> List.map (fun (encoder, _) -> Option.get encoder)
         |> List.mapi (fun i e ->
-               Exp.apply ~attrs:[ Utils.attr_uapp ] ~loc:pcd_loc e
+               Exp.apply ~loc:pcd_loc e
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
         |> List.append [ json_expr ]
       in
@@ -82,7 +82,7 @@ let generate_arg_decoder generator_settings args constructor_name =
        (args
        |> List.map (Codecs.generate_codecs generator_settings)
        |> List.mapi (fun i (_, decoder) ->
-              Exp.apply ~attrs:[ Utils.attr_uapp ] (Option.get decoder)
+              Exp.apply (Option.get decoder)
                 [
                   ( Asttypes.Nolabel,
                     (* +1 because index 0 is the constructor *)
@@ -117,9 +117,8 @@ let generate_decoder_case generator_settings
         pc_guard = None;
         pc_rhs =
           [%expr
-            if (Js.Array.length json_arr [@res.uapp]) <> [%e arg_len] then
+            if Js.Array.length json_arr <> [%e arg_len] then
               Spice.error "Invalid number of arguments to variant constructor" v
-              [@res.uapp]
             else [%e decoded]];
       }
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
@@ -165,12 +164,14 @@ let generate_unboxed_decode generator_settings
           match d with
           | Some d ->
               let constructor = Exp.construct (lid name) (Some [%expr v]) in
+              let inline_fun_expr =
+                Utils.expr_func ~arity:1 [%expr fun v -> [%e constructor]]
+              in
 
               Some
                 (Utils.expr_func ~arity:1
                    [%expr
-                     fun v ->
-                       Belt.Result.map ([%e d] v) (fun v -> [%e constructor])])
+                     fun v -> Belt.Result.map ([%e d] v) [%e inline_fun_expr]])
           | None -> None)
       | _ -> fail pcd_loc "Expected exactly one type argument")
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
@@ -180,7 +181,8 @@ let parse_decl _generator_settings
   let alias, has_attr_as =
     match get_attribute_by_name pcd_attributes "spice.as" with
     | Ok (Some attribute) -> (get_expression_from_payload attribute, true)
-    | Ok None -> (Exp.constant (Pconst_string (txt, Location.none, None)), false)
+    | Ok None ->
+        (Exp.constant (Pconst_string (txt, Location.none, Some "*j")), false)
     | Error s -> (fail pcd_loc s, false)
   in
 
@@ -250,7 +252,7 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
                    match (v : Js.Json.t) with
                    | Js.Json.String str_or_num -> [%e decoder_switch]
                    | Js.Json.Number str_or_num -> [%e decoder_switch_num]
-                   | _ -> Spice.error "Not a JSONString" v [@res.uapp]])
+                   | _ -> Spice.error "Not a JSONString" v])
         else
           let decoder_default_case =
             {
@@ -259,7 +261,7 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
               pc_rhs =
                 [%expr
                   Spice.error "Invalid variant constructor"
-                    (Belt.Array.getExn json_arr 0) [@res.uapp]];
+                    (Belt.Array.getExn json_arr 0)];
             }
           in
 
@@ -267,7 +269,7 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
             constr_decls |> List.map (generate_decoder_case generator_settings)
             |> fun l ->
             l @ [ decoder_default_case ]
-            |> Exp.match_ [%expr Belt.Array.getExn json_arr 0 [@res.uapp]]
+            |> Exp.match_ [%expr Belt.Array.getExn json_arr 0]
           in
 
           Some
@@ -277,9 +279,8 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
                    match (v : Js.Json.t) with
                    | Js.Json.Array [||] ->
                        Spice.error "Expected variant, found empty array" v
-                       [@res.uapp]
                    | Js.Json.Array json_arr -> [%e decoder_switch]
-                   | _ -> Spice.error "Not a variant" v [@res.uapp]])
+                   | _ -> Spice.error "Not a variant" v])
   in
 
   (encoder, decoder)

@@ -12,16 +12,16 @@ function t_decode(v) {
   }
   switch (typeof v) {
     case "string" :
-        if ("m³" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "M3"
-                };
-        } else {
-          return Spice.error(undefined, "Not matched", v);
-        }
-    case "number" :
+      if ("m³" === v) {
+        return {
+          TAG: "Ok",
+          _0: "M3"
+        };
+      } else {
         return Spice.error(undefined, "Not matched", v);
+      }
+    case "number" :
+      return Spice.error(undefined, "Not matched", v);
     default:
       return Spice.error(undefined, "Not a JSONString", v);
   }
@@ -30,12 +30,11 @@ function t_decode(v) {
 function t_encode$1(v) {
   switch (v) {
     case "Create" :
-        return "create";
+      return "create";
     case "Update" :
-        return "update";
+      return "update";
     case "Delete" :
-        return "delete";
-    
+      return "delete";
   }
 }
 
@@ -45,39 +44,39 @@ function t_decode$1(v) {
   }
   switch (typeof v) {
     case "string" :
-        if ("create" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "Create"
-                };
-        } else if ("update" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "Update"
-                };
-        } else if ("delete" === v) {
-          return {
-                  TAG: "Ok",
-                  _0: "Delete"
-                };
-        } else {
-          return Spice.error(undefined, "Not matched", v);
-        }
-    case "number" :
+      if ("create" === v) {
+        return {
+          TAG: "Ok",
+          _0: "Create"
+        };
+      } else if ("update" === v) {
+        return {
+          TAG: "Ok",
+          _0: "Update"
+        };
+      } else if ("delete" === v) {
+        return {
+          TAG: "Ok",
+          _0: "Delete"
+        };
+      } else {
         return Spice.error(undefined, "Not matched", v);
+      }
+    case "number" :
+      return Spice.error(undefined, "Not matched", v);
     default:
       return Spice.error(undefined, "Not a JSONString", v);
   }
 }
 
-var Action = {
+let Action = {
   t_encode: t_encode$1,
   t_decode: t_decode$1
 };
 
 export {
-  t_encode ,
-  t_decode ,
-  Action ,
+  t_encode,
+  t_decode,
+  Action,
 }
 /* No side effect */

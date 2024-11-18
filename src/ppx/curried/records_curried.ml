@@ -156,7 +156,7 @@ let parse_decl generator_settings
   let key =
     match get_attribute_by_name pld_attributes "spice.key" with
     | Ok (Some attribute) -> get_expression_from_payload attribute
-    | Ok None -> Exp.constant (Pconst_string (txt, Location.none, None))
+    | Ok None -> Exp.constant (Pconst_string (txt, Location.none, Some "*j"))
     | Error s -> fail pld_loc s
   in
   let optional_attrs = [ "ns.optional"; "res.optional" ] in

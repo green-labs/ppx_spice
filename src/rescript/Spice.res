@@ -24,30 +24,30 @@ let stringFromJson = j =>
   | _ => Error({path: "", message: "Not a string", value: j})
   }
 
-let intToJson = (i): Js.Json.t => Js.Json.Number(float_of_int(i))
+let intToJson = (i): Js.Json.t => Js.Json.Number(Float.fromInt(i))
 let intFromJson = j =>
   switch (j: Js.Json.t) {
   | Js.Json.Number(f) =>
-    float_of_int(Js.Math.floor(f)) == f
+    Float.fromInt(Js.Math.floor(f)) == f
       ? Ok(Js.Math.floor(f))
       : Error({path: "", message: "Not an integer", value: j})
 
   | _ => Error({path: "", message: "Not a number", value: j})
   }
 
-let int64ToJson = (i): Js.Json.t => Js.Json.Number(Int64.float_of_bits(i))
+let int64ToJson = (i): Js.Json.t => Js.Json.Number(BigInt.toFloat(i))
 
 let int64FromJson = j =>
   switch (j: Js.Json.t) {
-  | Js.Json.Number(n) => Ok(Int64.bits_of_float(n))
+  | Js.Json.Number(n) => Ok(BigInt.fromFloat(n))
   | _ => error("Not a number", j)
   }
 
-let int64ToJsonUnsafe = (i): Js.Json.t => Js.Json.number(Int64.to_float(i))
+let int64ToJsonUnsafe = (i): Js.Json.t => Js.Json.number(BigInt.toFloat(i))
 
 let int64FromJsonUnsafe = j =>
   switch (j: Js.Json.t) {
-  | Js.Json.Number(n) => Ok(Int64.of_float(n))
+  | Js.Json.Number(n) => Ok(BigInt.fromFloat(n))
   | _ => error("Not a number", j)
   }
 
@@ -82,7 +82,7 @@ let arrayFromJson = (decoder, json) =>
       | (Error(_), _) => acc
 
       | (_, Error({path} as error)) =>
-        Error({...error, path: "[" ++ (string_of_int(i) ++ ("]" ++ path))})
+        Error({...error, path: "[" ++ (Int.toString(i) ++ ("]" ++ path))})
 
       | (Ok(prev), Ok(newVal)) =>
         Ok(Js.Array.concat([newVal], prev))

@@ -10,7 +10,7 @@ let add_params param_names expr =
       let pat = Pat.var (mknoloc s) in
       Exp.fun_ Asttypes.Nolabel None pat acc)
     param_names
-    (Utils.expr_func ~arity:1 [%expr fun v -> ([%e expr] v [@res.uapp])])
+    (Utils.expr_func ~arity:1 [%expr fun v -> [%e expr] v])
 
 let generate_codec_decls type_name param_names (encoder, decoder) =
   let encoder_pat = Pat.var (mknoloc (type_name ^ Utils.encoder_func_suffix)) in

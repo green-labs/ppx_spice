@@ -6,9 +6,9 @@ import * as Polyvariants_test from "./spec/polyvariants_test.mjs";
 import * as Encode_decode_test from "./spec/encode_decode_test.mjs";
 import * as Optional_field_records_test from "./spec/optional_field_records_test.mjs";
 
-var testEqual = Variants_test.testEqual;
+let testEqual = Variants_test.testEqual;
 
 export {
-  testEqual ,
+  testEqual,
 }
 /* Records_test Not a pure module */

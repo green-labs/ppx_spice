@@ -4,37 +4,37 @@ import * as Zora from "zora";
 import * as EncodeDecode from "../../../src/EncodeDecode.mjs";
 
 function testEqual(t, name, lhs, rhs) {
-  t.test(name, (async function (t) {
-          t.equal(lhs, rhs, name);
-        }));
+  t.test(name, async t => {
+    t.equal(lhs, rhs, name);
+  });
 }
 
-Zora.test("encode only", (function (t) {
-        var sample = {};
-        sample["name"] = "Alice";
-        sample["nickname"] = "Ecila";
-        var encoded = EncodeDecode.te_encode({
-              name: "Alice",
-              nickname: "Ecila"
-            });
-        testEqual(t, "encode", encoded, sample);
-      }));
+Zora.test("encode only", t => {
+  let sample = {};
+  sample["name"] = "Alice";
+  sample["nickname"] = "Ecila";
+  let encoded = EncodeDecode.te_encode({
+    name: "Alice",
+    nickname: "Ecila"
+  });
+  testEqual(t, "encode", encoded, sample);
+});
 
-Zora.test("decode only", (function (t) {
-        var sample = {};
-        sample["name"] = "Alice";
-        sample["nickname"] = "Ecila";
-        var decoded = EncodeDecode.td_decode(sample);
-        testEqual(t, "decode", decoded, {
-              TAG: "Ok",
-              _0: {
-                name: "Alice",
-                nickname: "Ecila"
-              }
-            });
-      }));
+Zora.test("decode only", t => {
+  let sample = {};
+  sample["name"] = "Alice";
+  sample["nickname"] = "Ecila";
+  let decoded = EncodeDecode.td_decode(sample);
+  testEqual(t, "decode", decoded, {
+    TAG: "Ok",
+    _0: {
+      name: "Alice",
+      nickname: "Ecila"
+    }
+  });
+});
 
 export {
-  testEqual ,
+  testEqual,
 }
 /*  Not a pure module */
