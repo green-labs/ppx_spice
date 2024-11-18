@@ -4,7 +4,8 @@
 
 ## 0.2.3
 
-- Support the compiler v12-alpha.4
+- Support the compiler v12-alpha.4 https://github.com/green-labs/ppx_spice/pull/82
+- Support bigint type https://github.com/green-labs/ppx_spice/pull/83
 
 ## 0.2.2
 
