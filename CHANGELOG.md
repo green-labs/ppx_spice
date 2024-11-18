@@ -2,6 +2,8 @@
 
 ## 0.2.3 (unreleased)
 
+- Support the compiler v12-alpha.4
+
 ## 0.2.2
 
 - Support Null https://github.com/green-labs/ppx_spice/pull/80
