@@ -131,8 +131,8 @@ Read our [Guide with examples](docs/GUIDE.md)
 | Compiler | Ppx_spice                    |
 | -------- | ---------------------------- |
 | v12      | v0.2.3 >=                    | 
-| v11      | v0.2.3 > && >= v0.2.1        |
-| v10      | v0.2.1 >                     |
+| v11      | v0.2.2 >= && > v0.2.0        |
+| v10      | v0.2.0 >=                     |
 
 ```sh
 yarn add -D @greenlabs/ppx-spice
