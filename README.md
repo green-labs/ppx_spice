@@ -128,11 +128,11 @@ Read our [Guide with examples](docs/GUIDE.md)
 
 ### Compatibility on the compiler versions
 
-| Compiler | Ppx_spice      |
-| -------- | -------------- |
-| v12      | >= v0.2.3      |
-| v11      | >= v0.2.1-rc.1 |
-| v10      | ~<= v0.1.15    |
+| Compiler | Ppx_spice                    |
+| -------- | ---------------------------- |
+| v12      | v0.2.3 >=                    | 
+| v11      | v0.2.3 > && >= v0.2.1        |
+| v10      | v0.2.1 >                     |
 
 ```sh
 yarn add -D @greenlabs/ppx-spice
