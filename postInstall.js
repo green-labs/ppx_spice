@@ -35,7 +35,21 @@ const installWindowsBinary = () => {
 
 switch (process.platform) {
   case "linux":
-    installMacLinuxBinary("ppx-linux.exe");
+    switch (process.arch) {
+      case "amd64":
+        installMacLinuxBinary("ppx-linux.exe");
+        break;
+      case "arm64":
+        installMacLinuxBinary("ppx-linux-arm64.exe");
+        break;
+      default:
+        // This won't break the installation because the `ppx` shell script remains
+        // but that script will throw an error in this case anyway
+        console.warn(
+          `No release available for platform "${process.platform}" arch "${process.arch}"`
+        );
+        process.exit(1);
+    }
     break;
   case "darwin":
     installMacLinuxBinary("ppx-osx.exe");

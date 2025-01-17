@@ -11,11 +11,11 @@ jobs:
         working-directory: src
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
         ocaml-compiler:
           - 4.14.0
     container:
-      image: ocaml/opam:alpine-3.16-ocaml-4.14
+      image: ocaml/opam:ubuntu-20.04-ocaml-4.14
       options: --user root
 
     steps:
