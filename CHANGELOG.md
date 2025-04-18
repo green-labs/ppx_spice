@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.2.4 (unreleased)
+## 0.2.4
+
+- Fix critical performance issues for records with a large number of fields. https://github.com/green-labs/ppx_spice/pull/87
 
 ## 0.2.3
 
