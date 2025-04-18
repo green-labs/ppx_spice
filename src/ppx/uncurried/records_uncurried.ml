@@ -44,21 +44,6 @@ let generate_encoder decls unboxed =
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
       |> Utils.expr_func ~arity:1
 
-let rec all_combinations fields =
-  match fields with
-  | [] -> [ [] ]
-  | f :: rest ->
-      let rest_combos = all_combinations rest in
-      if f.is_option || f.is_optional then
-        (* option/optional: Some(x) as name, None *)
-        List.concat
-          [
-            List.map (fun combo -> (`Some, combo)) rest_combos;
-            List.map (fun combo -> (`None, combo)) rest_combos;
-          ]
-        |> List.map (fun (tag, combo) -> (tag, f) :: combo)
-      else List.map (fun combo -> (`Plain, f) :: combo) rest_combos
-
 let generate_flat_decoder_expr decls =
   let loc = !default_loc in
   let dict_expr = Exp.ident (mknoloc (Longident.Lident "dict")) in
@@ -109,72 +94,26 @@ let generate_flat_decoder_expr decls =
            Exp.ident (mknoloc (Longident.Lident result_name)))
          field_results)
   in
-  (* Generate all Ok pattern/case combinations for option/optional fields *)
-  let combos = all_combinations decls in
-  let ok_cases =
-    List.map
-      (fun combo ->
-        let pats, var_names, field_tags =
-          List.fold_left
-            (fun (pats, vars, tags) (tag, d) ->
-              let { name } = d in
-              match tag with
-              | `Some ->
-                  ( pats
-                    @ [
-                        Pat.construct
-                          (mknoloc (Longident.Lident "Ok"))
-                          (Some
-                             (Pat.alias
-                                (Pat.construct
-                                   (mknoloc (Longident.Lident "Some"))
-                                   (Some (Pat.any ())))
-                                (mknoloc name)));
-                      ],
-                    vars @ [ name ],
-                    tags @ [ (tag, d) ] )
-              | `None ->
-                  ( pats
-                    @ [
-                        Pat.construct
-                          (mknoloc (Longident.Lident "Ok"))
-                          (Some
-                             (Pat.construct
-                                (mknoloc (Longident.Lident "None"))
-                                None));
-                      ],
-                    vars @ [ "_none" ],
-                    tags @ [ (tag, d) ] )
-              | `Plain ->
-                  ( pats
-                    @ [
-                        Pat.construct
-                          (mknoloc (Longident.Lident "Ok"))
-                          (Some (Pat.var (mknoloc name)));
-                      ],
-                    vars @ [ name ],
-                    tags @ [ (tag, d) ] ))
-            ([], [], []) combo
-        in
-        let record_fields =
-          List.map2
-            (fun (tag, d) var_name ->
-              let name = d.name in
-              let is_optional = d.is_optional in
-              let is_option = d.is_option in
-              let lid_val = lid name in
-              let attrs = if is_optional then [ Utils.attr_optional ] else [] in
-              match tag with
-              | `None when is_optional ->
-                  (lid_val, Exp.construct ~attrs (lid "None") None) (* ?None *)
-              | `None when is_option ->
-                  (lid_val, Exp.construct (lid "None") None) (* field: None *)
-              | _ -> (lid_val, make_ident_expr ~attrs var_name))
-            field_tags var_names
-        in
-        let pat = Pat.tuple pats in
-        Exp.case pat [%expr Ok [%e Exp.record record_fields None]])
-      combos
+  let ok_pattern =
+    Pat.tuple
+      (List.map
+         (fun d ->
+           let { name; _ } = d in
+           Pat.construct
+             (mknoloc (Longident.Lident "Ok"))
+             (Some (Pat.var (mknoloc name))))
+         decls)
+  in
+  let ok_expr =
+    let record_fields =
+      List.map
+        (fun d ->
+          let { name; is_optional } = d in
+          let attrs = if is_optional then [ Utils.attr_optional ] else [] in
+          (lid name, make_ident_expr ~attrs name))
+        decls
+    in
+    [%expr Ok [%e Exp.record record_fields None]]
   in
   let error_patterns =
     List.mapi
@@ -192,7 +131,9 @@ let generate_flat_decoder_expr decls =
           [%expr Spice.error ~path:[%e key] e.message e.value])
       decls
   in
-  let match_expr = Exp.match_ tuple_expr (ok_cases @ error_patterns) in
+  let match_expr =
+    Exp.match_ tuple_expr (Exp.case ok_pattern ok_expr :: error_patterns)
+  in
   List.fold_right
     (fun vb acc -> Exp.let_ Nonrecursive [ vb ] acc)
     let_bindings match_expr
