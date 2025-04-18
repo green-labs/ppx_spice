@@ -31,25 +31,14 @@ function t0_decode(v) {
     _0: undefined
   });
   if (a_result.TAG === "Ok") {
-    let a = a_result._0;
     if (b_result.TAG === "Ok") {
-      let b = b_result._0;
-      if (b !== undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            a: a,
-            b: b
-          }
-        };
-      } else {
-        return {
-          TAG: "Ok",
-          _0: {
-            a: a
-          }
-        };
-      }
+      return {
+        TAG: "Ok",
+        _0: {
+          a: a_result._0,
+          b: b_result._0
+        }
+      };
     }
     let e = b_result._0;
     return Spice.error("b", e.message, e.value);
@@ -85,25 +74,14 @@ function t1_decode(v) {
     _0: undefined
   });
   if (a_result.TAG === "Ok") {
-    let a = a_result._0;
     if (bs_result.TAG === "Ok") {
-      let bs = bs_result._0;
-      if (bs !== undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            a: a,
-            bs: bs
-          }
-        };
-      } else {
-        return {
-          TAG: "Ok",
-          _0: {
-            a: a
-          }
-        };
-      }
+      return {
+        TAG: "Ok",
+        _0: {
+          a: a_result._0,
+          bs: bs_result._0
+        }
+      };
     }
     let e = bs_result._0;
     return Spice.error("bs", e.message, e.value);
@@ -181,25 +159,14 @@ function t2_decode(v) {
     _0: undefined
   });
   if (a_result.TAG === "Ok") {
-    let a = a_result._0;
     if (bs_result.TAG === "Ok") {
-      let bs = bs_result._0;
-      if (bs !== undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            a: a,
-            bs: bs
-          }
-        };
-      } else {
-        return {
-          TAG: "Ok",
-          _0: {
-            a: a
-          }
-        };
-      }
+      return {
+        TAG: "Ok",
+        _0: {
+          a: a_result._0,
+          bs: bs_result._0
+        }
+      };
     }
     let e = bs_result._0;
     return Spice.error("bs", e.message, e.value);

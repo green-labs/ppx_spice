@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.5(unreleased)
+
+- Flat JSON decoders are now generated for records, with correct handling of optional and option fields. https://github.com/green-labs/ppx_spice/pull/88
+
 ## 0.2.4
 
 - Fix critical performance issues for records with a large number of fields. https://github.com/green-labs/ppx_spice/pull/87

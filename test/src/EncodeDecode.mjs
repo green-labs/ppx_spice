@@ -31,25 +31,14 @@ function td_decode(v) {
     _0: undefined
   });
   if (name_result.TAG === "Ok") {
-    let name = name_result._0;
     if (nickname_result.TAG === "Ok") {
-      let nickname = nickname_result._0;
-      if (nickname !== undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            name: name,
-            nickname: nickname
-          }
-        };
-      } else {
-        return {
-          TAG: "Ok",
-          _0: {
-            name: name
-          }
-        };
-      }
+      return {
+        TAG: "Ok",
+        _0: {
+          name: name_result._0,
+          nickname: nickname_result._0
+        }
+      };
     }
     let e = nickname_result._0;
     return Spice.error("nickname", e.message, e.value);

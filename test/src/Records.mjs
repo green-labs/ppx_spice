@@ -113,51 +113,20 @@ function tOp_decode(v) {
     _0: undefined
   });
   if (label_result.TAG === "Ok") {
-    let label = label_result._0;
-    if (label !== undefined) {
-      if (value_result.TAG === "Ok") {
-        let value = value_result._0;
-        if (value !== undefined) {
-          return {
-            TAG: "Ok",
-            _0: {
-              label: label,
-              value: value
-            }
-          };
-        } else {
-          return {
-            TAG: "Ok",
-            _0: {
-              label: label
-            }
-          };
+    if (value_result.TAG === "Ok") {
+      return {
+        TAG: "Ok",
+        _0: {
+          label: label_result._0,
+          value: value_result._0
         }
-      }
-      
-    } else if (value_result.TAG === "Ok") {
-      let value$1 = value_result._0;
-      if (value$1 !== undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            value: value$1
-          }
-        };
-      } else {
-        return {
-          TAG: "Ok",
-          _0: {}
-        };
-      }
+      };
     }
-    
-  } else {
-    let e = label_result._0;
-    return Spice.error("label", e.message, e.value);
+    let e = value_result._0;
+    return Spice.error("value", e.message, e.value);
   }
-  let e$1 = value_result._0;
-  return Spice.error("value", e$1.message, e$1.value);
+  let e$1 = label_result._0;
+  return Spice.error("label", e$1.message, e$1.value);
 }
 
 function t2_encode(v) {
@@ -202,95 +171,31 @@ function t2_decode(v) {
     _0: undefined
   });
   let n2_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "n2"), extra => Spice.nullFromJson(Spice.stringFromJson, extra)), Spice.error(undefined, "n2" + " missing", v));
-  let exit = 0;
   if (o_result.TAG === "Ok") {
-    let o = o_result._0;
-    if (o !== undefined) {
-      if (n_result.TAG === "Ok") {
-        let n = n_result._0;
-        if (on_result.TAG === "Ok") {
-          let on = on_result._0;
-          if (on !== undefined) {
-            if (n2_result.TAG === "Ok") {
-              return {
-                TAG: "Ok",
-                _0: {
-                  o: o,
-                  n: n,
-                  on: on,
-                  n2: n2_result._0
-                }
-              };
-            }
-            exit = 3;
-          } else {
-            if (n2_result.TAG === "Ok") {
-              return {
-                TAG: "Ok",
-                _0: {
-                  o: o,
-                  n: n,
-                  n2: n2_result._0
-                }
-              };
-            }
-            exit = 3;
-          }
-        } else {
-          exit = 2;
-        }
-      } else {
-        exit = 1;
-      }
-    } else if (n_result.TAG === "Ok") {
-      let n$1 = n_result._0;
+    if (n_result.TAG === "Ok") {
       if (on_result.TAG === "Ok") {
-        let on$1 = on_result._0;
-        if (on$1 !== undefined) {
-          if (n2_result.TAG === "Ok") {
-            return {
-              TAG: "Ok",
-              _0: {
-                n: n$1,
-                on: on$1,
-                n2: n2_result._0
-              }
-            };
-          }
-          exit = 3;
-        } else {
-          if (n2_result.TAG === "Ok") {
-            return {
-              TAG: "Ok",
-              _0: {
-                n: n$1,
-                n2: n2_result._0
-              }
-            };
-          }
-          exit = 3;
+        if (n2_result.TAG === "Ok") {
+          return {
+            TAG: "Ok",
+            _0: {
+              o: o_result._0,
+              n: n_result._0,
+              on: on_result._0,
+              n2: n2_result._0
+            }
+          };
         }
-      } else {
-        exit = 2;
+        let e = n2_result._0;
+        return Spice.error("n2", e.message, e.value);
       }
-    } else {
-      exit = 1;
+      let e$1 = on_result._0;
+      return Spice.error("on", e$1.message, e$1.value);
     }
-  } else {
-    let e = o_result._0;
-    return Spice.error("o", e.message, e.value);
+    let e$2 = n_result._0;
+    return Spice.error("n", e$2.message, e$2.value);
   }
-  switch (exit) {
-    case 1 :
-      let e$1 = n_result._0;
-      return Spice.error("n", e$1.message, e$1.value);
-    case 2 :
-      let e$2 = on_result._0;
-      return Spice.error("on", e$2.message, e$2.value);
-    case 3 :
-      let e$3 = n2_result._0;
-      return Spice.error("n2", e$3.message, e$3.value);
-  }
+  let e$3 = o_result._0;
+  return Spice.error("o", e$3.message, e$3.value);
 }
 
 function t3_encode(v) {
@@ -323,25 +228,14 @@ function t3_decode(v) {
     _0: 1
   });
   if (value_result.TAG === "Ok") {
-    let value = value_result._0;
     if (value2_result.TAG === "Ok") {
-      let value2 = value2_result._0;
-      if (value2 !== undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            value: value,
-            value2: value2
-          }
-        };
-      } else {
-        return {
-          TAG: "Ok",
-          _0: {
-            value: value
-          }
-        };
-      }
+      return {
+        TAG: "Ok",
+        _0: {
+          value: value_result._0,
+          value2: value2_result._0
+        }
+      };
     }
     let e = value2_result._0;
     return Spice.error("value2", e.message, e.value);
@@ -386,62 +280,25 @@ function t4_decode(v) {
     _0: undefined
   });
   if (a_result.TAG === "Ok") {
-    let a = a_result._0;
     if (b_result.TAG === "Ok") {
-      let b = b_result._0;
-      if (b !== undefined) {
-        if (c_result.TAG === "Ok") {
-          let c = c_result._0;
-          if (c !== undefined) {
-            return {
-              TAG: "Ok",
-              _0: {
-                a: a,
-                b: b,
-                c: c
-              }
-            };
-          } else {
-            return {
-              TAG: "Ok",
-              _0: {
-                a: a,
-                b: b
-              }
-            };
+      if (c_result.TAG === "Ok") {
+        return {
+          TAG: "Ok",
+          _0: {
+            a: a_result._0,
+            b: b_result._0,
+            c: c_result._0
           }
-        }
-        
-      } else if (c_result.TAG === "Ok") {
-        let c$1 = c_result._0;
-        if (c$1 !== undefined) {
-          return {
-            TAG: "Ok",
-            _0: {
-              a: a,
-              c: c$1
-            }
-          };
-        } else {
-          return {
-            TAG: "Ok",
-            _0: {
-              a: a
-            }
-          };
-        }
+        };
       }
-      
-    } else {
-      let e = b_result._0;
-      return Spice.error("b", e.message, e.value);
+      let e = c_result._0;
+      return Spice.error("c", e.message, e.value);
     }
-  } else {
-    let e$1 = a_result._0;
-    return Spice.error("a", e$1.message, e$1.value);
+    let e$1 = b_result._0;
+    return Spice.error("b", e$1.message, e$1.value);
   }
-  let e$2 = c_result._0;
-  return Spice.error("c", e$2.message, e$2.value);
+  let e$2 = a_result._0;
+  return Spice.error("a", e$2.message, e$2.value);
 }
 
 export {
