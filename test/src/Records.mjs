@@ -24,43 +24,23 @@ function t_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.map(Js_dict.get(v, "spice-label"), Spice.stringFromJson);
-  if (match === undefined) {
-    return Spice.error(undefined, "spice-label" + " missing", v);
-  }
-  if (match.TAG === "Ok") {
-    let match$1 = Belt_Option.map(Js_dict.get(v, "spice-value"), Spice.intFromJson);
-    if (match$1 === undefined) {
-      return Spice.error(undefined, "spice-value" + " missing", v);
-    }
-    if (match$1.TAG === "Ok") {
+  let label_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "spice-label"), Spice.stringFromJson), Spice.error(undefined, "spice-label" + " missing", v));
+  let value_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "spice-value"), Spice.intFromJson), Spice.error(undefined, "spice-value" + " missing", v));
+  if (label_result.TAG === "Ok") {
+    if (value_result.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          label: match._0,
-          value: match$1._0
+          label: label_result._0,
+          value: value_result._0
         }
       };
     }
-    let e = match$1._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("spice-value" + e.path),
-        message: e.message,
-        value: e.value
-      }
-    };
+    let e = value_result._0;
+    return Spice.error("spice-value", e.message, e.value);
   }
-  let e$1 = match._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("spice-label" + e$1.path),
-      message: e$1.message,
-      value: e$1.value
-    }
-  };
+  let e$1 = label_result._0;
+  return Spice.error("spice-label", e$1.message, e$1.value);
 }
 
 function t1_encode(v) {
@@ -83,43 +63,23 @@ function t1_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.map(Js_dict.get(v, "label"), Spice.stringFromJson);
-  if (match === undefined) {
-    return Spice.error(undefined, "label" + " missing", v);
-  }
-  if (match.TAG === "Ok") {
-    let match$1 = Belt_Option.map(Js_dict.get(v, "value"), Spice.intFromJson);
-    if (match$1 === undefined) {
-      return Spice.error(undefined, "value" + " missing", v);
-    }
-    if (match$1.TAG === "Ok") {
+  let label_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "label"), Spice.stringFromJson), Spice.error(undefined, "label" + " missing", v));
+  let value_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value"), Spice.intFromJson), Spice.error(undefined, "value" + " missing", v));
+  if (label_result.TAG === "Ok") {
+    if (value_result.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          label: match._0,
-          value: match$1._0
+          label: label_result._0,
+          value: value_result._0
         }
       };
     }
-    let e = match$1._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("value" + e.path),
-        message: e.message,
-        value: e.value
-      }
-    };
+    let e = value_result._0;
+    return Spice.error("value", e.message, e.value);
   }
-  let e$1 = match._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("label" + e$1.path),
-      message: e$1.message,
-      value: e$1.value
-    }
-  };
+  let e$1 = label_result._0;
+  return Spice.error("label", e$1.message, e$1.value);
 }
 
 function tOp_encode(v) {
@@ -144,72 +104,60 @@ function tOp_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.map(Js_dict.get(v, "label"), extra => Spice.optionFromJson(Spice.stringFromJson, extra));
-  if (match !== undefined) {
-    if (match.TAG === "Ok") {
-      let label = match._0;
-      let match$1 = Belt_Option.map(Js_dict.get(v, "value"), extra => Spice.optionFromJson(Spice.intFromJson, extra));
-      if (match$1 === undefined) {
-        return {
-          TAG: "Ok",
-          _0: {
-            label: label
-          }
-        };
-      }
-      if (match$1.TAG === "Ok") {
-        return {
-          TAG: "Ok",
-          _0: {
-            label: label,
-            value: match$1._0
-          }
-        };
-      }
-      let e = match$1._0;
-      return {
-        TAG: "Error",
-        _0: {
-          path: "." + ("value" + e.path),
-          message: e.message,
-          value: e.value
+  let label_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "label"), extra => Spice.optionFromJson(Spice.stringFromJson, extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  let value_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value"), extra => Spice.optionFromJson(Spice.intFromJson, extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  if (label_result.TAG === "Ok") {
+    let label = label_result._0;
+    if (label !== undefined) {
+      if (value_result.TAG === "Ok") {
+        let value = value_result._0;
+        if (value !== undefined) {
+          return {
+            TAG: "Ok",
+            _0: {
+              label: label,
+              value: value
+            }
+          };
+        } else {
+          return {
+            TAG: "Ok",
+            _0: {
+              label: label
+            }
+          };
         }
-      };
-    }
-    let e$1 = match._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("label" + e$1.path),
-        message: e$1.message,
-        value: e$1.value
       }
-    };
-  }
-  let match$2 = Belt_Option.map(Js_dict.get(v, "value"), extra => Spice.optionFromJson(Spice.intFromJson, extra));
-  if (match$2 === undefined) {
-    return {
-      TAG: "Ok",
-      _0: {}
-    };
-  }
-  if (match$2.TAG === "Ok") {
-    return {
-      TAG: "Ok",
-      _0: {
-        value: match$2._0
+      
+    } else if (value_result.TAG === "Ok") {
+      let value$1 = value_result._0;
+      if (value$1 !== undefined) {
+        return {
+          TAG: "Ok",
+          _0: {
+            value: value$1
+          }
+        };
+      } else {
+        return {
+          TAG: "Ok",
+          _0: {}
+        };
       }
-    };
-  }
-  let e$2 = match$2._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("value" + e$2.path),
-      message: e$2.message,
-      value: e$2.value
     }
-  };
+    
+  } else {
+    let e = label_result._0;
+    return Spice.error("label", e.message, e.value);
+  }
+  let e$1 = value_result._0;
+  return Spice.error("value", e$1.message, e$1.value);
 }
 
 function t2_encode(v) {
@@ -244,173 +192,105 @@ function t2_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.map(Js_dict.get(v, "o"), extra => Spice.optionFromJson(Spice.stringFromJson, extra));
-  if (match !== undefined) {
-    if (match.TAG === "Ok") {
-      let o = match._0;
-      let match$1 = Belt_Option.map(Js_dict.get(v, "n"), extra => Spice.nullFromJson(Spice.stringFromJson, extra));
-      if (match$1 === undefined) {
-        return Spice.error(undefined, "n" + " missing", v);
-      }
-      if (match$1.TAG === "Ok") {
-        let n = match$1._0;
-        let match$2 = Belt_Option.map(Js_dict.get(v, "on"), extra => Spice.optionFromJson(extra => Spice.nullFromJson(Spice.stringFromJson, extra), extra));
-        if (match$2 !== undefined) {
-          if (match$2.TAG === "Ok") {
-            let match$3 = Belt_Option.map(Js_dict.get(v, "n2"), extra => Spice.nullFromJson(Spice.stringFromJson, extra));
-            if (match$3 === undefined) {
-              return Spice.error(undefined, "n2" + " missing", v);
-            }
-            if (match$3.TAG === "Ok") {
+  let o_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "o"), extra => Spice.optionFromJson(Spice.stringFromJson, extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  let n_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "n"), extra => Spice.nullFromJson(Spice.stringFromJson, extra)), Spice.error(undefined, "n" + " missing", v));
+  let on_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "on"), extra => Spice.optionFromJson(extra => Spice.nullFromJson(Spice.stringFromJson, extra), extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  let n2_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "n2"), extra => Spice.nullFromJson(Spice.stringFromJson, extra)), Spice.error(undefined, "n2" + " missing", v));
+  let exit = 0;
+  if (o_result.TAG === "Ok") {
+    let o = o_result._0;
+    if (o !== undefined) {
+      if (n_result.TAG === "Ok") {
+        let n = n_result._0;
+        if (on_result.TAG === "Ok") {
+          let on = on_result._0;
+          if (on !== undefined) {
+            if (n2_result.TAG === "Ok") {
               return {
                 TAG: "Ok",
                 _0: {
                   o: o,
                   n: n,
-                  on: match$2._0,
-                  n2: match$3._0
+                  on: on,
+                  n2: n2_result._0
                 }
               };
             }
-            let e = match$3._0;
+            exit = 3;
+          } else {
+            if (n2_result.TAG === "Ok") {
+              return {
+                TAG: "Ok",
+                _0: {
+                  o: o,
+                  n: n,
+                  n2: n2_result._0
+                }
+              };
+            }
+            exit = 3;
+          }
+        } else {
+          exit = 2;
+        }
+      } else {
+        exit = 1;
+      }
+    } else if (n_result.TAG === "Ok") {
+      let n$1 = n_result._0;
+      if (on_result.TAG === "Ok") {
+        let on$1 = on_result._0;
+        if (on$1 !== undefined) {
+          if (n2_result.TAG === "Ok") {
             return {
-              TAG: "Error",
+              TAG: "Ok",
               _0: {
-                path: "." + ("n2" + e.path),
-                message: e.message,
-                value: e.value
+                n: n$1,
+                on: on$1,
+                n2: n2_result._0
               }
             };
           }
-          let e$1 = match$2._0;
-          return {
-            TAG: "Error",
-            _0: {
-              path: "." + ("on" + e$1.path),
-              message: e$1.message,
-              value: e$1.value
-            }
-          };
-        }
-        let match$4 = Belt_Option.map(Js_dict.get(v, "n2"), extra => Spice.nullFromJson(Spice.stringFromJson, extra));
-        if (match$4 === undefined) {
-          return Spice.error(undefined, "n2" + " missing", v);
-        }
-        if (match$4.TAG === "Ok") {
-          return {
-            TAG: "Ok",
-            _0: {
-              o: o,
-              n: n,
-              n2: match$4._0
-            }
-          };
-        }
-        let e$2 = match$4._0;
-        return {
-          TAG: "Error",
-          _0: {
-            path: "." + ("n2" + e$2.path),
-            message: e$2.message,
-            value: e$2.value
+          exit = 3;
+        } else {
+          if (n2_result.TAG === "Ok") {
+            return {
+              TAG: "Ok",
+              _0: {
+                n: n$1,
+                n2: n2_result._0
+              }
+            };
           }
-        };
-      }
-      let e$3 = match$1._0;
-      return {
-        TAG: "Error",
-        _0: {
-          path: "." + ("n" + e$3.path),
-          message: e$3.message,
-          value: e$3.value
+          exit = 3;
         }
-      };
-    }
-    let e$4 = match._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("o" + e$4.path),
-        message: e$4.message,
-        value: e$4.value
+      } else {
+        exit = 2;
       }
-    };
+    } else {
+      exit = 1;
+    }
+  } else {
+    let e = o_result._0;
+    return Spice.error("o", e.message, e.value);
   }
-  let match$5 = Belt_Option.map(Js_dict.get(v, "n"), extra => Spice.nullFromJson(Spice.stringFromJson, extra));
-  if (match$5 === undefined) {
-    return Spice.error(undefined, "n" + " missing", v);
+  switch (exit) {
+    case 1 :
+      let e$1 = n_result._0;
+      return Spice.error("n", e$1.message, e$1.value);
+    case 2 :
+      let e$2 = on_result._0;
+      return Spice.error("on", e$2.message, e$2.value);
+    case 3 :
+      let e$3 = n2_result._0;
+      return Spice.error("n2", e$3.message, e$3.value);
   }
-  if (match$5.TAG === "Ok") {
-    let n$1 = match$5._0;
-    let match$6 = Belt_Option.map(Js_dict.get(v, "on"), extra => Spice.optionFromJson(extra => Spice.nullFromJson(Spice.stringFromJson, extra), extra));
-    if (match$6 !== undefined) {
-      if (match$6.TAG === "Ok") {
-        let match$7 = Belt_Option.map(Js_dict.get(v, "n2"), extra => Spice.nullFromJson(Spice.stringFromJson, extra));
-        if (match$7 === undefined) {
-          return Spice.error(undefined, "n2" + " missing", v);
-        }
-        if (match$7.TAG === "Ok") {
-          return {
-            TAG: "Ok",
-            _0: {
-              n: n$1,
-              on: match$6._0,
-              n2: match$7._0
-            }
-          };
-        }
-        let e$5 = match$7._0;
-        return {
-          TAG: "Error",
-          _0: {
-            path: "." + ("n2" + e$5.path),
-            message: e$5.message,
-            value: e$5.value
-          }
-        };
-      }
-      let e$6 = match$6._0;
-      return {
-        TAG: "Error",
-        _0: {
-          path: "." + ("on" + e$6.path),
-          message: e$6.message,
-          value: e$6.value
-        }
-      };
-    }
-    let match$8 = Belt_Option.map(Js_dict.get(v, "n2"), extra => Spice.nullFromJson(Spice.stringFromJson, extra));
-    if (match$8 === undefined) {
-      return Spice.error(undefined, "n2" + " missing", v);
-    }
-    if (match$8.TAG === "Ok") {
-      return {
-        TAG: "Ok",
-        _0: {
-          n: n$1,
-          n2: match$8._0
-        }
-      };
-    }
-    let e$7 = match$8._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("n2" + e$7.path),
-        message: e$7.message,
-        value: e$7.value
-      }
-    };
-  }
-  let e$8 = match$5._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("n" + e$8.path),
-      message: e$8.message,
-      value: e$8.value
-    }
-  };
 }
 
 function t3_encode(v) {
@@ -434,43 +314,40 @@ function t3_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value"), Spice.intFromJson), {
+  let value_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value"), Spice.intFromJson), {
     TAG: "Ok",
     _0: 0
   });
-  if (match.TAG === "Ok") {
-    let match$1 = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value2"), extra => Spice.optionFromJson(Spice.intFromJson, extra)), {
-      TAG: "Ok",
-      _0: 1
-    });
-    if (match$1.TAG === "Ok") {
-      return {
-        TAG: "Ok",
-        _0: {
-          value: match._0,
-          value2: match$1._0
-        }
-      };
-    }
-    let e = match$1._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("value2" + e.path),
-        message: e.message,
-        value: e.value
+  let value2_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value2"), extra => Spice.optionFromJson(Spice.intFromJson, extra)), {
+    TAG: "Ok",
+    _0: 1
+  });
+  if (value_result.TAG === "Ok") {
+    let value = value_result._0;
+    if (value2_result.TAG === "Ok") {
+      let value2 = value2_result._0;
+      if (value2 !== undefined) {
+        return {
+          TAG: "Ok",
+          _0: {
+            value: value,
+            value2: value2
+          }
+        };
+      } else {
+        return {
+          TAG: "Ok",
+          _0: {
+            value: value
+          }
+        };
       }
-    };
-  }
-  let e$1 = match._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("value" + e$1.path),
-      message: e$1.message,
-      value: e$1.value
     }
-  };
+    let e = value2_result._0;
+    return Spice.error("value2", e.message, e.value);
+  }
+  let e$1 = value_result._0;
+  return Spice.error("value", e$1.message, e$1.value);
 }
 
 function t4_encode(v) {
@@ -499,93 +376,72 @@ function t4_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.map(Js_dict.get(v, "a"), Spice.bigintFromJson);
-  if (match === undefined) {
-    return Spice.error(undefined, "a" + " missing", v);
-  }
-  if (match.TAG === "Ok") {
-    let a = match._0;
-    let match$1 = Belt_Option.map(Js_dict.get(v, "b"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra));
-    if (match$1 !== undefined) {
-      if (match$1.TAG === "Ok") {
-        let b = match$1._0;
-        let match$2 = Belt_Option.map(Js_dict.get(v, "c"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra));
-        if (match$2 === undefined) {
-          return {
-            TAG: "Ok",
-            _0: {
-              a: a,
-              b: b
-            }
-          };
-        }
-        if (match$2.TAG === "Ok") {
-          return {
-            TAG: "Ok",
-            _0: {
-              a: a,
-              b: b,
-              c: match$2._0
-            }
-          };
-        }
-        let e = match$2._0;
-        return {
-          TAG: "Error",
-          _0: {
-            path: "." + ("c" + e.path),
-            message: e.message,
-            value: e.value
+  let a_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "a"), Spice.bigintFromJson), Spice.error(undefined, "a" + " missing", v));
+  let b_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "b"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  let c_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "c"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  if (a_result.TAG === "Ok") {
+    let a = a_result._0;
+    if (b_result.TAG === "Ok") {
+      let b = b_result._0;
+      if (b !== undefined) {
+        if (c_result.TAG === "Ok") {
+          let c = c_result._0;
+          if (c !== undefined) {
+            return {
+              TAG: "Ok",
+              _0: {
+                a: a,
+                b: b,
+                c: c
+              }
+            };
+          } else {
+            return {
+              TAG: "Ok",
+              _0: {
+                a: a,
+                b: b
+              }
+            };
           }
-        };
+        }
+        
+      } else if (c_result.TAG === "Ok") {
+        let c$1 = c_result._0;
+        if (c$1 !== undefined) {
+          return {
+            TAG: "Ok",
+            _0: {
+              a: a,
+              c: c$1
+            }
+          };
+        } else {
+          return {
+            TAG: "Ok",
+            _0: {
+              a: a
+            }
+          };
+        }
       }
-      let e$1 = match$1._0;
-      return {
-        TAG: "Error",
-        _0: {
-          path: "." + ("b" + e$1.path),
-          message: e$1.message,
-          value: e$1.value
-        }
-      };
+      
+    } else {
+      let e = b_result._0;
+      return Spice.error("b", e.message, e.value);
     }
-    let match$3 = Belt_Option.map(Js_dict.get(v, "c"), extra => Spice.optionFromJson(Spice.bigintFromJson, extra));
-    if (match$3 === undefined) {
-      return {
-        TAG: "Ok",
-        _0: {
-          a: a
-        }
-      };
-    }
-    if (match$3.TAG === "Ok") {
-      return {
-        TAG: "Ok",
-        _0: {
-          a: a,
-          c: match$3._0
-        }
-      };
-    }
-    let e$2 = match$3._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("c" + e$2.path),
-        message: e$2.message,
-        value: e$2.value
-      }
-    };
+  } else {
+    let e$1 = a_result._0;
+    return Spice.error("a", e$1.message, e$1.value);
   }
-  let e$3 = match._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("a" + e$3.path),
-      message: e$3.message,
-      value: e$3.value
-    }
-  };
+  let e$2 = c_result._0;
+  return Spice.error("c", e$2.message, e$2.value);
 }
 
 export {

@@ -25,49 +25,37 @@ function td_decode(v) {
   if (!(typeof v === "object" && !Array.isArray(v))) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let match = Belt_Option.map(Js_dict.get(v, "name"), Spice.stringFromJson);
-  if (match === undefined) {
-    return Spice.error(undefined, "name" + " missing", v);
-  }
-  if (match.TAG === "Ok") {
-    let name = match._0;
-    let match$1 = Belt_Option.map(Js_dict.get(v, "nickname"), extra => Spice.optionFromJson(Spice.stringFromJson, extra));
-    if (match$1 === undefined) {
-      return {
-        TAG: "Ok",
-        _0: {
-          name: name
-        }
-      };
-    }
-    if (match$1.TAG === "Ok") {
-      return {
-        TAG: "Ok",
-        _0: {
-          name: name,
-          nickname: match$1._0
-        }
-      };
-    }
-    let e = match$1._0;
-    return {
-      TAG: "Error",
-      _0: {
-        path: "." + ("nickname" + e.path),
-        message: e.message,
-        value: e.value
+  let name_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "name"), Spice.stringFromJson), Spice.error(undefined, "name" + " missing", v));
+  let nickname_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "nickname"), extra => Spice.optionFromJson(Spice.stringFromJson, extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  if (name_result.TAG === "Ok") {
+    let name = name_result._0;
+    if (nickname_result.TAG === "Ok") {
+      let nickname = nickname_result._0;
+      if (nickname !== undefined) {
+        return {
+          TAG: "Ok",
+          _0: {
+            name: name,
+            nickname: nickname
+          }
+        };
+      } else {
+        return {
+          TAG: "Ok",
+          _0: {
+            name: name
+          }
+        };
       }
-    };
-  }
-  let e$1 = match._0;
-  return {
-    TAG: "Error",
-    _0: {
-      path: "." + ("name" + e$1.path),
-      message: e$1.message,
-      value: e$1.value
     }
-  };
+    let e = nickname_result._0;
+    return Spice.error("nickname", e.message, e.value);
+  }
+  let e$1 = name_result._0;
+  return Spice.error("name", e$1.message, e$1.value);
 }
 
 export {
