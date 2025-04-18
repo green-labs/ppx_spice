@@ -97,7 +97,7 @@ zoraBlock("record with null", t => {
   let sampleRecord: Records.t2 = {
     o: None,
     n: Js.null,
-    n2: Js.Null.return("n2")
+    n2: Js.Null.return("n2"),
   }
 
   let encoded = sampleRecord->Records.t2_encode
@@ -118,7 +118,7 @@ zoraBlock("record with spice.default", t => {
 
   let sampleRecord: Records.t3 = {
     value: 0,
-    value2: 1
+    value2: 1,
   }
 
   let encoded = sampleRecord->Records.t3_encode

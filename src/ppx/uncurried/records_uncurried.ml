@@ -32,9 +32,9 @@ let generate_encoder decls unboxed =
                else
                  [%expr
                    [%e key],
-                     (* The Encoder for option `Spice.optionToJson` returns option type.
+                   (* The Encoder for option `Spice.optionToJson` returns option type.
                         So, encoder for other types return with Some to match type of encoder. *)
-                     Some ([%e Option.get encoder] [%e field])])
+                   Some ([%e Option.get encoder] [%e field])])
         |> Exp.array
       in
       Exp.constraint_
@@ -44,86 +44,161 @@ let generate_encoder decls unboxed =
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
       |> Utils.expr_func ~arity:1
 
-let generate_dict_get { key; codecs = _, decoder; default } =
-  let decoder = Option.get decoder in
-  match default with
-  | Some default ->
-      [%expr
-        Some
-          (Belt.Option.getWithDefault
-             (Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder])
-             (Ok [%e default]))]
-  | None -> [%expr Belt.Option.map (Js.Dict.get dict [%e key]) [%e decoder]]
+let rec all_combinations fields =
+  match fields with
+  | [] -> [ [] ]
+  | f :: rest ->
+      let rest_combos = all_combinations rest in
+      if f.is_option || f.is_optional then
+        (* option/optional: Some(x) as name, None *)
+        List.concat
+          [
+            List.map (fun combo -> (`Some, combo)) rest_combos;
+            List.map (fun combo -> (`None, combo)) rest_combos;
+          ]
+        |> List.map (fun (tag, combo) -> (tag, f) :: combo)
+      else List.map (fun combo -> (`Plain, f) :: combo) rest_combos
 
-let generate_error_case { key } =
-  {
-    pc_lhs = [%pat? Some (Error (e : Spice.decodeError))];
-    pc_guard = None;
-    pc_rhs = [%expr Error { e with path = "." ^ [%e key] ^ e.path }];
-  }
-
-let generate_error_case2 { key } =
-  {
-    pc_lhs = [%pat? None];
-    pc_guard = None;
-    pc_rhs = [%expr Spice.error ([%e key] ^ " missing") v];
-  }
-
-let generate_final_record_expr path decls =
-  decls
-  |> List.map (fun { name; is_optional } ->
-         let attrs = if is_optional then [ Utils.attr_optional ] else [] in
-         let is_opt = List.assoc_opt name path in
-         match is_opt with
-         | Some true -> (lid name, make_ident_expr ~attrs name)
-         | Some false -> (lid name, Exp.construct ~attrs (lid "None") None)
-         | None -> assert false)
-  |> fun l -> [%expr Ok [%e Exp.record l None]]
-
-let generate_success_case { name } success_expr =
-  {
-    pc_lhs = (mknoloc name |> Pat.var |> fun p -> [%pat? Some (Ok [%p p])]);
-    pc_guard = None;
-    pc_rhs = success_expr;
-  }
-
-let generate_success_case2 success_expr =
-  { pc_lhs = [%pat? None]; pc_guard = None; pc_rhs = success_expr }
-
-let rec generate_nested_switches_recurse path all_decls remaining_decls =
-  let ({ is_optional; is_option } as current), success_expr, success_expr2 =
-    match remaining_decls with
-    | [] -> failwith "Spice internal error: [] not expected"
-    | [ ({ name } as last) ] ->
-        ( last,
-          generate_final_record_expr
-            (List.rev_append path [ (name, true) ])
-            all_decls,
-          generate_final_record_expr
-            (List.rev_append path [ (name, false) ])
-            all_decls )
-    | ({ name } as first) :: tail ->
-        ( first,
-          generate_nested_switches_recurse
-            (List.rev_append path [ (name, true) ])
-            all_decls tail,
-          generate_nested_switches_recurse
-            (List.rev_append path [ (name, false) ])
-            all_decls tail )
+let generate_flat_decoder_expr decls =
+  let loc = !default_loc in
+  let dict_expr = Exp.ident (mknoloc (Longident.Lident "dict")) in
+  let field_results =
+    List.map
+      (fun d ->
+        let { name; key; codecs; default; is_optional; is_option } = d in
+        let result_name = name ^ "_result" in
+        let decode_expr =
+          match codecs with
+          | _, Some decode ->
+              let get_expr = [%expr Js.Dict.get [%e dict_expr] [%e key]] in
+              let decode_applied = [%expr [%e decode]] in
+              let opt_map =
+                [%expr Belt.Option.map [%e get_expr] [%e decode_applied]]
+              in
+              let default_expr =
+                match (is_optional, is_option, default) with
+                | true, _, Some d ->
+                    [%expr Belt.Option.getWithDefault [%e opt_map] (Ok [%e d])]
+                | true, _, None ->
+                    [%expr Belt.Option.getWithDefault [%e opt_map] (Ok None)]
+                | _, true, _ ->
+                    [%expr Belt.Option.getWithDefault [%e opt_map] (Ok None)]
+                | _, _, Some d ->
+                    [%expr Belt.Option.getWithDefault [%e opt_map] (Ok [%e d])]
+                | _, _, None ->
+                    [%expr
+                      Belt.Option.getWithDefault [%e opt_map]
+                        (Spice.error ([%e key] ^ " missing") v)]
+              in
+              default_expr
+          | _ -> [%expr Spice.error ([%e key] ^ " missing") v]
+        in
+        (result_name, decode_expr))
+      decls
   in
-  if is_optional || is_option then
-    [ generate_error_case current ]
-    |> List.append [ generate_success_case2 success_expr2 ]
-    |> List.append [ generate_success_case current success_expr ]
-    |> Exp.match_ (generate_dict_get current)
-  else
-    [ generate_error_case current ]
-    |> List.append [ generate_error_case2 current ]
-    |> List.append [ generate_success_case current success_expr ]
-    |> Exp.match_ (generate_dict_get current)
-[@@ocaml.doc
-  " Recursively generates an expression containing nested switches, first\n\
-  \ *  decoding the first record items, then (if successful) the second, etc. "]
+  let let_bindings =
+    List.map
+      (fun (result_name, decode_expr) ->
+        Vb.mk (Pat.var (mknoloc result_name)) decode_expr)
+      field_results
+  in
+  let tuple_expr =
+    Exp.tuple
+      (List.map
+         (fun (result_name, _) ->
+           Exp.ident (mknoloc (Longident.Lident result_name)))
+         field_results)
+  in
+  (* Generate all Ok pattern/case combinations for option/optional fields *)
+  let combos = all_combinations decls in
+  let ok_cases =
+    List.map
+      (fun combo ->
+        let pats, var_names, field_tags =
+          List.fold_left
+            (fun (pats, vars, tags) (tag, d) ->
+              let { name } = d in
+              match tag with
+              | `Some ->
+                  ( pats
+                    @ [
+                        Pat.construct
+                          (mknoloc (Longident.Lident "Ok"))
+                          (Some
+                             (Pat.alias
+                                (Pat.construct
+                                   (mknoloc (Longident.Lident "Some"))
+                                   (Some (Pat.any ())))
+                                (mknoloc name)));
+                      ],
+                    vars @ [ name ],
+                    tags @ [ (tag, d) ] )
+              | `None ->
+                  ( pats
+                    @ [
+                        Pat.construct
+                          (mknoloc (Longident.Lident "Ok"))
+                          (Some
+                             (Pat.construct
+                                (mknoloc (Longident.Lident "None"))
+                                None));
+                      ],
+                    vars @ [ "_none" ],
+                    tags @ [ (tag, d) ] )
+              | `Plain ->
+                  ( pats
+                    @ [
+                        Pat.construct
+                          (mknoloc (Longident.Lident "Ok"))
+                          (Some (Pat.var (mknoloc name)));
+                      ],
+                    vars @ [ name ],
+                    tags @ [ (tag, d) ] ))
+            ([], [], []) combo
+        in
+        let record_fields =
+          List.map2
+            (fun (tag, d) var_name ->
+              let name = d.name in
+              let is_optional = d.is_optional in
+              let is_option = d.is_option in
+              let lid_val = lid name in
+              let attrs = if is_optional then [ Utils.attr_optional ] else [] in
+              match tag with
+              | `None when is_optional ->
+                  (lid_val, Exp.construct ~attrs (lid "None") None) (* ?None *)
+              | `None when is_option ->
+                  (lid_val, Exp.construct (lid "None") None) (* field: None *)
+              | _ -> (lid_val, make_ident_expr ~attrs var_name))
+            field_tags var_names
+        in
+        let pat = Pat.tuple pats in
+        Exp.case pat [%expr Ok [%e Exp.record record_fields None]])
+      combos
+  in
+  let error_patterns =
+    List.mapi
+      (fun i d ->
+        let { key; _ } = d in
+        let pats =
+          List.init (List.length decls) (fun j ->
+              if i = j then
+                Pat.construct
+                  (mknoloc (Longident.Lident "Error"))
+                  (Some (Pat.var (mknoloc "e")))
+              else Pat.any ())
+        in
+        Exp.case (Pat.tuple pats)
+          [%expr Spice.error ~path:[%e key] e.message e.value])
+      decls
+  in
+  let match_expr = Exp.match_ tuple_expr (ok_cases @ error_patterns) in
+  List.fold_right
+    (fun vb acc -> Exp.let_ Nonrecursive [ vb ] acc)
+    let_bindings match_expr
+
+let generate_nested_switches_recurse _path decls _remaining_decls =
+  generate_flat_decoder_expr decls
 
 let generate_nested_switches decls =
   generate_nested_switches_recurse [] decls decls
