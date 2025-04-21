@@ -2,7 +2,7 @@
 
 ## 0.2.6(unreleased)
 
-
+- Fix compilation issue for records with a single field.
 
 ## 0.2.5
 

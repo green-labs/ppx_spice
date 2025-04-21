@@ -88,21 +88,31 @@ let generate_flat_decoder_expr decls =
       field_results
   in
   let tuple_expr =
-    Exp.tuple
-      (List.map
-         (fun (result_name, _) ->
-           Exp.ident (mknoloc (Longident.Lident result_name)))
-         field_results)
+    match field_results with
+    | [ (result_name, _) ] -> Exp.ident (mknoloc (Longident.Lident result_name))
+    | _ ->
+        Exp.tuple
+          (List.map
+             (fun (result_name, _) ->
+               Exp.ident (mknoloc (Longident.Lident result_name)))
+             field_results)
   in
   let ok_pattern =
-    Pat.tuple
-      (List.map
-         (fun d ->
-           let { name; _ } = d in
-           Pat.construct
-             (mknoloc (Longident.Lident "Ok"))
-             (Some (Pat.var (mknoloc name))))
-         decls)
+    match decls with
+    | [ d ] ->
+        let { name; _ } = d in
+        Pat.construct
+          (mknoloc (Longident.Lident "Ok"))
+          (Some (Pat.var (mknoloc name)))
+    | _ ->
+        Pat.tuple
+          (List.map
+             (fun d ->
+               let { name; _ } = d in
+               Pat.construct
+                 (mknoloc (Longident.Lident "Ok"))
+                 (Some (Pat.var (mknoloc name))))
+             decls)
   in
   let ok_expr =
     let record_fields =
@@ -127,8 +137,8 @@ let generate_flat_decoder_expr decls =
                   (Some (Pat.var (mknoloc "e")))
               else Pat.any ())
         in
-        Exp.case (Pat.tuple pats)
-          [%expr Spice.error ~path:[%e key] e.message e.value])
+        let pat = match pats with [ p ] -> p | _ -> Pat.tuple pats in
+        Exp.case pat [%expr Spice.error ~path:[%e key] e.message e.value])
       decls
   in
   let match_expr =
