@@ -2,7 +2,7 @@
 
 ## 0.2.8(unreleased)
 
-
+- Dropped support for curried mode in accordance with compiler v12 changes.
 
 ## 0.2.7
 

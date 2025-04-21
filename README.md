@@ -134,6 +134,8 @@ Read our [Guide with examples](docs/GUIDE.md)
 | v11      | v0.2.2 >= && > v0.2.0        |
 | v10      | v0.2.0 >=                    |
 
+NOTE: Starting from v0.2.8, support for curried mode is discontinued to align with the changes in compiler v12.
+
 ```sh
 yarn add -D @greenlabs/ppx-spice
 ```
@@ -146,11 +148,9 @@ yarn add -D @greenlabs/ppx-spice
 ],
 "ppx-flags": [
   ...,
-  ["@greenlabs/ppx-spice/ppx", "-uncurried"]
+  "@greenlabs/ppx-spice/ppx"
 ],
 ```
-
-> If you want to set it to uncurried mode, add `-uncurried`.
 
 ## Development
 
