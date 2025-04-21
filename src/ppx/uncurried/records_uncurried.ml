@@ -134,7 +134,12 @@ let generate_flat_decoder_expr decls =
               if i = j then
                 Pat.construct
                   (mknoloc (Longident.Lident "Error"))
-                  (Some (Pat.var (mknoloc "e")))
+                  (Some
+                     (Pat.constraint_
+                        (Pat.var (mknoloc "e"))
+                        (Typ.constr
+                           (mknoloc (Longident.parse "Spice.decodeError"))
+                           [])))
               else Pat.any ())
         in
         let pat = match pats with [ p ] -> p | _ -> Pat.tuple pats in

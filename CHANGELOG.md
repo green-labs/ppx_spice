@@ -2,7 +2,7 @@
 
 ## 0.2.7(unreleased)
 
-
+- Add type annotation to error pattern: now generates `Error(e: Spice.decodeError)` for record decoding errors.
 
 ## 0.2.6
 

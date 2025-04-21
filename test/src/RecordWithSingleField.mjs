@@ -31,8 +31,64 @@ function t_decode(v) {
   return Spice.error("a", e.message, e.value);
 }
 
+let M = {
+  t_encode: t_encode,
+  t_decode: t_decode
+};
+
+function response_encode(v) {
+  let extra = v.data;
+  let extra$1 = v.errors;
+  return Js_dict.fromArray(Spice.filterOptional([
+    [
+      "data",
+      Spice.optionToJson(v => v, extra)
+    ],
+    [
+      "errors",
+      Spice.optionToJson(extra => Spice.arrayToJson(t_encode, extra), extra$1)
+    ]
+  ]));
+}
+
+function response_decode(v) {
+  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  if (!(typeof v === "object" && !Array.isArray(v))) {
+    return Spice.error(undefined, "Not an object", v);
+  }
+  let data_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "data"), extra => Spice.optionFromJson(v => ({
+    TAG: "Ok",
+    _0: v
+  }), extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  let errors_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "errors"), extra => Spice.optionFromJson(extra => Spice.arrayFromJson(t_decode, extra), extra)), {
+    TAG: "Ok",
+    _0: undefined
+  });
+  if (data_result.TAG === "Ok") {
+    if (errors_result.TAG === "Ok") {
+      return {
+        TAG: "Ok",
+        _0: {
+          data: data_result._0,
+          errors: errors_result._0
+        }
+      };
+    }
+    let e = errors_result._0;
+    return Spice.error("errors", e.message, e.value);
+  }
+  let e$1 = data_result._0;
+  return Spice.error("data", e$1.message, e$1.value);
+}
+
 export {
-  t_encode,
-  t_decode,
+  M,
+  response_encode,
+  response_decode,
 }
 /* No side effect */
