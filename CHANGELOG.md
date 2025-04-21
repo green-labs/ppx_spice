@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.2.8(unreleased)
+
+
+
 ## 0.2.7
 
 - Add type annotation to error pattern: now generates `Error(e: Spice.decodeError)` for record decoding errors.
