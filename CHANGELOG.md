@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.6(unreleased)
+## 0.2.6
 
 - Fix compilation issue for records with a single field.
 
