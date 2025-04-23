@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.8(unreleased)
+## 0.2.8
 
 - Dropped support for curried mode in accordance with compiler v12 changes.
 - Fixed a build error in the polyvariant encoder generation function to ensure compatibility with compiler v12-alpha.12. https://github.com/green-labs/ppx_spice/pull/91
