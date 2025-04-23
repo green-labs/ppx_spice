@@ -19,10 +19,7 @@ function t0_encode(v) {
 }
 
 function t0_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let a_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "a"), Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
@@ -62,10 +59,7 @@ function t1_encode(v) {
 }
 
 function t1_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let a_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "a"), Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
@@ -102,9 +96,6 @@ function b_encode(v) {
 }
 
 function b_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
   switch (typeof v) {
     case "string" :
       if ("B0" === v) {
@@ -147,10 +138,7 @@ function t2_encode(v) {
 }
 
 function t2_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let a_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "a"), Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));

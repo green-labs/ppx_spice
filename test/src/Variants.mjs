@@ -13,9 +13,6 @@ function t_encode(v) {
 }
 
 function t_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
   switch (typeof v) {
     case "string" :
       if ("둘" === v) {
@@ -49,9 +46,6 @@ function t1_encode(v) {
 }
 
 function t1_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not a variant", v);
-  }
   if (!Array.isArray(v)) {
     return Spice.error(undefined, "Not a variant", v);
   }
@@ -59,7 +53,7 @@ function t1_decode(v) {
     return Spice.error(undefined, "Expected variant, found empty array", v);
   }
   let match = Belt_Array.getExn(v, 0);
-  if (!(!Array.isArray(match) && (match === null || typeof match !== "object") && typeof match !== "number" && typeof match !== "string" && typeof match !== "boolean") && typeof match === "string") {
+  if (typeof match === "string") {
     switch (match) {
       case "One1" :
         if (v.length !== 1) {
@@ -105,9 +99,6 @@ function t4_encode(v) {
 }
 
 function t4_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
   switch (typeof v) {
     case "string" :
       return Spice.error(undefined, "Not matched", v);

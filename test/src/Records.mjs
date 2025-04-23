@@ -18,10 +18,7 @@ function t_encode(v) {
 }
 
 function t_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let label_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "spice-label"), Spice.stringFromJson), Spice.error(undefined, "spice-label" + " missing", v));
@@ -57,10 +54,7 @@ function t1_encode(v) {
 }
 
 function t1_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let label_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "label"), Spice.stringFromJson), Spice.error(undefined, "label" + " missing", v));
@@ -98,10 +92,7 @@ function tOp_encode(v) {
 }
 
 function tOp_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let label_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "label"), extra => Spice.optionFromJson(Spice.stringFromJson, extra)), {
@@ -155,10 +146,7 @@ function t2_encode(v) {
 }
 
 function t2_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let o_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "o"), extra => Spice.optionFromJson(Spice.stringFromJson, extra)), {
@@ -213,10 +201,7 @@ function t3_encode(v) {
 }
 
 function t3_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let value_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "value"), Spice.intFromJson), {
@@ -264,10 +249,7 @@ function t4_encode(v) {
 }
 
 function t4_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let a_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "a"), Spice.bigintFromJson), Spice.error(undefined, "a" + " missing", v));

@@ -26,7 +26,12 @@ function stringToJson(s) {
 }
 
 function stringFromJson(j) {
-  if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "string") {
+  if (typeof j === "string") {
+    return {
+      TAG: "Ok",
+      _0: j
+    };
+  } else {
     return {
       TAG: "Error",
       _0: {
@@ -34,11 +39,6 @@ function stringFromJson(j) {
         message: "Not a string",
         value: j
       }
-    };
-  } else {
-    return {
-      TAG: "Ok",
-      _0: j
     };
   }
 }
@@ -48,26 +48,28 @@ function intToJson(i) {
 }
 
 function intFromJson(j) {
-  if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "number") {
-    return {
-      TAG: "Error",
-      _0: {
-        path: "",
-        message: "Not a number",
-        value: j
-      }
-    };
-  } else if (Js_math.floor(j) === j) {
-    return {
-      TAG: "Ok",
-      _0: Js_math.floor(j)
-    };
+  if (typeof j === "number") {
+    if (Js_math.floor(j) === j) {
+      return {
+        TAG: "Ok",
+        _0: Js_math.floor(j)
+      };
+    } else {
+      return {
+        TAG: "Error",
+        _0: {
+          path: "",
+          message: "Not an integer",
+          value: j
+        }
+      };
+    }
   } else {
     return {
       TAG: "Error",
       _0: {
         path: "",
-        message: "Not an integer",
+        message: "Not a number",
         value: j
       }
     };
@@ -79,13 +81,13 @@ function bigintToJson(i) {
 }
 
 function bigintFromJson(j) {
-  if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "number") {
-    return error(undefined, "Not a number", j);
-  } else {
+  if (typeof j === "number") {
     return {
       TAG: "Ok",
       _0: BigInt(j)
     };
+  } else {
+    return error(undefined, "Not a number", j);
   }
 }
 
@@ -94,7 +96,12 @@ function floatToJson(v) {
 }
 
 function floatFromJson(j) {
-  if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "number") {
+  if (typeof j === "number") {
+    return {
+      TAG: "Ok",
+      _0: j
+    };
+  } else {
     return {
       TAG: "Error",
       _0: {
@@ -102,11 +109,6 @@ function floatFromJson(j) {
         message: "Not a number",
         value: j
       }
-    };
-  } else {
-    return {
-      TAG: "Ok",
-      _0: j
     };
   }
 }
@@ -120,7 +122,19 @@ function boolToJson(v) {
 }
 
 function boolFromJson(j) {
-  if (!Array.isArray(j) && (j === null || typeof j !== "object") && typeof j !== "number" && typeof j !== "string" && typeof j !== "boolean" || typeof j !== "boolean") {
+  if (typeof j === "boolean") {
+    if (j) {
+      return {
+        TAG: "Ok",
+        _0: true
+      };
+    } else {
+      return {
+        TAG: "Ok",
+        _0: false
+      };
+    }
+  } else {
     return {
       TAG: "Error",
       _0: {
@@ -128,16 +142,6 @@ function boolFromJson(j) {
         message: "Not a boolean",
         value: j
       }
-    };
-  } else if (j) {
-    return {
-      TAG: "Ok",
-      _0: true
-    };
-  } else {
-    return {
-      TAG: "Ok",
-      _0: false
     };
   }
 }
@@ -158,16 +162,7 @@ function arrayToJson(encoder, arr) {
 }
 
 function arrayFromJson(decoder, json) {
-  if (!Array.isArray(json) && (json === null || typeof json !== "object") && typeof json !== "number" && typeof json !== "string" && typeof json !== "boolean" || !Array.isArray(json)) {
-    return {
-      TAG: "Error",
-      _0: {
-        path: "",
-        message: "Not an array",
-        value: json
-      }
-    };
-  } else {
+  if (Array.isArray(json)) {
     return Js_array.reducei((acc, jsonI, i) => {
       let match = decoder(jsonI);
       if (acc.TAG !== "Ok") {
@@ -192,6 +187,15 @@ function arrayFromJson(decoder, json) {
       TAG: "Ok",
       _0: []
     }, json);
+  } else {
+    return {
+      TAG: "Error",
+      _0: {
+        path: "",
+        message: "Not an array",
+        value: json
+      }
+    };
   }
 }
 
@@ -225,7 +229,7 @@ function optionToJson(encoder, opt) {
 }
 
 function optionFromJson(decoder, json) {
-  if (!Array.isArray(json) && (json === null || typeof json !== "object") && typeof json !== "number" && typeof json !== "string" && typeof json !== "boolean") {
+  if (json === null) {
     return {
       TAG: "Ok",
       _0: undefined
@@ -244,7 +248,7 @@ function nullToJson(encoder, opt) {
 }
 
 function nullFromJson(decoder, json) {
-  if (!Array.isArray(json) && (json === null || typeof json !== "object") && typeof json !== "number" && typeof json !== "string" && typeof json !== "boolean") {
+  if (json === null) {
     return {
       TAG: "Ok",
       _0: null
@@ -267,9 +271,6 @@ function resultToJson(okEncoder, errorEncoder, result) {
 }
 
 function resultFromJson(okDecoder, errorDecoder, json) {
-  if (!Array.isArray(json) && (json === null || typeof json !== "object") && typeof json !== "number" && typeof json !== "string" && typeof json !== "boolean") {
-    return error(undefined, "Not an array", json);
-  }
   if (!Array.isArray(json)) {
     return error(undefined, "Not an array", json);
   }
@@ -278,9 +279,6 @@ function resultFromJson(okDecoder, errorDecoder, json) {
   }
   let variantConstructorId = json[0];
   let payload = json[1];
-  if (!Array.isArray(variantConstructorId) && (variantConstructorId === null || typeof variantConstructorId !== "object") && typeof variantConstructorId !== "number" && typeof variantConstructorId !== "string" && typeof variantConstructorId !== "boolean") {
-    return error(undefined, "Not a string", variantConstructorId);
-  }
   if (typeof variantConstructorId !== "string") {
     return error(undefined, "Not a string", variantConstructorId);
   }
@@ -316,16 +314,7 @@ function dictToJson(encoder, dict) {
 }
 
 function dictFromJson(decoder, json) {
-  if (!Array.isArray(json) && (json === null || typeof json !== "object") && typeof json !== "number" && typeof json !== "string" && typeof json !== "boolean" || !(typeof json === "object" && !Array.isArray(json))) {
-    return {
-      TAG: "Error",
-      _0: {
-        path: "",
-        message: "Not a dict",
-        value: json
-      }
-    };
-  } else {
+  if (typeof json === "object" && json !== null && !Array.isArray(json)) {
     return Belt_Array.reduce(Js_dict.entries(json), {
       TAG: "Ok",
       _0: {}
@@ -353,6 +342,15 @@ function dictFromJson(decoder, json) {
         }
       };
     });
+  } else {
+    return {
+      TAG: "Error",
+      _0: {
+        path: "",
+        message: "Not a dict",
+        value: json
+      }
+    };
   }
 }
 

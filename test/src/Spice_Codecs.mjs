@@ -12,7 +12,7 @@ function falseableEncode(encoder, opt) {
 }
 
 function falseableDecode(decoder, json) {
-  if (!(!Array.isArray(json) && (json === null || typeof json !== "object") && typeof json !== "number" && typeof json !== "string" && typeof json !== "boolean") && typeof json === "boolean" && !json) {
+  if (json === false) {
     return {
       TAG: "Ok",
       _0: undefined

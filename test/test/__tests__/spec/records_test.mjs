@@ -79,7 +79,9 @@ Zora.test("record with optional field", t => {
   });
   testEqual(t, "encode omit optional field", encoded$1, sample2);
   let sample3 = {};
-  let encoded$2 = Records.tOp_encode({});
+  let encoded$2 = Records.tOp_encode({
+    label: undefined
+  });
   testEqual(t, "encode omit optional field with None field", encoded$2, sample3);
 });
 
@@ -89,6 +91,7 @@ Zora.test("record with null", t => {
   sample["n2"] = "n2";
   let sampleRecord_n = null;
   let sampleRecord = {
+    o: undefined,
     n: sampleRecord_n,
     n2: "n2"
   };
@@ -127,7 +130,8 @@ Zora.test("record with bigint", t => {
   sample["b"] = 1.0;
   let sampleRecord = {
     a: 0n,
-    b: 1n
+    b: 1n,
+    c: undefined
   };
   let encoded = Records.t4_encode(sampleRecord);
   testEqual(t, "encode", encoded, sample);

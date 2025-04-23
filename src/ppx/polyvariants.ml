@@ -235,7 +235,8 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
            (generate_encoder_case generator_settings unboxed has_attr_as)
            parsed_fields
         |> Exp.match_ [%expr v]
-        |> Exp.fun_ Asttypes.Nolabel None [%pat? v])
+        |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
+        |> Utils.expr_func ~arity:1)
     else None
   in
 

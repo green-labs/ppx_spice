@@ -12,10 +12,7 @@ function t_encode(v) {
 }
 
 function t_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let a_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "a"), Spice.stringFromJson), Spice.error(undefined, "a" + " missing", v));
@@ -52,10 +49,7 @@ function response_encode(v) {
 }
 
 function response_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let data_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "data"), extra => Spice.optionFromJson(v => ({

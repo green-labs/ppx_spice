@@ -7,9 +7,6 @@ function t_encode(v) {
 }
 
 function t_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
   switch (typeof v) {
     case "string" :
       if ("m³" === v) {
@@ -39,9 +36,6 @@ function t_encode$1(v) {
 }
 
 function t_decode$1(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not a JSONString", v);
-  }
   switch (typeof v) {
     case "string" :
       if ("create" === v) {
