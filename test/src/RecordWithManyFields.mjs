@@ -85,10 +85,7 @@ function params_encode(v) {
 }
 
 function params_decode(v) {
-  if (!Array.isArray(v) && (v === null || typeof v !== "object") && typeof v !== "number" && typeof v !== "string" && typeof v !== "boolean") {
-    return Spice.error(undefined, "Not an object", v);
-  }
-  if (!(typeof v === "object" && !Array.isArray(v))) {
+  if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
   let width_result = Belt_Option.getWithDefault(Belt_Option.map(Js_dict.get(v, "width"), extra => Spice.optionFromJson(Spice.floatFromJson, extra)), {
