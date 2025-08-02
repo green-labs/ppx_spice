@@ -1,5 +1,5 @@
 {
-  "name": "spice-ppx",
+  "name": "",
   "sources": [
     {
       "dir": "test",
@@ -18,8 +18,8 @@
     }
   ],
   "suffix": ".mjs",
-  "bs-dependencies": [],
-  "bs-dev-dependencies": [
+  "dependencies": [],
+  "dev-dependencies": [
     "@dusty-phillips/rescript-zora"
   ],
   "ppx-flags": [
@@ -30,5 +30,5 @@
     "number": "-48"
   },
   "generators": [],
-  "bsc-flags": []
+  "compiler-flags": []
 }
