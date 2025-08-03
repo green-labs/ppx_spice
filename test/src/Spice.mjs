@@ -7,6 +7,7 @@ import * as Belt_List from "rescript/lib/es6/Belt_List.js";
 import * as Belt_Array from "rescript/lib/es6/Belt_Array.js";
 import * as Belt_Result from "rescript/lib/es6/Belt_Result.js";
 import * as Spice_Codecs from "./Spice_Codecs.mjs";
+import * as Stdlib_BigInt from "rescript/lib/es6/Stdlib_BigInt.js";
 import * as Primitive_option from "rescript/lib/es6/Primitive_option.js";
 
 function error(path, message, value) {
@@ -81,13 +82,17 @@ function bigintToJson(i) {
 }
 
 function bigintFromJson(j) {
-  if (typeof j === "number") {
+  if (typeof j !== "number") {
+    return error(undefined, "Not a number", j);
+  }
+  let v = Stdlib_BigInt.fromFloat(j);
+  if (v !== undefined) {
     return {
       TAG: "Ok",
-      _0: BigInt(j)
+      _0: v
     };
   } else {
-    return error(undefined, "Not a number", j);
+    return error(undefined, "Not a bigint", j);
   }
 }
 
