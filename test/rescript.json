@@ -1,5 +1,5 @@
 {
-  "name": "",
+  "name": "spice-ppx-test",
   "sources": [
     {
       "dir": "test",
