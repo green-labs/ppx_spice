@@ -2,7 +2,7 @@
 
 ## 0.2.9(unreleased)
 
-
+- Fix bigint codec on rescript v12. https://github.com/green-labs/ppx_spice/pull/93
 
 ## 0.2.8
 

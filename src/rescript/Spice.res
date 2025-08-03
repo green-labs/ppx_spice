@@ -39,7 +39,11 @@ let bigintToJson = (i): Js.Json.t => Js.Json.Number(BigInt.toFloat(i))
 
 let bigintFromJson = j =>
   switch (j: Js.Json.t) {
-  | Js.Json.Number(n) => Ok(BigInt.fromFloat(n))
+  | Js.Json.Number(n) =>
+    switch BigInt.fromFloat(n) {
+    | Some(v) => v->Ok
+    | None => error("Not a bigint", j)
+    }
   | _ => error("Not a number", j)
   }
 
