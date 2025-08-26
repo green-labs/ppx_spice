@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.9(unreleased)
+## 0.2.9
 
 - Update test project for compiler v12. https://github.com/green-labs/ppx_spice/pull/94
 - Fix bigint codec on rescript v12. https://github.com/green-labs/ppx_spice/pull/93
