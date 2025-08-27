@@ -1,6 +1,6 @@
 {
   "name": "@greenlabs/ppx-spice",
-  "version": "0.2.9",
+  "version": "0.2.10",
   "description": "ReScript PPX which generate JSON (de)serializer",
   "license": "MIT",
   "author": "Greenlabs Dev <developer@greenlabs.co.kr>",
