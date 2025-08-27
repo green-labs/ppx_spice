@@ -11,11 +11,11 @@ jobs:
         working-directory: src
     strategy:
       matrix:
-        os: [ubuntu-latest]
+        os: [ubuntu-latest, ubuntu-24.04-arm]
         ocaml-compiler:
           - 4.14.0
     container:
-      image: ocaml/opam:alpine-3.16-ocaml-4.14
+      image: ocaml/opam:ubuntu-20.04-ocaml-4.14
       options: --user root
 
     steps:
@@ -133,6 +133,13 @@ jobs:
           name: ubuntu-latest
           path: binaries/linux
 
+      - name: Download linux-arm64 artifacts
+        if: success()
+        uses: actions/download-artifact@master
+        with:
+          name: ubuntu-24.04-arm
+          path: binaries/linux-arm64
+
       - name: Download macOS artifacts
         if: success()
         uses: actions/download-artifact@master
@@ -152,6 +159,7 @@ jobs:
         run: |
           mkdir -p bin
           mv binaries/linux/ppx.exe ppx-linux.exe
+          mv binaries/linux-arm64/ppx.exe ppx-linux-arm64.exe
           mv binaries/darwin/ppx.exe ppx-osx.exe
           mv binaries/windows/ppx.exe ppx-windows.exe
 
