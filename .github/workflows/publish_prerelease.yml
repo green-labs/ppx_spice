@@ -1,6 +1,14 @@
 name: ppx_spice publish prerelease
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or tag to build and publish from"
+        required: true
+
+env:
+  TARGET_REF: ${{ github.event.inputs.ref }}
 
 jobs:
   build_linux:
@@ -20,6 +28,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.TARGET_REF }}
 
       - name: Opam init
         run: opam init -a --disable-sandboxing --compiler=4.14.0
@@ -55,6 +65,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.TARGET_REF }}
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -92,6 +104,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.TARGET_REF }}
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -121,6 +135,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          ref: ${{ env.TARGET_REF }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
