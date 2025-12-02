@@ -6,9 +6,13 @@ on:
       ref:
         description: "Branch or tag to build and publish from"
         required: true
+      repository:
+        description: "owner/repo to check out (use fork to test external PRs)"
+        required: false
 
 env:
   TARGET_REF: ${{ github.event.inputs.ref }}
+  TARGET_REPO: ${{ github.event.inputs.repository || github.repository }}
 
 jobs:
   build_linux:
@@ -29,6 +33,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          repository: ${{ env.TARGET_REPO }}
           ref: ${{ env.TARGET_REF }}
 
       - name: Opam init
@@ -66,6 +71,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          repository: ${{ env.TARGET_REPO }}
           ref: ${{ env.TARGET_REF }}
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
@@ -105,6 +111,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          repository: ${{ env.TARGET_REPO }}
           ref: ${{ env.TARGET_REF }}
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
@@ -136,6 +143,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
+          repository: ${{ env.TARGET_REPO }}
           ref: ${{ env.TARGET_REF }}
       - uses: actions/setup-node@v3
         with:
