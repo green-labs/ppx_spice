@@ -7,10 +7,11 @@ let testEqual = (t, name, lhs, rhs) =>
   })
 
 zoraBlock("optional field record", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("a", Js.Json.number(1.))
-  sample->Js.Dict.set("b", Js.Json.number(1.))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "a": JSON.Number(1.),
+    "b": JSON.Number(1.),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: t0 = {
     a: 1,
@@ -25,10 +26,11 @@ zoraBlock("optional field record", t => {
 })
 
 zoraBlock("optional field record: array<int>", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("a", Js.Json.number(1.))
-  sample->Js.Dict.set("bs", Js.Json.array([Js.Json.number(1.)]))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "a": JSON.Number(1.),
+    "bs": JSON.Array([JSON.Number(1.)]),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: t1 = {
     a: 1,
@@ -42,10 +44,11 @@ zoraBlock("optional field record: array<int>", t => {
 })
 
 zoraBlock("optional field record: array<variant>", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("a", Js.Json.number(1.))
-  sample->Js.Dict.set("bs", Js.Json.array([Js.Json.string("B1")]))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "a": JSON.Number(1.),
+    "bs": JSON.Array([JSON.String("B1")]),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: t2 = {
     a: 1,
@@ -60,10 +63,11 @@ zoraBlock("optional field record: array<variant>", t => {
 })
 
 zoraBlock("optional field record: omit array<variant>", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("a", Js.Json.number(1.))
+  let sample = dict{
+    "a": JSON.Number(1.),
+  }
 
-  let sampleJson = sample->Js.Json.object_
+  let sampleJson = sample->JSON.Object
   let sampleRecord: t2 = {
     a: 1,
   }

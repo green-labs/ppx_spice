@@ -1,5 +1,5 @@
 {
-  "name": "ppx-spice-examples",
+  "name": "spice-ppx-examples",
   "sources": [
     {
       "dir": "src",
@@ -12,23 +12,12 @@
       "in-source": true
     }
   ],
-  "bs-dependencies": [
-    "@greenlabs/ppx-spice"
-  ],
-  "bs-dev-dependencies": [],
-  "ppx-flags": [
-    [
-      "../ppx",
-      "-uncurried"
-    ]
-  ],
+  "dependencies": ["@greenlabs/ppx-spice"],
+  "dev-dependencies": [],
+  "ppx-flags": ["@greenlabs/ppx-spice/ppx"],
   "warnings": {
     "error": true,
     "number": "-48"
   },
-  "generators": [],
-  "bsc-flags": [
-    "-bs-super-errors",
-    "-open Belt"
-  ]
+  "generators": []
 }

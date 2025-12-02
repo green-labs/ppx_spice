@@ -19,9 +19,9 @@ type tOp = {
 @spice
 type t2 = {
   o: option<string>,
-  n: Js.null<string>,
-  on?: Js.null<string>,
-  n2: Js.Null.t<string>
+  n: Null.t<string>,
+  on?: Null.t<string>,
+  n2: Null.t<string>
 }
 
 @spice

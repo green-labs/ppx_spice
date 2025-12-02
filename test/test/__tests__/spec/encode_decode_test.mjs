@@ -10,21 +10,25 @@ function testEqual(t, name, lhs, rhs) {
 }
 
 Zora.test("encode only", t => {
-  let sample = {};
-  sample["name"] = "Alice";
-  sample["nickname"] = "Ecila";
+  let sample = {
+    name: "Alice",
+    nickname: "Ecila"
+  };
+  let sampleJson = sample;
   let encoded = EncodeDecode.te_encode({
     name: "Alice",
     nickname: "Ecila"
   });
-  testEqual(t, "encode", encoded, sample);
+  testEqual(t, "encode", encoded, sampleJson);
 });
 
 Zora.test("decode only", t => {
-  let sample = {};
-  sample["name"] = "Alice";
-  sample["nickname"] = "Ecila";
-  let decoded = EncodeDecode.td_decode(sample);
+  let sample = {
+    name: "Alice",
+    nickname: "Ecila"
+  };
+  let sampleJson = sample;
+  let decoded = EncodeDecode.td_decode(sampleJson);
   testEqual(t, "decode", decoded, {
     TAG: "Ok",
     _0: {

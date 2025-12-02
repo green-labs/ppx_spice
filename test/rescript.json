@@ -19,12 +19,8 @@
   ],
   "suffix": ".mjs",
   "dependencies": [],
-  "dev-dependencies": [
-    "@dusty-phillips/rescript-zora"
-  ],
-  "ppx-flags": [
-    "../ppx"
-  ],
+  "dev-dependencies": ["@dusty-phillips/rescript-zora"],
+  "ppx-flags": ["@greenlabs/ppx-spice/ppx"],
   "warnings": {
     "error": true,
     "number": "-48"

@@ -7,10 +7,11 @@ let testEqual = (t, name, lhs, rhs) =>
   })
 
 zoraBlock("encode only", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("name", Js.Json.string("Alice"))
-  sample->Js.Dict.set("nickname", Js.Json.string("Ecila"))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "name": JSON.String("Alice"),
+    "nickname": JSON.String("Ecila"),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: te = {
     name: "Alice",
@@ -23,10 +24,11 @@ zoraBlock("encode only", t => {
 })
 
 zoraBlock("decode only", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("name", Js.Json.string("Alice"))
-  sample->Js.Dict.set("nickname", Js.Json.string("Ecila"))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "name": JSON.String("Alice"),
+    "nickname": JSON.String("Ecila"),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: td = {
     name: "Alice",

@@ -24,83 +24,93 @@ let deepEqualWithBigInt = ((a, b) => {
 });
 
 Zora.test("record with @spice.key", t => {
-  let sample = {};
-  sample["spice-label"] = "sample";
-  sample["spice-value"] = 1.0;
+  let sample = {
+    "spice-label": "sample",
+    "spice-value": 1.0
+  };
+  let sampleJson = sample;
   let sampleRecord = {
     label: "sample",
     value: 1
   };
   let encoded = Records.t_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = Records.t_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = Records.t_decode(sampleJson);
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
 });
 
 Zora.test("record without @spice.key", t => {
-  let sample = {};
-  sample["label"] = "sample";
-  sample["value"] = 1.0;
+  let sample = {
+    label: "sample",
+    value: 1.0
+  };
+  let sampleJson = sample;
   let sampleRecord = {
     label: "sample",
     value: 1
   };
   let encoded = Records.t1_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = Records.t1_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = Records.t1_decode(sampleJson);
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
 });
 
 Zora.test("record with optional field", t => {
-  let sample1 = {};
-  sample1["label"] = "sample";
-  sample1["value"] = 1.0;
+  let sample1 = {
+    label: "sample",
+    value: 1.0
+  };
+  let sampleJson1 = sample1;
   let sampleRecord1 = {
     label: "sample",
     value: 1
   };
   let encoded = Records.tOp_encode(sampleRecord1);
-  testEqual(t, "encode", encoded, sample1);
-  let decoded = Records.tOp_decode(sample1);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `encode`, encoded, sampleJson1);
+  let decoded = Records.tOp_decode(sampleJson1);
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord1
   });
-  let sample2 = {};
-  sample2["label"] = "sample";
+  let sample2 = {
+    label: "sample"
+  };
+  let sampleJson2 = sample2;
   let encoded$1 = Records.tOp_encode({
     label: "sample"
   });
-  testEqual(t, "encode omit optional field", encoded$1, sample2);
+  testEqual(t, `encode omit optional field`, encoded$1, sampleJson2);
   let sample3 = {};
+  let sampleJson3 = sample3;
   let encoded$2 = Records.tOp_encode({
     label: undefined
   });
-  testEqual(t, "encode omit optional field with None field", encoded$2, sample3);
+  testEqual(t, `encode omit optional field with None field`, encoded$2, sampleJson3);
 });
 
 Zora.test("record with null", t => {
-  let sample = {};
-  sample["n"] = null;
-  sample["n2"] = "n2";
-  let sampleRecord_n = null;
+  let sample = {
+    n: null,
+    n2: "n2"
+  };
+  let sampleJson = sample;
   let sampleRecord = {
     o: undefined,
-    n: sampleRecord_n,
+    n: null,
     n2: "n2"
   };
   let encoded = Records.t2_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = Records.t2_decode(sample);
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = Records.t2_decode(sampleJson);
   ((sampleRecord["o"]= undefined));
   ((sampleRecord["on"]= undefined));
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
@@ -108,34 +118,39 @@ Zora.test("record with null", t => {
 
 Zora.test("record with spice.default", t => {
   let sample = {};
-  let sample2 = {};
-  sample2["value"] = 0.0;
-  sample2["value2"] = 1.0;
+  let sampleJson = sample;
+  let sample2 = {
+    value: 0.0,
+    value2: 1.0
+  };
+  let sampleJson2 = sample2;
   let sampleRecord = {
     value: 0,
     value2: 1
   };
   let encoded = Records.t3_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample2);
-  let decoded = Records.t3_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `encode`, encoded, sampleJson2);
+  let decoded = Records.t3_decode(sampleJson);
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
 });
 
 Zora.test("record with bigint", t => {
-  let sample = {};
-  sample["a"] = 0.0;
-  sample["b"] = 1.0;
+  let sample = {
+    a: 0.0,
+    b: 1.0
+  };
+  let sampleJson = sample;
   let sampleRecord = {
     a: 0n,
     b: 1n,
     c: undefined
   };
   let encoded = Records.t4_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = Records.t4_decode(sample);
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = Records.t4_decode(sampleJson);
   ((sampleRecord["c"] = undefined));
   t.ok(deepEqualWithBigInt(decoded, {
     TAG: "Ok",

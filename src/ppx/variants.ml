@@ -18,9 +18,9 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         match constructor_expr with
         | { pexp_desc = Pexp_constant const; pexp_loc } -> (
             match const with
-            | Pconst_string _ -> [%expr Js.Json.String [%e constructor_expr]]
-            | Pconst_float _ -> [%expr Js.Json.Number [%e constructor_expr]]
-            | Pconst_integer _ -> [%expr Js.Json.Number [%e constructor_expr]]
+            | Pconst_string _ -> [%expr JSON.String [%e constructor_expr]]
+            | Pconst_float _ -> [%expr JSON.Number [%e constructor_expr]]
+            | Pconst_integer _ -> [%expr JSON.Number [%e constructor_expr]]
             | _ -> fail pexp_loc "cannot find a name??!")
         | { pexp_loc } -> fail pexp_loc "cannot find a name???"
       in
@@ -51,7 +51,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as
         pc_rhs =
           (if unboxed then List.tl rhs_list |> List.hd
            else if has_attr_as then json_expr
-           else [%expr Js.Json.Array [%e rhs_list |> Exp.array]]);
+           else [%expr JSON.Array [%e rhs_list |> Exp.array]]);
       }
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
 
@@ -90,7 +90,7 @@ let generate_arg_decoder generator_settings args constructor_name =
                       Pconst_integer (string_of_int (i + 1), None)
                       |> Exp.constant
                     in
-                    [%expr Belt.Array.getExn json_arr [%e idx]] );
+                    [%expr Array.getUnsafe json_arr [%e idx]] );
                 ])
        |> tuple_or_singleton Exp.tuple)
 
@@ -113,11 +113,11 @@ let generate_decoder_case generator_settings
       {
         pc_lhs =
           ( Pconst_string (name, Location.none, None) |> Pat.constant |> fun v ->
-            Some v |> Pat.construct (lid "Js.Json.String") );
+            Some v |> Pat.construct (lid "JSON.String") );
         pc_guard = None;
         pc_rhs =
           [%expr
-            if Js.Array.length json_arr <> [%e arg_len] then
+            if Array.length json_arr <> [%e arg_len] then
               Spice.error "Invalid number of arguments to variant constructor" v
             else [%e decoded]];
       }
@@ -170,8 +170,7 @@ let generate_unboxed_decode generator_settings
 
               Some
                 (Utils.expr_func ~arity:1
-                   [%expr
-                     fun v -> Belt.Result.map ([%e d] v) [%e inline_fun_expr]])
+                   [%expr fun v -> Result.map ([%e d] v) [%e inline_fun_expr]])
           | None -> None)
       | _ -> fail pcd_loc "Expected exactly one type argument")
   | Pcstr_record _ -> fail pcd_loc "This syntax is not yet implemented by spice"
@@ -249,9 +248,9 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
             (Utils.expr_func ~arity:1
                [%expr
                  fun v ->
-                   match (v : Js.Json.t) with
-                   | Js.Json.String str_or_num -> [%e decoder_switch]
-                   | Js.Json.Number str_or_num -> [%e decoder_switch_num]
+                   match (v : JSON.t) with
+                   | JSON.String str_or_num -> [%e decoder_switch]
+                   | JSON.Number str_or_num -> [%e decoder_switch_num]
                    | _ -> Spice.error "Not a JSONString" v])
         else
           let decoder_default_case =
@@ -261,7 +260,7 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
               pc_rhs =
                 [%expr
                   Spice.error "Invalid variant constructor"
-                    (Belt.Array.getExn json_arr 0)];
+                    (Array.getUnsafe json_arr 0)];
             }
           in
 
@@ -269,17 +268,17 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings)
             constr_decls |> List.map (generate_decoder_case generator_settings)
             |> fun l ->
             l @ [ decoder_default_case ]
-            |> Exp.match_ [%expr Belt.Array.getExn json_arr 0]
+            |> Exp.match_ [%expr Array.getUnsafe json_arr 0]
           in
 
           Some
             (Utils.expr_func ~arity:1
                [%expr
                  fun v ->
-                   match (v : Js.Json.t) with
-                   | Js.Json.Array [||] ->
+                   match (v : JSON.t) with
+                   | JSON.Array [||] ->
                        Spice.error "Expected variant, found empty array" v
-                   | Js.Json.Array json_arr -> [%e decoder_switch]
+                   | JSON.Array json_arr -> [%e decoder_switch]
                    | _ -> Spice.error "Not a variant" v])
   in
 
