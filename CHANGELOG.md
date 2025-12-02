@@ -1,8 +1,10 @@
 # CHANGELOG
 
-## 0.2.10(unreleased)
+## 0.3.0 (unreleased)
 
-
+- BREAKING: changes to support rescript v12, will now generate codecs that use Stdlib instead of Js or Belt.
+- Updates codec generation to handle the `result` type in addition to `Belt.Result.t`
+- Polyvariant codecs no longer have an intermediate `Js.Json.tagged` type / function calls.
 
 ## 0.2.9
 
