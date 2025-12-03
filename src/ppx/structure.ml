@@ -23,23 +23,17 @@ let generate_codec_decls type_name param_names (encoder, decoder) =
     List.map (fun s -> decoder_var_prefix ^ s) param_names
   in
 
-  let vbs = [] in
-
-  let vbs =
-    match encoder with
-    | None -> vbs
-    | Some encoder ->
-        vbs @ [ Vb.mk encoder_pat (add_params encoder_param_names encoder) ]
-  in
-
-  let vbs =
-    match decoder with
-    | None -> vbs
-    | Some decoder ->
-        vbs @ [ Vb.mk decoder_pat (add_params decoder_param_names decoder) ]
-  in
-
-  vbs
+  match (encoder, decoder) with
+  | Some encoder, Some decoder ->
+      [
+        Vb.mk encoder_pat (add_params encoder_param_names encoder);
+        Vb.mk decoder_pat (add_params decoder_param_names decoder);
+      ]
+  | Some encoder, None ->
+      [ Vb.mk encoder_pat (add_params encoder_param_names encoder) ]
+  | None, Some decoder ->
+      [ Vb.mk decoder_pat (add_params decoder_param_names decoder) ]
+  | None, None -> []
 
 let map_type_decl decl =
   let {
@@ -88,10 +82,8 @@ let map_type_decl decl =
 let map_structure_item mapper ({ pstr_desc } as structure_item) =
   match pstr_desc with
   | Pstr_type (rec_flag, decls) -> (
-      let value_bindings = decls |> List.map map_type_decl |> List.concat in
-      [ mapper#structure_item structure_item ]
-      @
-      match List.length value_bindings > 0 with
-      | true -> [ Str.value rec_flag value_bindings ]
-      | false -> [])
+      let value_bindings = List.concat_map map_type_decl decls in
+      match value_bindings with
+      | [] -> [ structure_item ]
+      | _ -> [ structure_item; Str.value rec_flag value_bindings ])
   | _ -> [ mapper#structure_item structure_item ]

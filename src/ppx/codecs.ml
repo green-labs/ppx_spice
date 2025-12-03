@@ -98,20 +98,16 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
       fail ptyp_loc "Can't generate codecs for function type"
   | Ptyp_package _ -> fail ptyp_loc "Can't generate codecs for module type"
   | Ptyp_tuple types ->
-      let composite_codecs =
-        List.map (generate_codecs generator_settings) types
+      let encoders, decoders =
+        types
+        |> List.map (generate_codecs generator_settings)
+        |> List.split
       in
       ( (if do_encode then
-           Some
-             (composite_codecs
-             |> List.map (fun (e, _) -> Option.get e)
-             |> Tuple.generate_encoder)
+           Some (encoders |> List.map Option.get |> Tuple.generate_encoder)
          else None),
         if do_decode then
-          Some
-            (composite_codecs
-            |> List.map (fun (_, d) -> Option.get d)
-            |> Tuple.generate_decoder)
+          Some (decoders |> List.map Option.get |> Tuple.generate_decoder)
         else None )
   | Ptyp_var s ->
       ( (if do_encode then Some (make_ident_expr (encoder_var_prefix ^ s))
@@ -139,7 +135,7 @@ and generate_codecs ({ do_encode; do_decode } as generator_settings)
               else None )
         | Error s -> fail ptyp_loc s
       in
-      match List.length typeArgs = 0 with
-      | true -> (encode, decode)
-      | false -> parameterize_codecs typeArgs encode decode generator_settings)
+      match typeArgs with
+      | [] -> (encode, decode)
+      | _ -> parameterize_codecs typeArgs encode decode generator_settings)
   | _ -> fail ptyp_loc "This syntax is not yet handled by spice"

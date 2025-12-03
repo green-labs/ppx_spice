@@ -21,25 +21,25 @@ function t0_decode(v) {
   if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let a_result = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
-  let b_result = Stdlib_Option.getOr(Stdlib_Option.map(v["b"], extra => Spice.optionFromJson(Spice.intFromJson, extra)), {
-    TAG: "Ok",
-    _0: undefined
-  });
-  if (a_result.TAG === "Ok") {
-    if (b_result.TAG === "Ok") {
+  let a = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
+  if (a.TAG === "Ok") {
+    let b = Stdlib_Option.getOr(Stdlib_Option.map(v["b"], extra => Spice.optionFromJson(Spice.intFromJson, extra)), {
+      TAG: "Ok",
+      _0: undefined
+    });
+    if (b.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          a: a_result._0,
-          b: b_result._0
+          a: a._0,
+          b: b._0
         }
       };
     }
-    let e = b_result._0;
+    let e = b._0;
     return Spice.error("b", e.message, e.value);
   }
-  let e$1 = a_result._0;
+  let e$1 = a._0;
   return Spice.error("a", e$1.message, e$1.value);
 }
 
@@ -61,25 +61,25 @@ function t1_decode(v) {
   if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let a_result = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
-  let bs_result = Stdlib_Option.getOr(Stdlib_Option.map(v["bs"], extra => Spice.optionFromJson(extra => Spice.arrayFromJson(Spice.intFromJson, extra), extra)), {
-    TAG: "Ok",
-    _0: undefined
-  });
-  if (a_result.TAG === "Ok") {
-    if (bs_result.TAG === "Ok") {
+  let a = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
+  if (a.TAG === "Ok") {
+    let bs = Stdlib_Option.getOr(Stdlib_Option.map(v["bs"], extra => Spice.optionFromJson(extra => Spice.arrayFromJson(Spice.intFromJson, extra), extra)), {
+      TAG: "Ok",
+      _0: undefined
+    });
+    if (bs.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          a: a_result._0,
-          bs: bs_result._0
+          a: a._0,
+          bs: bs._0
         }
       };
     }
-    let e = bs_result._0;
+    let e = bs._0;
     return Spice.error("bs", e.message, e.value);
   }
-  let e$1 = a_result._0;
+  let e$1 = a._0;
   return Spice.error("a", e$1.message, e$1.value);
 }
 
@@ -140,25 +140,25 @@ function t2_decode(v) {
   if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let a_result = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
-  let bs_result = Stdlib_Option.getOr(Stdlib_Option.map(v["bs"], extra => Spice.optionFromJson(extra => Spice.arrayFromJson(b_decode, extra), extra)), {
-    TAG: "Ok",
-    _0: undefined
-  });
-  if (a_result.TAG === "Ok") {
-    if (bs_result.TAG === "Ok") {
+  let a = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.intFromJson), Spice.error(undefined, "a" + " missing", v));
+  if (a.TAG === "Ok") {
+    let bs = Stdlib_Option.getOr(Stdlib_Option.map(v["bs"], extra => Spice.optionFromJson(extra => Spice.arrayFromJson(b_decode, extra), extra)), {
+      TAG: "Ok",
+      _0: undefined
+    });
+    if (bs.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          a: a_result._0,
-          bs: bs_result._0
+          a: a._0,
+          bs: bs._0
         }
       };
     }
-    let e = bs_result._0;
+    let e = bs._0;
     return Spice.error("bs", e.message, e.value);
   }
-  let e$1 = a_result._0;
+  let e$1 = a._0;
   return Spice.error("a", e$1.message, e$1.value);
 }
 
