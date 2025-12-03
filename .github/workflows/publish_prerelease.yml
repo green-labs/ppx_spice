@@ -10,6 +10,10 @@ on:
         description: "owner/repo to check out (use fork to test external PRs)"
         required: false
 
+permissions:
+  id-token: write  # Required for OIDC
+  contents: read
+
 env:
   TARGET_REF: ${{ github.event.inputs.ref }}
   TARGET_REPO: ${{ github.event.inputs.repository || github.repository }}
@@ -186,5 +190,4 @@ jobs:
       - name: Publish
         if: success()
         run: npm publish --tag next
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
