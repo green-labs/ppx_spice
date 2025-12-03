@@ -52,22 +52,22 @@ function recordItem_decode(v) {
   if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let id_result = Stdlib_Option.getOr(Stdlib_Option.map(v["id"], Spice.intFromJson), Spice.error(undefined, "id" + " missing", v));
-  let name_result = Stdlib_Option.getOr(Stdlib_Option.map(v["name"], Spice.stringFromJson), Spice.error(undefined, "name" + " missing", v));
-  if (id_result.TAG === "Ok") {
-    if (name_result.TAG === "Ok") {
+  let id = Stdlib_Option.getOr(Stdlib_Option.map(v["id"], Spice.intFromJson), Spice.error(undefined, "id" + " missing", v));
+  if (id.TAG === "Ok") {
+    let name = Stdlib_Option.getOr(Stdlib_Option.map(v["name"], Spice.stringFromJson), Spice.error(undefined, "name" + " missing", v));
+    if (name.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          id: id_result._0,
-          name: name_result._0
+          id: id._0,
+          name: name._0
         }
       };
     }
-    let e = name_result._0;
+    let e = name._0;
     return Spice.error("name", e.message, e.value);
   }
-  let e$1 = id_result._0;
+  let e$1 = id._0;
   return Spice.error("id", e$1.message, e$1.value);
 }
 

@@ -105,6 +105,123 @@ function t2_decode(v) {
   }
 }
 
+function t3_encode(v) {
+  if (typeof v !== "object") {
+    return ["None"];
+  }
+  if (v.NAME !== "Multiple") {
+    return [
+      "Single",
+      Spice.intToJson(v.VAL)
+    ];
+  }
+  let match = v.VAL;
+  return [
+    "Multiple",
+    Spice.stringToJson(match[0]),
+    Spice.intToJson(match[1]),
+    Spice.boolToJson(match[2])
+  ];
+}
+
+function t3_decode(v) {
+  if (!Array.isArray(v)) {
+    return Spice.error(undefined, "Not a polyvariant", v);
+  }
+  if (v.length === 0) {
+    return Spice.error(undefined, "Expected polyvariant, found empty array", v);
+  }
+  let match = v[0];
+  if (typeof match === "string") {
+    switch (match) {
+      case "Multiple" :
+        if (v.length !== 4) {
+          return Spice.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
+        }
+        let v0 = Spice.stringFromJson(v[1]);
+        if (v0.TAG === "Ok") {
+          let v1 = Spice.intFromJson(v[2]);
+          if (v1.TAG === "Ok") {
+            let v2 = Spice.boolFromJson(v[3]);
+            if (v2.TAG === "Ok") {
+              return {
+                TAG: "Ok",
+                _0: {
+                  NAME: "Multiple",
+                  VAL: [
+                    v0._0,
+                    v1._0,
+                    v2._0
+                  ]
+                }
+              };
+            }
+            let e = v2._0;
+            return {
+              TAG: "Error",
+              _0: {
+                path: "[3]" + e.path,
+                message: e.message,
+                value: e.value
+              }
+            };
+          }
+          let e$1 = v1._0;
+          return {
+            TAG: "Error",
+            _0: {
+              path: "[2]" + e$1.path,
+              message: e$1.message,
+              value: e$1.value
+            }
+          };
+        }
+        let e$2 = v0._0;
+        return {
+          TAG: "Error",
+          _0: {
+            path: "[1]" + e$2.path,
+            message: e$2.message,
+            value: e$2.value
+          }
+        };
+      case "None" :
+        if (v.length !== 1) {
+          return Spice.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
+        } else {
+          return {
+            TAG: "Ok",
+            _0: "None"
+          };
+        }
+      case "Single" :
+        if (v.length !== 2) {
+          return Spice.error(undefined, "Invalid number of arguments to polyvariant constructor", v);
+        }
+        let v0$1 = Spice.intFromJson(v[1]);
+        if (v0$1.TAG === "Ok") {
+          return {
+            TAG: "Ok",
+            _0: {
+              NAME: "Single",
+              VAL: v0$1._0
+            }
+          };
+        }
+        let e$3 = v0$1._0;
+        return {
+          TAG: "Error",
+          _0: {
+            path: "[1]" + e$3.path,
+            message: e$3.message,
+            value: e$3.value
+          }
+        };
+    }
+  }
+  return Spice.error(undefined, "Invalid polymorphic variant constructor", v[0]);
+}
+
 export {
   t_encode,
   t_decode,
@@ -112,5 +229,7 @@ export {
   t1_decode,
   t2_encode,
   t2_decode,
+  t3_encode,
+  t3_decode,
 }
 /* No side effect */

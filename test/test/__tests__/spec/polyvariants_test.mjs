@@ -60,6 +60,90 @@ Zora.test("polymorphic variants with @spice.as number", t => {
   });
 });
 
+Zora.test("polymorphic variants with arguments", t => {
+  let encoded = Polyvariants.t3_encode("None");
+  testEqual(t, "encode #None", encoded, ["None"]);
+  let decoded = Polyvariants.t3_decode(["None"]);
+  testEqual(t, "decode #None", decoded, {
+    TAG: "Ok",
+    _0: "None"
+  });
+  let encoded$1 = Polyvariants.t3_encode({
+    NAME: "Single",
+    VAL: 42
+  });
+  testEqual(t, "encode #Single", encoded$1, [
+    "Single",
+    42.0
+  ]);
+  let decoded$1 = Polyvariants.t3_decode([
+    "Single",
+    42.0
+  ]);
+  testEqual(t, "decode #Single", decoded$1, {
+    TAG: "Ok",
+    _0: {
+      NAME: "Single",
+      VAL: 42
+    }
+  });
+  let encoded$2 = Polyvariants.t3_encode({
+    NAME: "Multiple",
+    VAL: [
+      "hello",
+      123,
+      true
+    ]
+  });
+  testEqual(t, "encode #Multiple", encoded$2, [
+    "Multiple",
+    "hello",
+    123.0,
+    true
+  ]);
+  let decoded$2 = Polyvariants.t3_decode([
+    "Multiple",
+    "hello",
+    123.0,
+    true
+  ]);
+  testEqual(t, "decode #Multiple", decoded$2, {
+    TAG: "Ok",
+    _0: {
+      NAME: "Multiple",
+      VAL: [
+        "hello",
+        123,
+        true
+      ]
+    }
+  });
+  let decoded$3 = Polyvariants.t3_decode([
+    "Single",
+    "not an int"
+  ]);
+  t.test("decode #Single with wrong type", async t => {
+    if (decoded$3.TAG === "Ok") {
+      t.fail("should have failed");
+      return;
+    }
+    t.equal(decoded$3._0.path, "[1]", "error path should be [1]");
+  });
+  let decoded$4 = Polyvariants.t3_decode([
+    "Multiple",
+    "hello",
+    "not an int",
+    true
+  ]);
+  t.test("decode #Multiple with wrong type at index 2", async t => {
+    if (decoded$4.TAG === "Ok") {
+      t.fail("should have failed");
+      return;
+    }
+    t.equal(decoded$4._0.path, "[2]", "error path should be [2]");
+  });
+});
+
 export {
   testEqual,
 }

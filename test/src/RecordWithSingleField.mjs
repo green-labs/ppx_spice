@@ -14,16 +14,16 @@ function t_decode(v) {
   if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let a_result = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.stringFromJson), Spice.error(undefined, "a" + " missing", v));
-  if (a_result.TAG === "Ok") {
+  let a = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], Spice.stringFromJson), Spice.error(undefined, "a" + " missing", v));
+  if (a.TAG === "Ok") {
     return {
       TAG: "Ok",
       _0: {
-        a: a_result._0
+        a: a._0
       }
     };
   }
-  let e = a_result._0;
+  let e = a._0;
   return Spice.error("a", e.message, e.value);
 }
 
@@ -51,31 +51,31 @@ function response_decode(v) {
   if (typeof v !== "object" || v === null || Array.isArray(v)) {
     return Spice.error(undefined, "Not an object", v);
   }
-  let data_result = Stdlib_Option.getOr(Stdlib_Option.map(v["data"], extra => Spice.optionFromJson(v => ({
+  let data = Stdlib_Option.getOr(Stdlib_Option.map(v["data"], extra => Spice.optionFromJson(v => ({
     TAG: "Ok",
     _0: v
   }), extra)), {
     TAG: "Ok",
     _0: undefined
   });
-  let errors_result = Stdlib_Option.getOr(Stdlib_Option.map(v["errors"], extra => Spice.optionFromJson(extra => Spice.arrayFromJson(t_decode, extra), extra)), {
-    TAG: "Ok",
-    _0: undefined
-  });
-  if (data_result.TAG === "Ok") {
-    if (errors_result.TAG === "Ok") {
+  if (data.TAG === "Ok") {
+    let errors = Stdlib_Option.getOr(Stdlib_Option.map(v["errors"], extra => Spice.optionFromJson(extra => Spice.arrayFromJson(t_decode, extra), extra)), {
+      TAG: "Ok",
+      _0: undefined
+    });
+    if (errors.TAG === "Ok") {
       return {
         TAG: "Ok",
         _0: {
-          data: data_result._0,
-          errors: errors_result._0
+          data: data._0,
+          errors: errors._0
         }
       };
     }
-    let e = errors_result._0;
+    let e = errors._0;
     return Spice.error("errors", e.message, e.value);
   }
-  let e$1 = data_result._0;
+  let e$1 = data._0;
   return Spice.error("data", e$1.message, e$1.value);
 }
 

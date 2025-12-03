@@ -1,5 +1,6 @@
 include Arrays_test
 include Encode_decode_test
+include Nested_modules_test
 include Optional_field_records_test
 include Polyvariants_test
 include Records_test

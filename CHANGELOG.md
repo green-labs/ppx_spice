@@ -3,6 +3,7 @@
 ## 0.3.1 (unreleased)
 
 - Fixes [#107](https://github.com/green-labs/ppx_spice/issues/107) Arrays being reversed by Spice.arrayFromJson
+- Significantly improves performance for tuples, variants with many cases, and records with many fields
 
 ## 0.3.0
 
