@@ -36,9 +36,9 @@ Zora.test("optional field record: array<int>", t => {
     bs: sampleRecord_bs
   };
   let encoded = OptionalFieldRecords.t1_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
+  testEqual(t, `encode`, encoded, sample);
   let decoded = OptionalFieldRecords.t1_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
@@ -54,9 +54,9 @@ Zora.test("optional field record: array<variant>", t => {
     bs: sampleRecord_bs
   };
   let encoded = OptionalFieldRecords.t2_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
+  testEqual(t, `encode`, encoded, sample);
   let decoded = OptionalFieldRecords.t2_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
@@ -68,7 +68,7 @@ Zora.test("optional field record: omit array<variant>", t => {
   let encoded = OptionalFieldRecords.t2_encode({
     a: 1
   });
-  testEqual(t, "encode", encoded, sample);
+  testEqual(t, `encode`, encoded, sample);
 });
 
 export {

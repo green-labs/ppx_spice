@@ -6,11 +6,32 @@ import * as Polyvariants_test from "./spec/polyvariants_test.mjs";
 import * as Encode_decode_test from "./spec/encode_decode_test.mjs";
 import * as Optional_field_records_test from "./spec/optional_field_records_test.mjs";
 
+let inner_decode = Encode_decode_test.inner_decode;
+
+let outer_decode = Encode_decode_test.outer_decode;
+
+let arrayWrapper_decode = Encode_decode_test.arrayWrapper_decode;
+
+let v_decode = Encode_decode_test.v_decode;
+
+let pv_decode = Encode_decode_test.pv_decode;
+
+let tupleWrapper_decode = Encode_decode_test.tupleWrapper_decode;
+
+let dictWrapper_decode = Encode_decode_test.dictWrapper_decode;
+
 let deepEqualWithBigInt = Records_test.deepEqualWithBigInt;
 
 let testEqual = Variants_test.testEqual;
 
 export {
+  inner_decode,
+  outer_decode,
+  arrayWrapper_decode,
+  v_decode,
+  pv_decode,
+  tupleWrapper_decode,
+  dictWrapper_decode,
   deepEqualWithBigInt,
   testEqual,
 }

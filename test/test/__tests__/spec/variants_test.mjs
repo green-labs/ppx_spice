@@ -11,33 +11,33 @@ function testEqual(t, name, lhs, rhs) {
 
 Zora.test("variants with @spice.as", t => {
   let variantEncoded = Variants.t_encode("One");
-  testEqual(t, "encode 하나", variantEncoded, 1);
+  testEqual(t, `encode 하나`, variantEncoded, 1);
   let variantEncoded$1 = Variants.t_encode("Two");
-  testEqual(t, "encode 둘", variantEncoded$1, "둘");
+  testEqual(t, `encode 둘`, variantEncoded$1, `둘`);
   let variantDecoded = Variants.t_decode(1);
-  testEqual(t, "decode 하나", variantDecoded, {
+  testEqual(t, `decode 하나`, variantDecoded, {
     TAG: "Ok",
     _0: "One"
   });
-  let variantDecoded$1 = Variants.t_decode("둘");
-  testEqual(t, "decode 둘", variantDecoded$1, {
+  let variantDecoded$1 = Variants.t_decode(`둘`);
+  testEqual(t, `decode 둘`, variantDecoded$1, {
     TAG: "Ok",
     _0: "Two"
   });
 });
 
-Zora.test("variants without @spice.as", t => {
+Zora.test(`variants without @spice.as`, t => {
   let variantEncoded = Variants.t1_encode("One1");
-  testEqual(t, "encode One1", variantEncoded, ["One1"]);
+  testEqual(t, `encode One1`, variantEncoded, [`One1`]);
   let variantEncoded$1 = Variants.t1_encode("Two1");
-  testEqual(t, "encode Two1", variantEncoded$1, ["Two1"]);
-  let variantDecoded = Variants.t1_decode(["One1"]);
-  testEqual(t, "decode [\"One1\"]", variantDecoded, {
+  testEqual(t, `encode Two1`, variantEncoded$1, [`Two1`]);
+  let variantDecoded = Variants.t1_decode([`One1`]);
+  testEqual(t, `decode ["One1"]`, variantDecoded, {
     TAG: "Ok",
     _0: "One1"
   });
-  let variantDecoded$1 = Variants.t1_decode(["Two1"]);
-  testEqual(t, "decode [\"Two1\"]", variantDecoded$1, {
+  let variantDecoded$1 = Variants.t1_decode([`Two1`]);
+  testEqual(t, `decode ["Two1"]`, variantDecoded$1, {
     TAG: "Ok",
     _0: "Two1"
   });
@@ -45,19 +45,19 @@ Zora.test("variants without @spice.as", t => {
 
 Zora.test("unboxed variants with @spice.as", t => {
   let variantEncoded = Variants.t2_encode(0);
-  testEqual(t, "encode 하나", variantEncoded, 0.0);
+  testEqual(t, `encode 하나`, variantEncoded, 0.0);
   let variantDecoded = Variants.t2_decode(0.0);
-  testEqual(t, "decode 하나", variantDecoded, {
+  testEqual(t, `decode 하나`, variantDecoded, {
     TAG: "Ok",
     _0: 0
   });
 });
 
-Zora.test("unboxed variants without @spice.as", t => {
+Zora.test(`unboxed variants without @spice.as`, t => {
   let variantEncoded = Variants.t3_encode(0);
-  testEqual(t, "encode One3(0)", variantEncoded, 0.0);
+  testEqual(t, `encode One3(0)`, variantEncoded, 0.0);
   let variantDecoded = Variants.t3_decode(0.0);
-  testEqual(t, "decode 0", variantDecoded, {
+  testEqual(t, `decode 0`, variantDecoded, {
     TAG: "Ok",
     _0: 0
   });
@@ -65,16 +65,16 @@ Zora.test("unboxed variants without @spice.as", t => {
 
 Zora.test("variants with @spice.as number", t => {
   let variantEncoded = Variants.t4_encode("One");
-  testEqual(t, "encode 1.0", variantEncoded, 1.0);
+  testEqual(t, `encode 1.0`, variantEncoded, 1.0);
   let variantEncoded$1 = Variants.t4_encode("Two");
-  testEqual(t, "encode 2.0", variantEncoded$1, 2.0);
+  testEqual(t, `encode 2.0`, variantEncoded$1, 2.0);
   let variantDecoded = Variants.t4_decode(1.0);
-  testEqual(t, "decode 1.0", variantDecoded, {
+  testEqual(t, `decode 1.0`, variantDecoded, {
     TAG: "Ok",
     _0: "One"
   });
   let variantDecoded$1 = Variants.t4_decode(2.0);
-  testEqual(t, "decode 2.0", variantDecoded$1, {
+  testEqual(t, `decode 2.0`, variantDecoded$1, {
     TAG: "Ok",
     _0: "Two"
   });

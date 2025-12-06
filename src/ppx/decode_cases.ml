@@ -3,7 +3,8 @@ open Parsetree
 open Ast_helper
 open Utils
 
-let generate_error_case numArgs i _ =
+(* The valueOffset is for adjusting the index in error paths, for example for Polyvariants *)
+let generate_error_case ?(valueOffset = 0) numArgs i _ =
   {
     pc_lhs =
       Array.init numArgs (fun which ->
@@ -14,5 +15,5 @@ let generate_error_case numArgs i _ =
       |> tuple_or_singleton Pat.tuple;
     pc_guard = None;
     pc_rhs =
-      [%expr Error { e with path = [%e index_const i] ^ e.path }];
+      [%expr Spice.error ~path: ([%e index_const (i + valueOffset)] ^ e.path) e.message e.value];
   }
