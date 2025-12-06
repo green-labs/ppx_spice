@@ -5,9 +5,10 @@
   "license": "MIT",
   "devDependencies": {
     "@dusty-phillips/rescript-zora": "^4.0.0",
+    "@greenlabs/ppx-spice": "workspace:../",
     "onchange": "^7.1.0",
     "pta": "^1.2.0",
-    "rescript": "12.0.0-beta.4",
+    "rescript": "12.0.0",
     "tap-difflet": "^0.7.2",
     "zora": "^5.2.0"
   },

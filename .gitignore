@@ -5,3 +5,4 @@ _esy
 _build
 ppx_spice.install
 .DS_Store
+src/_opam

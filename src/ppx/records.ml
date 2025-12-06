@@ -143,7 +143,7 @@ let generate_flat_decoder_expr decls =
               else Pat.any ())
         in
         let pat = match pats with [ p ] -> p | _ -> Pat.tuple pats in
-        Exp.case pat [%expr Spice.error ~path:[%e key] e.message e.value])
+        Exp.case pat [%expr Spice.error ~path:("." ^ [%e key] ^ e.path) e.message e.value])
       decls
   in
   let match_expr =
