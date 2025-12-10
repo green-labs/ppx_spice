@@ -156,8 +156,9 @@ jobs:
           ref: ${{ env.TARGET_REF }}
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           registry-url: "https://registry.npmjs.org"
+          scope: "@greenlabs"
 
       - name: Download linux artifacts
         if: success()
@@ -196,8 +197,7 @@ jobs:
         if: success()
         run: |
           if [ "${NPM_TAG:-latest}" = "latest" ]; then
-            npm publish
+            npm publish --provenance --access public
           else
-            npm publish --tag "${NPM_TAG}"
+            npm publish --provenance --access public --tag "${NPM_TAG}"
           fi
-
