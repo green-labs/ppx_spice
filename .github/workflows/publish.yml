@@ -13,16 +13,16 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.2
     container:
-      image: ocaml/opam:alpine-3.16-ocaml-4.14
+      image: ocaml/opam:alpine-3.16-ocaml-4.14.2
       options: --user root
 
     steps:
       - uses: actions/checkout@v3
 
       - name: Opam init
-        run: opam init -a --disable-sandboxing --compiler=4.14.0
+        run: opam init -a --disable-sandboxing --compiler=4.14.2
 
       - name: Install deps
         run: opam install . --deps-only --with-test
@@ -51,7 +51,7 @@ jobs:
       matrix:
         os: [macOS-latest]
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.2
 
     steps:
       - uses: actions/checkout@v3
@@ -88,7 +88,7 @@ jobs:
       matrix:
         os: [windows-latest]
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.2
 
     steps:
       - uses: actions/checkout@v3
