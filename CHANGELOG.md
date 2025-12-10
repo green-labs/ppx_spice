@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## 0.3.0 (unreleased)
+## 0.3.0
 
 - BREAKING: changes to support rescript v12, will now generate codecs that use Stdlib instead of Js or Belt.
 - Updates codec generation to handle the `result` type in addition to `Belt.Result.t`
 - Polyvariant codecs no longer have an intermediate `Js.Json.tagged` type / function calls.
+- Upgrade ocaml from v4.14.0 to v4.14.2 https://github.com/green-labs/ppx_spice/pull/101
 
 ## 0.2.9
 
