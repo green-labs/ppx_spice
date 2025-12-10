@@ -200,5 +200,4 @@ jobs:
           else
             npm publish --tag "${NPM_TAG}"
           fi
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+
