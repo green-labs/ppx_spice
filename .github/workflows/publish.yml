@@ -1,6 +1,27 @@
 name: ppx_spice publish
 
-on: [workflow_dispatch]
+on:
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch or tag to build and publish from"
+        required: false
+      repository:
+        description: "owner/repo to check out (use fork to test external PRs)"
+        required: false
+      npm_tag:
+        description: "npm dist-tag to publish under (e.g., latest, next)"
+        required: false
+        default: latest
+
+env:
+  TARGET_REF: ${{ github.event.inputs.ref || github.ref }}
+  TARGET_REPO: ${{ github.event.inputs.repository || github.repository }}
+  NPM_TAG: ${{ github.event.inputs.npm_tag || 'latest' }}
+
+permissions:
+  id-token: write  # Required for OIDC publish to npm
+  contents: read
 
 jobs:
   build_linux:
@@ -13,16 +34,19 @@ jobs:
       matrix:
         os: [ubuntu-latest]
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.2
     container:
-      image: ocaml/opam:alpine-3.16-ocaml-4.14
+      image: ocaml/opam:alpine-3.16-ocaml-4.14.2
       options: --user root
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          ref: ${{ env.TARGET_REF }}
 
       - name: Opam init
-        run: opam init -a --disable-sandboxing --compiler=4.14.0
+        run: opam init -a --disable-sandboxing --compiler=4.14.2
 
       - name: Install deps
         run: opam install . --deps-only --with-test
@@ -51,10 +75,13 @@ jobs:
       matrix:
         os: [macOS-latest]
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.2
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          ref: ${{ env.TARGET_REF }}
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -88,10 +115,13 @@ jobs:
       matrix:
         os: [windows-latest]
         ocaml-compiler:
-          - 4.14.0
+          - 4.14.2
 
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          ref: ${{ env.TARGET_REF }}
 
       - name: Use OCaml ${{ matrix.ocaml-compiler}}
         uses: ocaml/setup-ocaml@v2
@@ -121,6 +151,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          ref: ${{ env.TARGET_REF }}
       - uses: actions/setup-node@v3
         with:
           node-version: 16
@@ -155,8 +188,17 @@ jobs:
           mv binaries/darwin/ppx.exe ppx-osx.exe
           mv binaries/windows/ppx.exe ppx-windows.exe
 
+      - name: Pack package
+        if: success()
+        run: npm pack
+
       - name: Publish
         if: success()
-        run: npm publish
+        run: |
+          if [ "${NPM_TAG:-latest}" = "latest" ]; then
+            npm publish
+          else
+            npm publish --tag "${NPM_TAG}"
+          fi
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
