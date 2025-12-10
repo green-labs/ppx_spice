@@ -159,6 +159,9 @@ jobs:
           node-version: 20
           registry-url: "https://registry.npmjs.org"
 
+      - name: Update npm for OIDC support
+        run: npm install -g npm@latest
+
       - name: Download linux artifacts
         if: success()
         uses: actions/download-artifact@master
