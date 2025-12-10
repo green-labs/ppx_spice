@@ -149,9 +149,6 @@ jobs:
     needs: [build_linux, build_macos, build_windows]
     name: (only on release) Publish
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ""          # Force OIDC; ignore any leftover token
-      NPM_CONFIG_USERCONFIG: ${{ runner.temp }}/.npmrc
     steps:
       - uses: actions/checkout@v3
         with:
@@ -187,8 +184,6 @@ jobs:
       - name: Move artifacts
         if: success()
         run: |
-          # Clear any pre-existing npm config to avoid stale auth
-          echo "" > "$NPM_CONFIG_USERCONFIG"
           mkdir -p bin
           mv binaries/linux/ppx.exe ppx-linux.exe
           mv binaries/darwin/ppx.exe ppx-osx.exe
