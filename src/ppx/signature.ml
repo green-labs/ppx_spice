@@ -6,7 +6,7 @@ let rec add_encoder_params param_names result_type =
   match param_names with
   | [] -> result_type
   | hd :: tl ->
-      [%type: ([%t Ast_helper.Typ.var hd] -> Js.Json.t) -> [%t result_type]]
+      [%type: ([%t Ast_helper.Typ.var hd] -> JSON.t) -> [%t result_type]]
       |> Utils.ctyp_arrow ~arity:1 |> add_encoder_params tl
 
 let make_result_type value_type =
@@ -17,7 +17,7 @@ let rec add_decoder_params param_names result_type =
   | [] -> result_type
   | hd :: tl ->
       let decoder_param =
-        [%type: Js.Json.t -> [%t make_result_type (Ast_helper.Typ.var hd)]]
+        [%type: JSON.t -> [%t make_result_type (Ast_helper.Typ.var hd)]]
         |> Utils.ctyp_arrow ~arity:1
       in
       [%type: [%t decoder_param] -> [%t result_type]]
@@ -39,7 +39,7 @@ let generate_sig_decls { do_encode; do_decode } type_name param_names =
     | true ->
         decls
         @ [
-            [%type: [%t value_type] -> Js.Json.t] |> Utils.ctyp_arrow ~arity:1
+            [%type: [%t value_type] -> JSON.t] |> Utils.ctyp_arrow ~arity:1
             |> add_encoder_params (List.rev param_names)
             |> Ast_helper.Val.mk (mknoloc encoder_pat)
             |> Ast_helper.Sig.value;
@@ -51,7 +51,7 @@ let generate_sig_decls { do_encode; do_decode } type_name param_names =
     | true ->
         decls
         @ [
-            [%type: Js.Json.t -> [%t make_result_type value_type]]
+            [%type: JSON.t -> [%t make_result_type value_type]]
             |> Utils.ctyp_arrow ~arity:1
             |> add_decoder_params (List.rev param_names)
             |> Ast_helper.Val.mk (mknoloc decoder_pat)

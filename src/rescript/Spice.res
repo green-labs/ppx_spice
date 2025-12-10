@@ -1,12 +1,12 @@
 type decodeError = {
   path: string,
   message: string,
-  value: Js.Json.t,
+  value: JSON.t,
 }
 
 type result<'a> = result<'a, decodeError>
-type decoder<'a> = Js.Json.t => result<'a>
-type encoder<'a> = 'a => Js.Json.t
+type decoder<'a> = JSON.t => result<'a>
+type encoder<'a> = 'a => JSON.t
 type codec<'a> = (encoder<'a>, decoder<'a>)
 
 let error = (~path=?, message, value) => {
@@ -17,29 +17,29 @@ let error = (~path=?, message, value) => {
   Error({path, message, value})
 }
 
-let stringToJson = (s): Js.Json.t => Js.Json.String(s)
+let stringToJson = (s): JSON.t => JSON.String(s)
 let stringFromJson = j =>
-  switch (j: Js.Json.t) {
-  | Js.Json.String(s) => Ok(s)
+  switch (j: JSON.t) {
+  | JSON.String(s) => Ok(s)
   | _ => Error({path: "", message: "Not a string", value: j})
   }
 
-let intToJson = (i): Js.Json.t => Js.Json.Number(Float.fromInt(i))
+let intToJson = (i): JSON.t => JSON.Number(Float.fromInt(i))
 let intFromJson = j =>
-  switch (j: Js.Json.t) {
-  | Js.Json.Number(f) =>
-    Float.fromInt(Js.Math.floor(f)) == f
-      ? Ok(Js.Math.floor(f))
+  switch (j: JSON.t) {
+  | JSON.Number(f) =>
+    Math.floor(f) == f
+      ? Ok(Math.Int.floor(f))
       : Error({path: "", message: "Not an integer", value: j})
 
   | _ => Error({path: "", message: "Not a number", value: j})
   }
 
-let bigintToJson = (i): Js.Json.t => Js.Json.Number(BigInt.toFloat(i))
+let bigintToJson = (i): JSON.t => JSON.Number(BigInt.toFloat(i))
 
 let bigintFromJson = j =>
-  switch (j: Js.Json.t) {
-  | Js.Json.Number(n) =>
+  switch (j: JSON.t) {
+  | JSON.Number(n) =>
     switch BigInt.fromFloat(n) {
     | Some(v) => v->Ok
     | None => error("Not a bigint", j)
@@ -47,123 +47,124 @@ let bigintFromJson = j =>
   | _ => error("Not a number", j)
   }
 
-let floatToJson = (v): Js.Json.t => Js.Json.Number(v)
+let floatToJson = (v): JSON.t => JSON.Number(v)
 let floatFromJson = j =>
-  switch (j: Js.Json.t) {
-  | Js.Json.Number(f) => Ok(f)
+  switch (j: JSON.t) {
+  | JSON.Number(f) => Ok(f)
   | _ => Error({path: "", message: "Not a number", value: j})
   }
 
-let boolToJson = (v): Js.Json.t =>
+let boolToJson = (v): JSON.t =>
   switch v {
-  | true => Js.Json.Boolean(true)
-  | false => Js.Json.Boolean(false)
+  | true => JSON.Boolean(true)
+  | false => JSON.Boolean(false)
   }
 let boolFromJson = j =>
-  switch (j: Js.Json.t) {
-  | Js.Json.Boolean(true) => Ok(true)
-  | Js.Json.Boolean(false) => Ok(false)
+  switch (j: JSON.t) {
+  | JSON.Boolean(true) => Ok(true)
+  | JSON.Boolean(false) => Ok(false)
   | _ => Error({path: "", message: "Not a boolean", value: j})
   }
 
-let unitToJson = (): Js.Json.t => Js.Json.Number(0.0)
+let unitToJson = (): JSON.t => JSON.Number(0.0)
 let unitFromJson = _ => Ok()
 
-let arrayToJson = (encoder, arr): Js.Json.t => Js.Json.Array(Js.Array.map(encoder, arr))
+let arrayToJson = (encoder, arr): JSON.t => JSON.Array(Array.map(arr, encoder))
 
 let arrayFromJson = (decoder, json) =>
-  switch (json: Js.Json.t) {
-  | Js.Json.Array(arr) => Js.Array.reducei((acc, jsonI, i) =>
+  switch (json: JSON.t) {
+  | JSON.Array(arr) =>
+    Array.reduceWithIndex(arr, Ok([]), (acc, jsonI, i) =>
       switch (acc, decoder(jsonI)) {
       | (Error(_), _) => acc
 
       | (_, Error({path} as error)) =>
         Error({...error, path: "[" ++ (Int.toString(i) ++ ("]" ++ path))})
 
-      | (Ok(prev), Ok(newVal)) =>
-        Ok(Js.Array.concat([newVal], prev))
+      | (Ok(prev), Ok(newVal)) => Ok(Array.concat([newVal], prev))
       }
-    , Ok([]), arr)
+    )
 
   | _ => Error({path: "", message: "Not an array", value: json})
   }
 
-let listToJson = (encoder, list) => arrayToJson(encoder, Belt.List.toArray(list))
+let listToJson = (encoder, list) => arrayToJson(encoder, List.toArray(list))
 
-let listFromJson = (decoder, json) =>
-  Belt.Result.map(arrayFromJson(decoder, json), Belt.List.fromArray)
+let listFromJson = (decoder, json) => Result.map(arrayFromJson(decoder, json), List.fromArray)
 
 let filterOptional = arr =>
-  Belt.Array.keepMap(arr, ((k, v)) => switch v {
+  Array.filterMap(arr, ((k, v)) =>
+    switch v {
     | Some(v) => Some(k, v)
     | None => None
-  })
+    }
+  )
 
-let optionToJson = (encoder, opt): option<Js.Json.t> =>
+let optionToJson = (encoder, opt): option<JSON.t> =>
   switch opt {
   | Some(x) => Some(encoder(x))
   | None => None
   }
 
 let optionFromJson = (decoder, json) =>
-  switch (json: Js.Json.t) {
-  | Js.Json.Null => Ok(None)
-  | _ => Belt.Result.map(decoder(json), v => Some(v))
+  switch (json: JSON.t) {
+  | JSON.Null => Ok(None)
+  | _ => Result.map(decoder(json), v => Some(v))
   }
 
-let nullToJson = (encoder, opt): Js.Json.t =>
+let nullToJson = (encoder, opt): JSON.t =>
   switch opt {
-  | Js.Null.Value(x) => encoder(x)
-  | Null => Js.Json.Null
+  | Null.Value(x) => encoder(x)
+  | Null => JSON.Null
   }
 
 let nullFromJson = (decoder, json) =>
-  switch (json: Js.Json.t) {
-  | Js.Json.Null => Ok(Js.Null.Null)
-  | _ => Belt.Result.map(decoder(json), v => Js.Null.Value(v))
+  switch (json: JSON.t) {
+  | JSON.Null => Ok(Null.Null)
+  | _ => Result.map(decoder(json), v => Null.Value(v))
   }
 
-let resultToJson = (okEncoder, errorEncoder, result): Js.Json.t => Js.Json.Array(
+let resultToJson = (okEncoder, errorEncoder, result): JSON.t => JSON.Array(
   switch result {
-  | Ok(v) => [Js.Json.String("Ok"), okEncoder(v)]
-  | Error(e) => [Js.Json.String("Error"), errorEncoder(e)]
+  | Ok(v) => [JSON.String("Ok"), okEncoder(v)]
+  | Error(e) => [JSON.String("Error"), errorEncoder(e)]
   },
 )
 
 let resultFromJson = (okDecoder, errorDecoder, json) =>
-  switch (json: Js.Json.t) {
-  | Js.Json.Array([variantConstructorId, payload]) =>
+  switch (json: JSON.t) {
+  | JSON.Array([variantConstructorId, payload]) =>
     switch variantConstructorId {
-    | Js.Json.String("Ok") => okDecoder(payload)->Belt.Result.map(v => Ok(v))
+    | JSON.String("Ok") => okDecoder(payload)->Result.map(v => Ok(v))
 
-    | Js.Json.String("Error") =>
+    | JSON.String("Error") =>
       switch errorDecoder(payload) {
       | Ok(v) => Ok(Error(v))
       | Error(e) => Error(e)
       }
 
-    | Js.Json.String(_) => error("Expected either \"Ok\" or \"Error\"", variantConstructorId)
+    | JSON.String(_) => error("Expected either \"Ok\" or \"Error\"", variantConstructorId)
     | _ => error("Not a string", variantConstructorId)
     }
-  | Js.Json.Array(_) => error("Expected exactly 2 values in array", json)
+  | JSON.Array(_) => error("Expected exactly 2 values in array", json)
   | _ => error("Not an array", json)
   }
 
-let dictToJson = (encoder, dict): Js.Json.t => Js.Json.Object(Js.Dict.map((. a) => encoder(a), dict))
+let dictToJson = (encoder, dict): JSON.t => JSON.Object(Dict.mapValues(dict, encoder))
 
 let dictFromJson = (decoder, json) =>
-  switch (json: Js.Json.t) {
-  | Js.Json.Object(dict) =>
+  switch (json: JSON.t) {
+  | JSON.Object(dict) =>
     dict
-    ->Js.Dict.entries
-    ->Belt.Array.reduce(Ok(Js.Dict.empty()), (acc, (key, value)) =>
+    ->Dict.toArray
+    ->Array.reduce(Ok(Dict.make()), (acc, (key, value)) =>
       switch (acc, decoder(value)) {
       | (Error(_), _) => acc
 
       | (_, Error({path} as error)) => Error({...error, path: "." ++ (key ++ path)})
 
       | (Ok(prev), Ok(newVal)) =>
-        let () = prev->Js.Dict.set(key, newVal)
+        let () = prev->Dict.set(key, newVal)
         Ok(prev)
       }
     )

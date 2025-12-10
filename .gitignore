@@ -3,5 +3,7 @@ lib
 node_modules
 _esy
 _build
+src/_opam
+src/rescript/*.js
 ppx_spice.install
 .DS_Store

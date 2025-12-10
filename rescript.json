@@ -3,18 +3,14 @@
   "sources": [
     {
       "dir": "src",
-      "subdirs": [
-        "rescript"
-      ]
+      "subdirs": ["rescript"]
     },
     {
       "dir": "test",
       "type": "dev"
     }
   ],
-  "ppx-flags": [
-    "./ppx"
-  ],
+  "ppx-flags": ["./ppx"],
   "warnings": {
     "number": "+A-9-40-42"
   },

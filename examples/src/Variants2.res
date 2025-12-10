@@ -22,6 +22,6 @@ let data = %raw(`
 
 let user: result<user, Spice.decodeError> = data->user_decode
 
-let json: Js.Json.t = user->Result.getExn->user_encode
+let json: JSON.t = user->Result.getOrThrow->user_encode
 
-let language = Js.Json.string("ReScript")->language_decode
+let language = JSON.String("ReScript")->language_decode

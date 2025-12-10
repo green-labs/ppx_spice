@@ -7,7 +7,7 @@
 			"group": "build",
 			"problemMatcher": [],
 			"label": "npm: res:watch",
-			"detail": "rescript build -w"
+			"detail": "rescript watch"
 		}
 	]
 }

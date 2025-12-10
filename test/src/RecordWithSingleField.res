@@ -5,6 +5,6 @@ module M = {
 
 @spice
 type response = {
-  data: option<Js.Json.t>,
+  data: option<JSON.t>,
   errors: option<array<M.t>>,
 }

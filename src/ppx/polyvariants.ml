@@ -35,8 +35,8 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
         match constructor_expr with
         | { pexp_desc = Pexp_constant const; pexp_loc } -> (
             match const with
-            | Pconst_string _ -> [%expr Js.Json.String [%e constructor_expr]]
-            | Pconst_float _ -> [%expr Js.Json.Number [%e constructor_expr]]
+            | Pconst_string _ -> [%expr JSON.String [%e constructor_expr]]
+            | Pconst_float _ -> [%expr JSON.Number [%e constructor_expr]]
             | _ -> fail pexp_loc "cannot find a name??")
         | { pexp_loc } -> fail pexp_loc "cannot find a name??"
       in
@@ -70,7 +70,7 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
         pc_rhs =
           (if unboxed then List.tl rhs_list |> List.hd (* diff *)
            else if has_attr_as then json_expr
-           else [%expr Js.Json.array [%e rhs_list |> Exp.array]]);
+           else [%expr JSON.Array [%e rhs_list |> Exp.array]]);
       }
   (* We don't have enough information to generate a encoder *)
   | Rinherit arg ->
@@ -110,7 +110,7 @@ let generate_arg_decoder generator_settings args constructor_name =
                       Pconst_integer (string_of_int (i + 1), None)
                       |> Exp.constant
                     in
-                    [%expr Belt.Array.getExn json_arr [%e idx]] );
+                    [%expr Array.getUnsafe json_arr [%e idx]] );
                 ])
        |> tuple_or_singleton Exp.tuple)
 
@@ -133,11 +133,11 @@ let generate_decoder_case generator_settings { prf_desc } =
       {
         pc_lhs =
           ( Pconst_string (txt, Location.none, None) |> Pat.constant |> fun v ->
-            Some ([], v) |> Pat.construct (lid "Js.Json.JSONString") );
+            Some ([], v) |> Pat.construct (lid "JSON.String") );
         pc_guard = None;
         pc_rhs =
           [%expr
-            if Js.Array.length tagged != [%e arg_len] then
+            if Array.length json_arr != [%e arg_len] then
               Spice.error
                 "Invalid number of arguments to polyvariant constructor" v
             else [%e decoded]];
@@ -191,8 +191,7 @@ let generate_unboxed_decode generator_settings { prf_desc } =
               Some
                 (Utils.expr_func ~arity:1
                    [%expr
-                     fun v ->
-                       Belt.Result.map ([%e d] v) (fun v -> [%e constructor])])
+                     fun v -> Result.map ([%e d] v) (fun v -> [%e constructor])])
           | None -> None)
       | _ -> fail loc "Expected exactly one type argument")
   | Rinherit coreType ->
@@ -273,9 +272,9 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
             (Utils.expr_func ~arity:1
                [%expr
                  fun v ->
-                   match Js.Json.classify v with
-                   | Js.Json.JSONString str_or_num -> [%e decoder_switch]
-                   | Js.Json.JSONNumber str_or_num -> [%e decoder_switch_num]
+                   match (v : JSON.t) with
+                   | JSON.String str_or_num -> [%e decoder_switch]
+                   | JSON.Number str_or_num -> [%e decoder_switch_num]
                    | _ -> Spice.error "Not a JSONString" v])
         else
           let decoder_default_case =
@@ -284,8 +283,8 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
               pc_guard = None;
               pc_rhs =
                 [%expr
-                  Spice.error "Invalid polymorphic constructor"
-                    (Belt.Array.getExn json_arr 0)];
+                  Spice.error "Invalid polymorphic variant constructor"
+                    (Array.getUnsafe json_arr 0)];
             }
           in
 
@@ -293,19 +292,17 @@ let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
             row_fields |> List.map (generate_decoder_case generator_settings)
             |> fun l ->
             l @ [ decoder_default_case ]
-            |> Exp.match_ [%expr Belt.Array.getExn tagged 0]
+            |> Exp.match_ [%expr Array.getUnsafe json_arr 0]
           in
 
           Some
             (Utils.expr_func ~arity:1
                [%expr
                  fun v ->
-                   match Js.Json.classify v with
-                   | Js.Json.JSONArray [||] ->
+                   match (v : JSON.t) with
+                   | JSON.Array [||] ->
                        Spice.error "Expected polyvariant, found empty array" v
-                   | Js.Json.JSONArray json_arr ->
-                       let tagged = Js.Array.map Js.Json.classify json_arr in
-                       [%e decoder_switch]
+                   | JSON.Array json_arr -> [%e decoder_switch]
                    | _ -> Spice.error "Not a polyvariant" v])
   in
 

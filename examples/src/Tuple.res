@@ -18,4 +18,4 @@ let data = %raw(`
 
 let user: result<user, Spice.decodeError> = data->user_decode
 
-let json: Js.Json.t = user->Result.getExn->user_encode
+let json: JSON.t = user->Result.getOrThrow->user_encode

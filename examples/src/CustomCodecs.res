@@ -7,18 +7,16 @@ let encoderStatus = v =>
   | PROCESSING => "processing"
   | SUCCESS => "success"
   | FAIL => "fail"
-  }->Js.Json.string
+  }->JSON.String
 
 let decoderStatus = json => {
-  switch Js.Json.classify(json) {
-  | Js.Json.JSONString(str) =>
-    switch str {
-    | "waiting" => WAITING->Ok
-    | "processing" => PROCESSING->Ok
-    | "success" => SUCCESS->Ok
-    | "fail" => FAIL->Ok
-    | _ => Error({Spice.path: "", message: "Expected Json String", value: json})
-    }
+  switch json {
+  | JSON.String("waiting") => Ok(WAITING)
+  | JSON.String("processing") => Ok(PROCESSING)
+  | JSON.String("success") => Ok(SUCCESS)
+  | JSON.String("fail") => Ok(FAIL)
+  | JSON.String(str) =>
+    Error({Spice.path: "", message: "Unexpected status value: " ++ str, value: json})
   | _ => Error({Spice.path: "", message: "Expected Json String", value: json})
   }
 }
@@ -36,4 +34,4 @@ let data = %raw(`
 
 let data = data->data_decode
 
-let json = data->Result.getExn->data_encode
+let json = data->Result.getOrThrow->data_encode

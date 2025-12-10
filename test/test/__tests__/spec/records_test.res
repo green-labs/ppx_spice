@@ -20,10 +20,11 @@ let deepEqualWithBigInt = %raw(`(a, b) => {
 }`)
 
 zoraBlock("record with @spice.key", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("spice-label", Js.Json.string("sample"))
-  sample->Js.Dict.set("spice-value", Js.Json.number(1.0))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "spice-label": JSON.String("sample"),
+    "spice-value": JSON.Number(1.0),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: Records.t = {
     label: "sample",
@@ -38,10 +39,11 @@ zoraBlock("record with @spice.key", t => {
 })
 
 zoraBlock("record without @spice.key", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("label", Js.Json.string("sample"))
-  sample->Js.Dict.set("value", Js.Json.number(1.0))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "label": JSON.String("sample"),
+    "value": JSON.Number(1.0),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: Records.t1 = {
     label: "sample",
@@ -56,10 +58,11 @@ zoraBlock("record without @spice.key", t => {
 })
 
 zoraBlock("record with optional field", t => {
-  let sample1 = Js.Dict.empty()
-  sample1->Js.Dict.set("label", Js.Json.string("sample"))
-  sample1->Js.Dict.set("value", Js.Json.number(1.0))
-  let sampleJson1 = sample1->Js.Json.object_
+  let sample1 = dict{
+    "label": JSON.String("sample"),
+    "value": JSON.Number(1.0),
+  }
+  let sampleJson1 = sample1->JSON.Object
 
   let sampleRecord1: Records.tOp = {
     label: Some("sample"),
@@ -72,9 +75,10 @@ zoraBlock("record with optional field", t => {
   let decoded = sampleJson1->Records.tOp_decode
   t->testEqual(`decode`, decoded, Ok(sampleRecord1))
 
-  let sample2 = Js.Dict.empty()
-  sample2->Js.Dict.set("label", Js.Json.string("sample"))
-  let sampleJson2 = sample2->Js.Json.object_
+  let sample2 = dict{
+    "label": JSON.String("sample"),
+  }
+  let sampleJson2 = sample2->JSON.Object
 
   let sampleRecord2: Records.tOp = {
     label: Some("sample"),
@@ -87,8 +91,8 @@ zoraBlock("record with optional field", t => {
   // let decoded = sampleJson2->Records.tOp_decode
   // t->testEqual(`decode omit optional field`, decoded, Ok(sampleRecord2))
 
-  let sample3 = Js.Dict.empty()
-  let sampleJson3 = sample3->Js.Json.object_
+  let sample3 = dict{}
+  let sampleJson3 = sample3->JSON.Object
 
   let sampleRecord3: Records.tOp = {
     label: None,
@@ -103,15 +107,16 @@ zoraBlock("record with optional field", t => {
 })
 
 zoraBlock("record with null", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("n", Js.Json.null)
-  sample->Js.Dict.set("n2", Js.Json.string("n2"))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "n": JSON.Null,
+    "n2": JSON.String("n2"),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: Records.t2 = {
     o: None,
-    n: Js.null,
-    n2: Js.Null.return("n2"),
+    n: Null.Null,
+    n2: Null.Value("n2"),
   }
 
   let encoded = sampleRecord->Records.t2_encode
@@ -127,13 +132,14 @@ zoraBlock("record with null", t => {
 })
 
 zoraBlock("record with spice.default", t => {
-  let sample = Js.Dict.empty()
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{}
+  let sampleJson = sample->JSON.Object
 
-  let sample2 = Js.Dict.empty()
-  sample2->Js.Dict.set("value", Js.Json.number(0.0))
-  sample2->Js.Dict.set("value2", Js.Json.number(1.0))
-  let sampleJson2 = sample2->Js.Json.object_
+  let sample2 = dict{
+    "value": JSON.Number(0.0),
+    "value2": JSON.Number(1.0),
+  }
+  let sampleJson2 = sample2->JSON.Object
 
   let sampleRecord: Records.t3 = {
     value: 0,
@@ -148,10 +154,11 @@ zoraBlock("record with spice.default", t => {
 })
 
 zoraBlock("record with bigint", t => {
-  let sample = Js.Dict.empty()
-  sample->Js.Dict.set("a", Js.Json.number(0.0))
-  sample->Js.Dict.set("b", Js.Json.number(1.0))
-  let sampleJson = sample->Js.Json.object_
+  let sample = dict{
+    "a": JSON.Number(0.0),
+    "b": JSON.Number(1.0),
+  }
+  let sampleJson = sample->JSON.Object
 
   let sampleRecord: Records.t4 = {
     a: 0n,

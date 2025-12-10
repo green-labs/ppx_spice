@@ -10,16 +10,18 @@ function testEqual(t, name, lhs, rhs) {
 }
 
 Zora.test("optional field record", t => {
-  let sample = {};
-  sample["a"] = 1;
-  sample["b"] = 1;
+  let sample = {
+    a: 1,
+    b: 1
+  };
+  let sampleJson = sample;
   let sampleRecord = {
     a: 1,
     b: 1
   };
   let encoded = OptionalFieldRecords.t0_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = OptionalFieldRecords.t0_decode(sample);
+  testEqual(t, "encode", encoded, sampleJson);
+  let decoded = OptionalFieldRecords.t0_decode(sampleJson);
   testEqual(t, "decode", decoded, {
     TAG: "Ok",
     _0: sampleRecord
@@ -27,48 +29,54 @@ Zora.test("optional field record", t => {
 });
 
 Zora.test("optional field record: array<int>", t => {
-  let sample = {};
-  sample["a"] = 1;
-  sample["bs"] = [1];
+  let sample = {
+    a: 1,
+    bs: [1]
+  };
+  let sampleJson = sample;
   let sampleRecord_bs = [1];
   let sampleRecord = {
     a: 1,
     bs: sampleRecord_bs
   };
   let encoded = OptionalFieldRecords.t1_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = OptionalFieldRecords.t1_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = OptionalFieldRecords.t1_decode(sampleJson);
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
 });
 
 Zora.test("optional field record: array<variant>", t => {
-  let sample = {};
-  sample["a"] = 1;
-  sample["bs"] = ["B1"];
+  let sample = {
+    a: 1,
+    bs: ["B1"]
+  };
+  let sampleJson = sample;
   let sampleRecord_bs = ["B1"];
   let sampleRecord = {
     a: 1,
     bs: sampleRecord_bs
   };
   let encoded = OptionalFieldRecords.t2_encode(sampleRecord);
-  testEqual(t, "encode", encoded, sample);
-  let decoded = OptionalFieldRecords.t2_decode(sample);
-  testEqual(t, "decode", decoded, {
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = OptionalFieldRecords.t2_decode(sampleJson);
+  testEqual(t, `decode`, decoded, {
     TAG: "Ok",
     _0: sampleRecord
   });
 });
 
 Zora.test("optional field record: omit array<variant>", t => {
-  let sample = {};
-  sample["a"] = 1;
+  let sample = {
+    a: 1
+  };
+  let sampleJson = sample;
   let encoded = OptionalFieldRecords.t2_encode({
     a: 1
   });
-  testEqual(t, "encode", encoded, sample);
+  testEqual(t, `encode`, encoded, sampleJson);
 });
 
 export {

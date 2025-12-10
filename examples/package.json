@@ -5,14 +5,15 @@
   "description": "Examples for the Spice PPX",
   "license": "MIT",
   "devDependencies": {
-    "rescript": "^11.0.0-rc.4"
+    "rescript": "12.0.0"
   },
   "scripts": {
     "res:build": "rescript",
     "res:clean": "rescript clean",
-    "res:watch": "rescript build -w"
+    "res:format": "rescript format",
+    "res:watch": "rescript watch"
   },
   "dependencies": {
-    "@greenlabs/ppx-spice": "^0.1.15"
+    "@greenlabs/ppx-spice": "workspace:../"
   }
 }

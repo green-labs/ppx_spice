@@ -56,16 +56,18 @@ and generate_constr_codecs { do_encode; do_decode }
   | Lident "option" ->
       ( (if do_encode then Some [%expr Spice.optionToJson] else None),
         if do_decode then Some [%expr Spice.optionFromJson] else None )
-  | Ldot (Lident "Js", "null") | Ldot (Ldot (Lident "Js", "Null"), "t") ->
+  | Ldot (Lident "Js", "null")
+  | Ldot (Ldot (Lident "Js", "Null"), "t")
+  | Ldot (Lident "Null", "t") ->
       ( (if do_encode then Some [%expr Spice.nullToJson] else None),
         if do_decode then Some [%expr Spice.nullFromJson] else None )
-  | Ldot (Ldot (Lident "Belt", "Result"), "t") ->
+  | Lident "result" | Ldot (Ldot (Lident "Belt", "Result"), "t") ->
       ( (if do_encode then Some [%expr Spice.resultToJson] else None),
         if do_decode then Some [%expr Spice.resultFromJson] else None )
-  | Ldot (Ldot (Lident "Js", "Dict"), "t") ->
+  | Ldot (Ldot (Lident "Js", "Dict"), "t") | Ldot (Lident "Dict", "t") ->
       ( (if do_encode then Some [%expr Spice.dictToJson] else None),
         if do_decode then Some [%expr Spice.dictFromJson] else None )
-  | Ldot (Ldot (Lident "Js", "Json"), "t") ->
+  | Ldot (Ldot (Lident "Js", "Json"), "t") | Ldot (Lident "JSON", "t") ->
       ( (if do_encode then Some (Utils.expr_func ~arity:1 [%expr fun v -> v])
          else None),
         if do_decode then Some (Utils.expr_func ~arity:1 [%expr fun v -> Ok v])
