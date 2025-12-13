@@ -81,7 +81,10 @@ let arrayFromJson = (decoder, json) =>
       | (_, Error({path} as error)) =>
         Error({...error, path: "[" ++ (Int.toString(i) ++ ("]" ++ path))})
 
-      | (Ok(prev), Ok(newVal)) => Ok(Array.concat([newVal], prev))
+      | (Ok(prev), Ok(newVal)) => {
+          Array.push(prev, newVal)
+          Ok(prev)
+        }
       }
     )
 

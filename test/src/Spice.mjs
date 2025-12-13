@@ -175,10 +175,12 @@ function arrayFromJson(decoder, json) {
       if (acc.TAG !== "Ok") {
         return acc;
       }
+      let prev = acc._0;
       if (match.TAG === "Ok") {
+        prev.push(match._0);
         return {
           TAG: "Ok",
-          _0: [match._0].concat(acc._0)
+          _0: prev
         };
       }
       let error = match._0;
