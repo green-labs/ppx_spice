@@ -43,73 +43,11 @@ let generate_encoder decls unboxed =
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
       |> Utils.expr_func ~arity:1
 
-let generate_flat_decoder_expr decls =
+let generate_nested_switches decls =
   let loc = !default_loc in
   let dict_expr = Exp.ident (mknoloc (Longident.Lident "dict")) in
-  let field_results =
-    List.map
-      (fun d ->
-        let { name; key; codecs; default; is_optional; is_option } = d in
-        let result_name = name ^ "_result" in
-        let decode_expr =
-          match codecs with
-          | _, Some decode ->
-              let get_expr = [%expr Dict.get [%e dict_expr] [%e key]] in
-              let decode_applied = [%expr [%e decode]] in
-              let opt_map =
-                [%expr Option.map [%e get_expr] [%e decode_applied]]
-              in
-              let default_expr =
-                match (is_optional, is_option, default) with
-                | true, _, Some d ->
-                    [%expr Option.getOr [%e opt_map] (Ok [%e d])]
-                | true, _, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
-                | _, true, _ -> [%expr Option.getOr [%e opt_map] (Ok None)]
-                | _, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
-                | _, _, None ->
-                    [%expr
-                      Option.getOr [%e opt_map]
-                        (Spice.error ([%e key] ^ " missing") v)]
-              in
-              default_expr
-          | _ -> [%expr Spice.error ([%e key] ^ " missing") v]
-        in
-        (result_name, decode_expr))
-      decls
-  in
-  let let_bindings =
-    List.map
-      (fun (result_name, decode_expr) ->
-        Vb.mk (Pat.var (mknoloc result_name)) decode_expr)
-      field_results
-  in
-  let tuple_expr =
-    match field_results with
-    | [ (result_name, _) ] -> Exp.ident (mknoloc (Longident.Lident result_name))
-    | _ ->
-        Exp.tuple
-          (List.map
-             (fun (result_name, _) ->
-               Exp.ident (mknoloc (Longident.Lident result_name)))
-             field_results)
-  in
-  let ok_pattern =
-    match decls with
-    | [ d ] ->
-        let { name; _ } = d in
-        Pat.construct
-          (mknoloc (Longident.Lident "Ok"))
-          (Some (Pat.var (mknoloc name)))
-    | _ ->
-        Pat.tuple
-          (List.map
-             (fun d ->
-               let { name; _ } = d in
-               Pat.construct
-                 (mknoloc (Longident.Lident "Ok"))
-                 (Some (Pat.var (mknoloc name))))
-             decls)
-  in
+
+  (* Build the final Ok expression with the record *)
   let ok_expr =
     let record_fields =
       List.map
@@ -121,39 +59,57 @@ let generate_flat_decoder_expr decls =
     in
     [%expr Ok [%e Exp.record record_fields None]]
   in
-  let error_patterns =
-    List.mapi
-      (fun i d ->
-        let { key; _ } = d in
-        let pats =
-          List.init (List.length decls) (fun j ->
-              if i = j then
-                Pat.construct
-                  (mknoloc (Longident.Lident "Error"))
-                  (Some
-                     (Pat.constraint_
-                        (Pat.var (mknoloc "e"))
-                        (Typ.constr
-                           (mknoloc (Longident.parse "Spice.decodeError"))
-                           [])))
-              else Pat.any ())
+
+  (* Generate nested match expressions from inside out (reverse order) *)
+  let generate_decode_expr d =
+    let { name; key; codecs; default; is_optional; is_option } = d in
+    match codecs with
+    | _, Some decode ->
+        let get_expr = [%expr Dict.get [%e dict_expr] [%e key]] in
+        let decode_applied = [%expr [%e decode]] in
+        let opt_map = [%expr Option.map [%e get_expr] [%e decode_applied]] in
+        let default_expr =
+          match (is_optional, is_option, default) with
+          | true, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
+          | true, _, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
+          | _, true, _ -> [%expr Option.getOr [%e opt_map] (Ok None)]
+          | _, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
+          | _, _, None ->
+              [%expr
+                Option.getOr [%e opt_map]
+                  (Spice.error ([%e key] ^ " missing") v)]
         in
-        let pat = match pats with [ p ] -> p | _ -> Pat.tuple pats in
-        Exp.case pat [%expr Spice.error ~path:[%e key] e.message e.value])
-      decls
+        (name, key, default_expr)
+    | _ -> (name, key, [%expr Spice.error ([%e key] ^ " missing") v])
   in
-  let match_expr =
-    Exp.match_ tuple_expr (Exp.case ok_pattern ok_expr :: error_patterns)
+
+  (* Build nested matches from the last field backwards using iterative approach *)
+  let build_nested_matches decls inner_expr =
+    let rec loop acc = function
+      | [] -> acc
+      | d :: rest ->
+          let name, key, decode_expr = generate_decode_expr d in
+          let var_pat = Pat.var (mknoloc name) in
+          let ok_case = Exp.case
+            (Pat.construct (mknoloc (Longident.Lident "Ok")) (Some var_pat)) acc in
+          let error_case =
+            Exp.case
+              (Pat.construct
+                 (mknoloc (Longident.Lident "Error"))
+                 (Some
+                    (Pat.constraint_ (Pat.var (mknoloc "e"))
+                       (Typ.constr
+                          (mknoloc (Longident.parse "Spice.decodeError"))
+                          []))))
+              [%expr Spice.error ~path:[%e key] e.message e.value]
+          in
+          let match_expr = Exp.match_ decode_expr [ ok_case; error_case ] in
+          loop match_expr rest
+    in
+    loop inner_expr (List.rev decls)
   in
-  List.fold_right
-    (fun vb acc -> Exp.let_ Nonrecursive [ vb ] acc)
-    let_bindings match_expr
 
-let generate_nested_switches_recurse _path decls _remaining_decls =
-  generate_flat_decoder_expr decls
-
-let generate_nested_switches decls =
-  generate_nested_switches_recurse [] decls decls
+  build_nested_matches decls ok_expr
 
 let generate_decoder decls unboxed =
   match unboxed with
@@ -175,24 +131,24 @@ let generate_decoder decls unboxed =
             | _ -> Spice.error "Not an object" v]
 
 let parse_decl generator_settings
-    { pld_name = { txt }; pld_loc; pld_type; pld_attributes } =
-  let default =
-    match get_attribute_by_name pld_attributes "spice.default" with
-    | Ok (Some attribute) -> Some (get_expression_from_payload attribute)
-    | Ok None -> None
-    | Error s -> fail pld_loc s
+    { pld_name = { txt }; pld_loc = _; pld_type; pld_attributes } =
+  let default, key, is_optional =
+    List.fold_left
+      (fun (default, key, is_optional) ({ attr_name = { txt = name } } as attr)
+      ->
+        match name with
+        | "spice.default" ->
+            (Some (get_expression_from_payload attr), key, is_optional)
+        | "spice.key" ->
+            (default, Some (get_expression_from_payload attr), is_optional)
+        | "ns.optional" | "res.optional" -> (default, key, true)
+        | _ -> (default, key, is_optional))
+      (None, None, false) pld_attributes
   in
   let key =
-    match get_attribute_by_name pld_attributes "spice.key" with
-    | Ok (Some attribute) -> get_expression_from_payload attribute
-    | Ok None -> Exp.constant (Pconst_string (txt, Location.none, Some "*j"))
-    | Error s -> fail pld_loc s
-  in
-  let optional_attrs = [ "ns.optional"; "res.optional" ] in
-  let is_optional =
-    optional_attrs
-    |> List.map (fun attr -> get_attribute_by_name pld_attributes attr)
-    |> List.exists (function Ok (Some _) -> true | _ -> false)
+    match key with
+    | Some k -> k
+    | None -> Exp.constant (Pconst_string (txt, Location.none, Some "*j"))
   in
   let is_option = Utils.check_option_type pld_type in
   let codecs = Codecs.generate_codecs generator_settings pld_type in

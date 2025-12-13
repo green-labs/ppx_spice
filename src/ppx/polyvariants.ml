@@ -1,3 +1,4 @@
+open Ppxlib
 open Parsetree
 open Ast_helper
 open Utils
@@ -49,19 +50,19 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
         | _ ->
             args
             |> List.mapi (fun i _ ->
-                   mkloc ("v" ^ string_of_int i) loc |> Pat.var)
+                mkloc ("v" ^ string_of_int i) loc |> Pat.var)
             |> Pat.tuple
             |> fun v -> Some v
       in
 
       let rhs_list =
-        args
-        |> List.map (Codecs.generate_codecs generator_settings)
-        |> List.map (fun (encoder, _) -> Option.get encoder)
-        |> List.mapi (fun i e ->
-               Exp.apply ~loc e
+        json_expr
+        :: List.mapi
+             (fun i arg ->
+               let encoder, _ = Codecs.generate_codecs generator_settings arg in
+               Exp.apply ~loc (Option.get encoder)
                  [ (Asttypes.Nolabel, make_ident_expr ("v" ^ string_of_int i)) ])
-        |> List.append [ json_expr ]
+             args
       in
 
       {
@@ -76,43 +77,66 @@ let generate_encoder_case generator_settings unboxed has_attr_as row =
   | Rinherit arg ->
       fail arg.ptyp_loc "This syntax is not yet implemented by spice"
 
-let generate_decode_success_case num_args constructor_name =
-  {
-    pc_lhs =
-      Array.init num_args (fun i ->
-          mknoloc ("v" ^ string_of_int i) |> Pat.var |> fun p ->
-          [%pat? Ok [%p p]])
-      |> Array.to_list
-      |> tuple_or_singleton Pat.tuple;
-    pc_guard = None;
-    pc_rhs =
-      ( Array.init num_args (fun i -> make_ident_expr ("v" ^ string_of_int i))
-      |> Array.to_list
-      |> tuple_or_singleton Exp.tuple
-      |> fun v ->
-        Some v |> Exp.variant constructor_name |> fun e -> [%expr Ok [%e e]] );
-  }
-
+(* O(n) nested matching for polyvariant arg decoding - replaces O(n²) pattern generation *)
 let generate_arg_decoder generator_settings args constructor_name =
   let num_args = List.length args in
-  args
-  |> List.mapi (Decode_cases.generate_error_case num_args)
-  |> List.append [ generate_decode_success_case num_args constructor_name ]
-  |> Exp.match_
-       (args
-       |> List.map (Codecs.generate_codecs generator_settings)
-       |> List.mapi (fun i (_, decoder) ->
-              Exp.apply (Option.get decoder)
-                [
-                  ( Asttypes.Nolabel,
-                    (* +1 because index 0 is the constructor *)
-                    let idx =
-                      Pconst_integer (string_of_int (i + 1), None)
-                      |> Exp.constant
-                    in
-                    [%expr Array.getUnsafe json_arr [%e idx]] );
-                ])
-       |> tuple_or_singleton Exp.tuple)
+
+  (* Build the final Ok expression with the constructed polyvariant *)
+  let ok_expr =
+    let tuple_elements =
+      Array.init num_args (fun i -> make_ident_expr ("v" ^ string_of_int i))
+      |> Array.to_list
+      |> tuple_or_singleton Exp.tuple
+    in
+    let constructed = Exp.variant constructor_name (Some tuple_elements) in
+    [%expr Ok [%e constructed]]
+  in
+
+  (* Generate decode expression for each arg *)
+  let generate_decode_expr i (_, decoder) =
+    let idx = Pconst_integer (string_of_int (i + 1), None) |> Exp.constant in
+    [%expr [%e Option.get decoder] (Array.getUnsafe json_arr [%e idx])]
+  in
+
+  (* Build nested matches from the last arg backwards *)
+  let build_nested_matches indexed_codecs inner_expr =
+    let rec loop acc = function
+      | [] -> acc
+      | (i, codec) :: rest ->
+          let decode_expr = generate_decode_expr i codec in
+          let var_pat = Pat.var (mknoloc ("v" ^ string_of_int i)) in
+          let ok_case =
+            Exp.case
+              (Pat.construct (mknoloc (Longident.Lident "Ok")) (Some var_pat))
+              acc
+          in
+          let error_case =
+            Exp.case
+              (Pat.construct
+                 (mknoloc (Longident.Lident "Error"))
+                 (Some
+                    (Pat.constraint_
+                       (Pat.var (mknoloc "e"))
+                       (Typ.constr
+                          (mknoloc
+                             (Longident.Ldot
+                                (Longident.Lident "Spice", "decodeError")))
+                          []))))
+              [%expr
+                Error
+                  (* +1 because index 0 is the constructor *)
+                  { e with path = [%e index_const (i + 1)] ^ e.path }]
+          in
+          let match_expr = Exp.match_ decode_expr [ ok_case; error_case ] in
+          loop match_expr rest
+    in
+    loop inner_expr (List.rev indexed_codecs)
+  in
+
+  (* Create indexed list of codecs *)
+  let codecs = List.map (Codecs.generate_codecs generator_settings) args in
+  let indexed_codecs = List.mapi (fun i c -> (i, c)) codecs in
+  build_nested_matches indexed_codecs ok_expr
 
 let generate_decoder_case generator_settings { prf_desc } =
   match prf_desc with
@@ -133,7 +157,7 @@ let generate_decoder_case generator_settings { prf_desc } =
       {
         pc_lhs =
           ( Pconst_string (txt, Location.none, None) |> Pat.constant |> fun v ->
-            Some ([], v) |> Pat.construct (lid "JSON.String") );
+            Some v |> Pat.construct (lid "JSON.String") );
         pc_guard = None;
         pc_rhs =
           [%expr
@@ -216,10 +240,14 @@ let parse_decl ({ prf_desc; prf_loc; prf_attributes } as row_field) =
 
 let generate_codecs ({ do_encode; do_decode } as generator_settings) row_fields
     unboxed =
-  let parsed_fields = List.map parse_decl row_fields in
-  let count_has_attr =
-    parsed_fields |> List.filter (fun v -> v.has_attr_as) |> List.length
+  let parsed_fields, count_has_attr =
+    List.fold_left
+      (fun (acc, count) decl ->
+        let parsed = parse_decl decl in
+        (parsed :: acc, if parsed.has_attr_as then count + 1 else count))
+      ([], 0) row_fields
   in
+  let parsed_fields = List.rev parsed_fields in
   let has_attr_as =
     if count_has_attr > 0 then
       if count_has_attr = List.length parsed_fields then true
