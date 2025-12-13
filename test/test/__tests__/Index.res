@@ -1,3 +1,4 @@
+include Arrays_test
 include Encode_decode_test
 include Optional_field_records_test
 include Polyvariants_test
