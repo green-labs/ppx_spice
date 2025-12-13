@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.1 (unreleased)
+
+- Adds support for codec generation for `dict<'a>` and `Result.t<'ok, 'err>` types
+
 ## 0.3.0
 
 - BREAKING: changes to support rescript v12, will now generate codecs that use Stdlib instead of Js or Belt.
@@ -45,7 +49,7 @@
 ## 0.2.1
 
 - a190663 Utilize Js.Json.Boolean(bool) instead oif Js.Json.True, False https://github.com/green-labs/ppx_spice/pull/58
-- a190663 Add support of uncurried mode for interface(*.resi) https://github.com/green-labs/ppx_spice/pull/58
+- a190663 Add support of uncurried mode for interface(\*.resi) https://github.com/green-labs/ppx_spice/pull/58
 - Support the compiler v11-rc.5 https://github.com/green-labs/ppx_spice/pull/61
 - Add the feature of encoding/decoding between the number and (polymorphic)variant with `@spice.as` https://github.com/green-labs/ppx_spice/pull/64
 - Fix generating encode, decode function when `@spice.as` with number https://github.com/green-labs/ppx_spice/pull/74
