@@ -2,26 +2,49 @@ open Ppxlib
 open Parsetree
 open Utils
 
-let rec add_encoder_params param_names result_type =
+(** For parameterized types, generate a function type that takes all type
+    parameter codecs at once and returns the final encoder. e.g.
+
+    type t<'a, 'b>: ('a => JSON.t, 'b => JSON.t) => t<'a, 'b> => JSON.t *)
+let add_encoder_params param_names result_type =
   match param_names with
   | [] -> result_type
-  | hd :: tl ->
-      [%type: ([%t Ast_helper.Typ.var hd] -> JSON.t) -> [%t result_type]]
-      |> Utils.ctyp_arrow ~arity:1 |> add_encoder_params tl
+  | _ ->
+      let num_params, params_arrow =
+        List.fold_right
+          (fun name (count, acc) ->
+            let param_type =
+              [%type: [%t Ast_helper.Typ.var name] -> JSON.t]
+              |> Utils.ctyp_arrow ~arity:1
+            in
+            (count + 1, [%type: [%t param_type] -> [%t acc]]))
+          param_names (0, result_type)
+      in
+      Utils.ctyp_arrow ~arity:num_params params_arrow
 
 let make_result_type value_type =
   [%type: ([%t value_type], Spice.decodeError) result]
 
-let rec add_decoder_params param_names result_type =
+(** For parameterized types, generate a function type that takes all type
+    parameter codecs at once and returns the final decoder. e.g., for
+
+    type t<'a, 'b>: (JSON.t => result<'a, _>, JSON.t => result<'b, _>) => JSON.t
+    => result<t<'a, 'b>, _> *)
+let add_decoder_params param_names result_type =
   match param_names with
   | [] -> result_type
-  | hd :: tl ->
-      let decoder_param =
-        [%type: JSON.t -> [%t make_result_type (Ast_helper.Typ.var hd)]]
-        |> Utils.ctyp_arrow ~arity:1
+  | _ ->
+      let num_params, params_arrow =
+        List.fold_right
+          (fun name (count, acc) ->
+            let param_type =
+              [%type: JSON.t -> [%t make_result_type (Ast_helper.Typ.var name)]]
+              |> Utils.ctyp_arrow ~arity:1
+            in
+            (count + 1, [%type: [%t param_type] -> [%t acc]]))
+          param_names (0, result_type)
       in
-      [%type: [%t decoder_param] -> [%t result_type]]
-      |> Utils.ctyp_arrow ~arity:1 |> add_decoder_params tl
+      Utils.ctyp_arrow ~arity:num_params params_arrow
 
 let generate_sig_decls { do_encode; do_decode } type_name param_names =
   let encoder_pat = type_name ^ Utils.encoder_func_suffix in
@@ -40,7 +63,7 @@ let generate_sig_decls { do_encode; do_decode } type_name param_names =
         decls
         @ [
             [%type: [%t value_type] -> JSON.t] |> Utils.ctyp_arrow ~arity:1
-            |> add_encoder_params (List.rev param_names)
+            |> add_encoder_params param_names
             |> Ast_helper.Val.mk (mknoloc encoder_pat)
             |> Ast_helper.Sig.value;
           ]
@@ -53,7 +76,7 @@ let generate_sig_decls { do_encode; do_decode } type_name param_names =
         @ [
             [%type: JSON.t -> [%t make_result_type value_type]]
             |> Utils.ctyp_arrow ~arity:1
-            |> add_decoder_params (List.rev param_names)
+            |> add_decoder_params param_names
             |> Ast_helper.Val.mk (mknoloc decoder_pat)
             |> Ast_helper.Sig.value;
           ]
