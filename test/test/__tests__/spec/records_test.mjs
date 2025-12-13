@@ -158,6 +158,57 @@ Zora.test("record with bigint", t => {
   }), "decode");
 });
 
+Zora.test("generic record with single type parameter", t => {
+  let sample = {
+    a: [
+      "one",
+      "two",
+      "three"
+    ]
+  };
+  let sampleJson = sample;
+  let sampleRecord = {
+    a: [
+      "one",
+      "two",
+      "three"
+    ]
+  };
+  let encoded = Records.t5_string_encode(sampleRecord);
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = Records.t5_string_decode(sampleJson);
+  let expectedDecoded = {
+    a: [
+      "three",
+      "two",
+      "one"
+    ]
+  };
+  testEqual(t, `decode`, decoded, {
+    TAG: "Ok",
+    _0: expectedDecoded
+  });
+});
+
+Zora.test("generic record with multiple type parameters", t => {
+  let sample = {
+    key: "myKey",
+    value: 42.0
+  };
+  let sampleJson = sample;
+  let sampleRecord = {
+    key: "myKey",
+    value: 42
+  };
+  let encoded = Records.t6_string_int_encode(sampleRecord);
+  testEqual(t, `encode`, encoded, sampleJson);
+  let decoded = Records.t6_string_int_decode(sampleJson);
+  testEqual(t, `decode`, decoded, {
+    TAG: "Ok",
+    _0: sampleRecord
+  });
+});
+
 export {
   testEqual,
   deepEqualWithBigInt,
