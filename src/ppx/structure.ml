@@ -4,13 +4,23 @@ open Ast_helper
 open Codecs
 open Utils
 
+(** For parameterized types, generate a function type that takes all type
+    parameter codecs at once and returns the final decoder. e.g.
+
+    type t<'a, 'b>: (JSON.t => result<'a, _>, (JSON.t => result<'b, _>) =>
+    JSON.t => result<t<'a, 'b>, _> *)
 let add_params param_names expr =
-  List.fold_right
-    (fun s acc ->
-      let pat = Pat.var (mknoloc s) in
-      Exp.fun_ Asttypes.Nolabel None pat acc)
-    param_names
-    (Utils.expr_func ~arity:1 [%expr fun v -> [%e expr] v])
+  match param_names with
+  | [] -> expr
+  | _ ->
+      let num_params, with_params =
+        List.fold_right
+          (fun s (count, acc) ->
+            let pat = Pat.var (mknoloc s) in
+            (count + 1, Exp.fun_ Asttypes.Nolabel None pat acc))
+          param_names (0, expr)
+      in
+      Utils.expr_func ~arity:num_params with_params
 
 let generate_codec_decls type_name param_names (encoder, decoder) =
   let encoder_pat = Pat.var (mknoloc (type_name ^ Utils.encoder_func_suffix)) in

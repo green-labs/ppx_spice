@@ -282,6 +282,78 @@ function t4_decode(v) {
   return Spice.error("a", e$2.message, e$2.value);
 }
 
+function t5_encode(encoder_data) {
+  return v => (Object.fromEntries(Spice.filterOptional([[
+      "a",
+      Spice.arrayToJson(encoder_data, v.a)
+    ]])));
+}
+
+function t5_decode(decoder_data) {
+  return v => {
+    if (typeof v !== "object" || v === null || Array.isArray(v)) {
+      return Spice.error(undefined, "Not an object", v);
+    }
+    let a_result = Stdlib_Option.getOr(Stdlib_Option.map(v["a"], extra => Spice.arrayFromJson(decoder_data, extra)), Spice.error(undefined, "a" + " missing", v));
+    if (a_result.TAG === "Ok") {
+      return {
+        TAG: "Ok",
+        _0: {
+          a: a_result._0
+        }
+      };
+    }
+    let e = a_result._0;
+    return Spice.error("a", e.message, e.value);
+  };
+}
+
+let t5_string_encode = t5_encode(Spice.stringToJson);
+
+let t5_string_decode = t5_decode(Spice.stringFromJson);
+
+function t6_encode(encoder_key, encoder_value) {
+  return v => (Object.fromEntries(Spice.filterOptional([
+    [
+      "key",
+      encoder_key(v.key)
+    ],
+    [
+      "value",
+      encoder_value(v.value)
+    ]
+  ])));
+}
+
+function t6_decode(decoder_key, decoder_value) {
+  return v => {
+    if (typeof v !== "object" || v === null || Array.isArray(v)) {
+      return Spice.error(undefined, "Not an object", v);
+    }
+    let key_result = Stdlib_Option.getOr(Stdlib_Option.map(v["key"], decoder_key), Spice.error(undefined, "key" + " missing", v));
+    let value_result = Stdlib_Option.getOr(Stdlib_Option.map(v["value"], decoder_value), Spice.error(undefined, "value" + " missing", v));
+    if (key_result.TAG === "Ok") {
+      if (value_result.TAG === "Ok") {
+        return {
+          TAG: "Ok",
+          _0: {
+            key: key_result._0,
+            value: value_result._0
+          }
+        };
+      }
+      let e = value_result._0;
+      return Spice.error("value", e.message, e.value);
+    }
+    let e$1 = key_result._0;
+    return Spice.error("key", e$1.message, e$1.value);
+  };
+}
+
+let t6_string_int_encode = t6_encode(Spice.stringToJson, Spice.intToJson);
+
+let t6_string_int_decode = t6_decode(Spice.stringFromJson, Spice.intFromJson);
+
 export {
   t_encode,
   t_decode,
@@ -295,5 +367,13 @@ export {
   t3_decode,
   t4_encode,
   t4_decode,
+  t5_encode,
+  t5_decode,
+  t5_string_encode,
+  t5_string_decode,
+  t6_encode,
+  t6_decode,
+  t6_string_int_encode,
+  t6_string_int_decode,
 }
-/* No side effect */
+/* t5_string_encode Not a pure module */

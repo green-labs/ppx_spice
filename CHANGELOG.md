@@ -3,6 +3,7 @@
 ## 0.3.1 (unreleased)
 
 - Fixes [#107](https://github.com/green-labs/ppx_spice/issues/107) Arrays being reversed by Spice.arrayFromJson
+- Fixes [#105](https://github.com/green-labs/ppx_spice/issues/105) Arity of generated codecs was incorrect, causing a type error when called.
 
 ## 0.3.0
 
