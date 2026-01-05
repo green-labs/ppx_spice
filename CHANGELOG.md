@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.1 (unreleased)
+
+- Fixes [#107](https://github.com/green-labs/ppx_spice/issues/107) Arrays being reversed by Spice.arrayFromJson
+
 ## 0.3.0
 
 - BREAKING: changes to support rescript v12, will now generate codecs that use Stdlib instead of Js or Belt.
