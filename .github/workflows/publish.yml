@@ -1,4 +1,4 @@
-name: @jfrolich/ppx-spice publish
+name: "@jfrolich/ppx-spice publish"
 
 on:
   workflow_dispatch:
