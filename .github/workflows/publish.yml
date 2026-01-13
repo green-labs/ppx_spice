@@ -1,4 +1,4 @@
-name: ppx_spice publish
+name: @jfrolich/ppx-spice publish
 
 on:
   workflow_dispatch:
@@ -199,8 +199,8 @@ jobs:
         if: success()
         run: |
           if [ "${NPM_TAG:-latest}" = "latest" ]; then
-            npm publish
+            npm publish --access public
           else
-            npm publish --tag "${NPM_TAG}"
+            npm publish --access public --tag "${NPM_TAG}"
           fi
 

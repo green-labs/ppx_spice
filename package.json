@@ -1,5 +1,5 @@
 {
-  "name": "@greenlabs/ppx-spice",
+  "name": "@jfrolich/ppx-spice",
   "version": "0.3.0",
   "packageManager": "yarn@1.22.22",
   "description": "ReScript PPX which generate JSON (de)serializer",
@@ -7,10 +7,10 @@
   "author": "Greenlabs Dev <developer@greenlabs.co.kr>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/green-labs/ppx_spice.git"
+    "url": "git+https://github.com/jfrolich/ppx_spice.git"
   },
   "bugs": {
-    "url": "https://github.com/green-labs/ppx_spice/issues"
+    "url": "https://github.com/jfrolich/ppx_spice/issues"
   },
   "keywords": [
     "ReScript",
