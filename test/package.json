@@ -4,7 +4,7 @@
   "description": "Test spice ppx",
   "license": "MIT",
   "devDependencies": {
-    "@greenlabs/ppx-spice": "workspace:../",
+    "@jfrolich/ppx-spice": "workspace:../",
     "@dusty-phillips/rescript-zora": "^4.0.0",
     "onchange": "^7.1.0",
     "pta": "^1.2.0",

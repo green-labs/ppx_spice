@@ -20,7 +20,7 @@
   "suffix": ".mjs",
   "dependencies": [],
   "dev-dependencies": ["@dusty-phillips/rescript-zora"],
-  "ppx-flags": ["@greenlabs/ppx-spice/ppx"],
+  "ppx-flags": ["@jfrolich/ppx-spice/ppx"],
   "warnings": {
     "error": true,
     "number": "-48"

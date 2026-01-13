@@ -1,5 +1,5 @@
 {
-  "name": "@greenlabs/ppx-spice",
+  "name": "@jfrolich/ppx-spice",
   "sources": [
     {
       "dir": "src",
