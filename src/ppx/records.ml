@@ -70,10 +70,9 @@ let generate_nested_decoder decls =
         let decode_applied = [%expr [%e decode]] in
         let opt_map = [%expr Option.map [%e get_expr] [%e decode_applied]] in
         (match (is_optional, is_option, default) with
-        | true, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
-        | true, _, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
-        | _, true, _ -> [%expr Option.getOr [%e opt_map] (Ok None)]
         | _, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
+        | true, _, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
+        | _, true, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
         | _, _, None ->
             [%expr
               Option.getOr [%e opt_map] (Spice.error ([%e key] ^ " missing") v)])
