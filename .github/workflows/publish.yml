@@ -197,6 +197,8 @@ jobs:
 
       - name: Publish
         if: success()
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           if [ "${NPM_TAG:-latest}" = "latest" ]; then
             npm publish --access public
