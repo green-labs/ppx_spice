@@ -233,6 +233,10 @@ jobs:
           mv binaries/darwin-arm64/ppx.exe ppx-osx-arm64.exe
           mv binaries/windows/ppx.exe ppx-windows.exe
 
+      - name: Set executable permissions
+        if: success()
+        run: chmod +x ppx-linux.exe ppx-osx.exe
+
       - name: Pack package
         if: success()
         run: npm pack
