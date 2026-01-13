@@ -67,7 +67,7 @@ jobs:
 
   build_macos_x64:
     name: macOS-x64
-    runs-on: macos-13
+    runs-on: macos-15
     defaults:
       run:
         working-directory: src
