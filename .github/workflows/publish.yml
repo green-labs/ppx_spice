@@ -235,7 +235,7 @@ jobs:
 
       - name: Set executable permissions
         if: success()
-        run: chmod +x ppx-linux.exe ppx-osx.exe
+        run: chmod +x ppx-linux.exe ppx-osx-x64.exe ppx-osx-arm64.exe
 
       - name: Pack package
         if: success()
