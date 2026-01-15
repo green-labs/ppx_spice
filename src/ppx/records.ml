@@ -43,73 +43,12 @@ let generate_encoder decls unboxed =
       |> Exp.fun_ Asttypes.Nolabel None [%pat? v]
       |> Utils.expr_func ~arity:1
 
-let generate_flat_decoder_expr decls =
+(* O(n) nested match decoder - replaces O(n²) tuple pattern matching *)
+let generate_nested_decoder decls =
   let loc = !default_loc in
   let dict_expr = Exp.ident (mknoloc (Longident.Lident "dict")) in
-  let field_results =
-    List.map
-      (fun d ->
-        let { name; key; codecs; default; is_optional; is_option } = d in
-        let result_name = name ^ "_result" in
-        let decode_expr =
-          match codecs with
-          | _, Some decode ->
-              let get_expr = [%expr Dict.get [%e dict_expr] [%e key]] in
-              let decode_applied = [%expr [%e decode]] in
-              let opt_map =
-                [%expr Option.map [%e get_expr] [%e decode_applied]]
-              in
-              let default_expr =
-                match (is_optional, is_option, default) with
-                | true, _, Some d ->
-                    [%expr Option.getOr [%e opt_map] (Ok [%e d])]
-                | true, _, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
-                | _, true, _ -> [%expr Option.getOr [%e opt_map] (Ok None)]
-                | _, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
-                | _, _, None ->
-                    [%expr
-                      Option.getOr [%e opt_map]
-                        (Spice.error ([%e key] ^ " missing") v)]
-              in
-              default_expr
-          | _ -> [%expr Spice.error ([%e key] ^ " missing") v]
-        in
-        (result_name, decode_expr))
-      decls
-  in
-  let let_bindings =
-    List.map
-      (fun (result_name, decode_expr) ->
-        Vb.mk (Pat.var (mknoloc result_name)) decode_expr)
-      field_results
-  in
-  let tuple_expr =
-    match field_results with
-    | [ (result_name, _) ] -> Exp.ident (mknoloc (Longident.Lident result_name))
-    | _ ->
-        Exp.tuple
-          (List.map
-             (fun (result_name, _) ->
-               Exp.ident (mknoloc (Longident.Lident result_name)))
-             field_results)
-  in
-  let ok_pattern =
-    match decls with
-    | [ d ] ->
-        let { name; _ } = d in
-        Pat.construct
-          (mknoloc (Longident.Lident "Ok"))
-          (Some (Pat.var (mknoloc name)))
-    | _ ->
-        Pat.tuple
-          (List.map
-             (fun d ->
-               let { name; _ } = d in
-               Pat.construct
-                 (mknoloc (Longident.Lident "Ok"))
-                 (Some (Pat.var (mknoloc name))))
-             decls)
-  in
+
+  (* Build the final Ok expression with the record *)
   let ok_expr =
     let record_fields =
       List.map
@@ -121,39 +60,60 @@ let generate_flat_decoder_expr decls =
     in
     [%expr Ok [%e Exp.record record_fields None]]
   in
-  let error_patterns =
-    List.mapi
-      (fun i d ->
-        let { key; _ } = d in
-        let pats =
-          List.init (List.length decls) (fun j ->
-              if i = j then
-                Pat.construct
-                  (mknoloc (Longident.Lident "Error"))
-                  (Some
-                     (Pat.constraint_
-                        (Pat.var (mknoloc "e"))
-                        (Typ.constr
-                           (mknoloc (Longident.parse "Spice.decodeError"))
-                           [])))
-              else Pat.any ())
-        in
-        let pat = match pats with [ p ] -> p | _ -> Pat.tuple pats in
-        Exp.case pat [%expr Spice.error ~path:[%e key] e.message e.value])
-      decls
-  in
-  let match_expr =
-    Exp.match_ tuple_expr (Exp.case ok_pattern ok_expr :: error_patterns)
-  in
-  List.fold_right
-    (fun vb acc -> Exp.let_ Nonrecursive [ vb ] acc)
-    let_bindings match_expr
 
-let generate_nested_switches_recurse _path decls _remaining_decls =
-  generate_flat_decoder_expr decls
+  (* Generate decode expression for a single field *)
+  let generate_decode_expr d =
+    let { key; codecs; default; is_optional; is_option; _ } = d in
+    match codecs with
+    | _, Some decode ->
+        let get_expr = [%expr Dict.get [%e dict_expr] [%e key]] in
+        let decode_applied = [%expr [%e decode]] in
+        let opt_map = [%expr Option.map [%e get_expr] [%e decode_applied]] in
+        (match (is_optional, is_option, default) with
+        | _, _, Some d -> [%expr Option.getOr [%e opt_map] (Ok [%e d])]
+        | true, _, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
+        | _, true, None -> [%expr Option.getOr [%e opt_map] (Ok None)]
+        | _, _, None ->
+            [%expr
+              Option.getOr [%e opt_map] (Spice.error ([%e key] ^ " missing") v)])
+    | _ -> [%expr Spice.error ([%e key] ^ " missing") v]
+  in
+
+  (* Build nested matches from the last field backwards *)
+  let build_nested_matches decls inner_expr =
+    let rec loop acc = function
+      | [] -> acc
+      | d :: rest ->
+          let { name; key; _ } = d in
+          let decode_expr = generate_decode_expr d in
+          let var_pat = Pat.var (mknoloc name) in
+          let ok_case =
+            Exp.case
+              (Pat.construct (mknoloc (Longident.Lident "Ok")) (Some var_pat))
+              acc
+          in
+          let error_case =
+            Exp.case
+              (Pat.construct
+                 (mknoloc (Longident.Lident "Error"))
+                 (Some
+                    (Pat.constraint_
+                       (Pat.var (mknoloc "e"))
+                       (Typ.constr
+                          (mknoloc (Longident.parse "Spice.decodeError"))
+                          []))))
+              [%expr Spice.error ~path:[%e key] e.message e.value]
+          in
+          let match_expr = Exp.match_ decode_expr [ ok_case; error_case ] in
+          loop match_expr rest
+    in
+    loop inner_expr (List.rev decls)
+  in
+
+  build_nested_matches decls ok_expr
 
 let generate_nested_switches decls =
-  generate_nested_switches_recurse [] decls decls
+  generate_nested_decoder decls
 
 let generate_decoder decls unboxed =
   match unboxed with
