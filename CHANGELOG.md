@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.3.1 (unreleased)
+## 0.3.1
 
 - Fixes [#107](https://github.com/green-labs/ppx_spice/issues/107) Arrays being reversed by Spice.arrayFromJson
 

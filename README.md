@@ -130,6 +130,7 @@ Read our [Guide with examples](docs/GUIDE.md)
 
 | Compiler      | Ppx_spice             | Note                          |
 | ------------- | --------------------- | ----------------------------- |
+| v12           | v0.3.0 >=             |                               |
 | v12-alpha.14  | v0.2.9 >=             | Bigint.fromFloat type changed |
 | v12-alpha.5   | v0.2.8                | Curried mode deprecated       |
 | v12-alpha.4   | v0.2.7 >= && > v0.2.2 |                               |
