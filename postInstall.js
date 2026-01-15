@@ -38,7 +38,9 @@ switch (process.platform) {
     installMacLinuxBinary("ppx-linux.exe");
     break;
   case "darwin":
-    installMacLinuxBinary("ppx-osx.exe");
+    // Detect macOS architecture: arm64 for Apple Silicon, x64 for Intel
+    const macBinary = process.arch === "arm64" ? "ppx-osx-arm64.exe" : "ppx-osx-x64.exe";
+    installMacLinuxBinary(macBinary);
     break;
   case "win32":
     installWindowsBinary();
