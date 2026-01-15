@@ -195,29 +195,58 @@ let parse_decl generator_settings
     |> List.exists (function Ok (Some _) -> true | _ -> false)
   in
   let is_option = Utils.check_option_type pld_type in
+  let is_null = Utils.check_null_type pld_type in
   let codecs = Codecs.generate_codecs generator_settings pld_type in
   let add_attrs attrs e = { e with pexp_attributes = attrs } in
   let codecs =
     if is_optional then
-      match codecs with
-      | Some encode, Some decode ->
-          ( Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionToJson [%e encode]]),
-            Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionFromJson [%e decode]]) )
-      | Some encode, _ ->
-          ( Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionToJson [%e encode]]),
-            None )
-      | _, Some decode ->
-          ( None,
-            Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionFromJson [%e decode]]) )
-      | None, None -> codecs
+      (* Special case for optional Null.t fields: use optionalNullFromJson
+         to correctly distinguish between absent field (None) and
+         present field with null value (Some(Null.Null)) *)
+      if is_null then
+        match Utils.get_null_inner_type pld_type with
+        | Some inner_type ->
+            let inner_codecs = Codecs.generate_codecs generator_settings inner_type in
+            (match codecs, inner_codecs with
+            | (Some encode, _), (_, Some inner_decode) ->
+                ( Some
+                    (add_attrs [ Utils.attr_partial ]
+                       [%expr Spice.optionToJson [%e encode]]),
+                  Some
+                    (add_attrs [ Utils.attr_partial ]
+                       [%expr Spice.optionalNullFromJson [%e inner_decode]]) )
+            | (Some encode, _), (_, None) ->
+                ( Some
+                    (add_attrs [ Utils.attr_partial ]
+                       [%expr Spice.optionToJson [%e encode]]),
+                  None )
+            | (None, _), (_, Some inner_decode) ->
+                ( None,
+                  Some
+                    (add_attrs [ Utils.attr_partial ]
+                       [%expr Spice.optionalNullFromJson [%e inner_decode]]) )
+            | (None, _), (_, None) -> codecs)
+        | None -> codecs
+      else
+        match codecs with
+        | Some encode, Some decode ->
+            ( Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionToJson [%e encode]]),
+              Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionFromJson [%e decode]]) )
+        | Some encode, _ ->
+            ( Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionToJson [%e encode]]),
+              None )
+        | _, Some decode ->
+            ( None,
+              Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionFromJson [%e decode]]) )
+        | None, None -> codecs
     else codecs
   in
 

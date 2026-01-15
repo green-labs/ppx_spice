@@ -131,6 +131,23 @@ zoraBlock("record with null", t => {
   t->testEqual(`decode`, decoded, Ok(sampleRecord))
 })
 
+zoraBlock("record with optional null field receiving explicit null", t => {
+  // Issue: https://github.com/green-labs/ppx_spice/issues/80
+  // When type is `on?: Null.t<string>` and JSON has `{on: null}`,
+  // encode -> decode should roundtrip correctly
+  let sampleRecord: Records.t2 = {
+    o: None,
+    n: Null.Null,
+    on: Null.Null, // This means Some(Null.Null) since on is optional
+    n2: Null.Value("n2"),
+  }
+
+  let encoded = sampleRecord->Records.t2_encode
+  let decoded = encoded->Records.t2_decode
+  // Roundtrip: encode then decode should return the original value
+  t->testEqual(`roundtrip encode->decode for optional Null.t field with null`, decoded, Ok(sampleRecord))
+})
+
 zoraBlock("record with spice.default", t => {
   let sample = dict{}
   let sampleJson = sample->JSON.Object

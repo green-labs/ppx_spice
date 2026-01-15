@@ -127,6 +127,14 @@ let nullFromJson = (decoder, json) =>
   | _ => Result.map(decoder(json), v => Null.Value(v))
   }
 
+// For optional Null.t fields: field?: Null.t<'a>
+// This handles the case where JSON null should decode to Some(Null.Null), not None
+let optionalNullFromJson = (decoder, json) =>
+  switch (json: JSON.t) {
+  | JSON.Null => Ok(Some(Null.Null))
+  | _ => Result.map(decoder(json), v => Some(Null.Value(v)))
+  }
+
 let resultToJson = (okEncoder, errorEncoder, result): JSON.t => JSON.Array(
   switch result {
   | Ok(v) => [JSON.String("Ok"), okEncoder(v)]
