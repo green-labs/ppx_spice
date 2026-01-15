@@ -131,6 +131,59 @@ zoraBlock("record with null", t => {
   t->testEqual(`decode`, decoded, Ok(sampleRecord))
 })
 
+zoraBlock("record with optional null field set to null", t => {
+  // Test the case where an optional Null.t field has an explicit null value
+  // Expected: {on: null} should decode to Some(Null.Null), not None
+  let sample = dict{
+    "n": JSON.Null,
+    "on": JSON.Null,
+    "n2": JSON.String("n2"),
+  }
+  let sampleJson = sample->JSON.Object
+
+  // For optional fields, we don't use Some() when constructing - just provide the value directly
+  let sampleRecord: Records.t2 = {
+    o: None,
+    n: Null.Null,
+    on: Null.Null,
+    n2: Null.Value("n2"),
+  }
+
+  let encoded = sampleRecord->Records.t2_encode
+  t->testEqual(`encode with explicit null for optional Null.t`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t2_decode
+  // ReScript omits option/optional fields in JS when constructing records directly,
+  // but dynamically created records may have these fields as `undefined` at runtime.
+  // This line ensures the test covers both cases.
+  let _ = %raw(`sampleRecord["o"]= undefined`)
+  t->testEqual(`decode with explicit null for optional Null.t`, decoded, Ok(sampleRecord))
+})
+
+zoraBlock("record with optional null field set to value", t => {
+  // Test the case where an optional Null.t field has an actual value
+  let sample = dict{
+    "n": JSON.Null,
+    "on": JSON.String("on_value"),
+    "n2": JSON.String("n2"),
+  }
+  let sampleJson = sample->JSON.Object
+
+  let sampleRecord: Records.t2 = {
+    o: None,
+    n: Null.Null,
+    on: Null.Value("on_value"),
+    n2: Null.Value("n2"),
+  }
+
+  let encoded = sampleRecord->Records.t2_encode
+  t->testEqual(`encode with value for optional Null.t`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t2_decode
+  let _ = %raw(`sampleRecord["o"]= undefined`)
+  t->testEqual(`decode with value for optional Null.t`, decoded, Ok(sampleRecord))
+})
+
 zoraBlock("record with spice.default", t => {
   let sample = dict{}
   let sampleJson = sample->JSON.Object

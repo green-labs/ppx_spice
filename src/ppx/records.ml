@@ -134,6 +134,16 @@ let generate_decoder decls unboxed =
             | JSON.Object dict -> [%e generate_nested_switches decls]
             | _ -> Spice.error "Not an object" v]
 
+(* Check if a type is Null.t<_> and return the inner type if so *)
+let get_null_inner_type pld_type =
+  match pld_type.ptyp_desc with
+  | Ptyp_constr ({ txt = Ldot (Lident "Null", "t"); _ }, [ inner_type ])
+  | Ptyp_constr
+      ({ txt = Ldot (Ldot (Lident "Js", "Null"), "t"); _ }, [ inner_type ])
+  | Ptyp_constr ({ txt = Ldot (Lident "Js", "null"); _ }, [ inner_type ]) ->
+      Some inner_type
+  | _ -> None
+
 let parse_decl generator_settings
     { pld_name = { txt }; pld_loc; pld_type; pld_attributes } =
   let default =
@@ -155,30 +165,58 @@ let parse_decl generator_settings
     |> List.exists (function Ok (Some _) -> true | _ -> false)
   in
   let is_option = Utils.check_option_type pld_type in
-  let codecs = Codecs.generate_codecs generator_settings pld_type in
   let add_attrs attrs e = { e with pexp_attributes = attrs } in
+
+  (* For optional Null.t<_> fields, use special codecs that correctly
+     distinguish between missing keys (None) and explicit null (Some(Null.Null)) *)
   let codecs =
-    if is_optional then
-      match codecs with
-      | Some encode, Some decode ->
-          ( Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionToJson [%e encode]]),
-            Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionFromJson [%e decode]]) )
-      | Some encode, _ ->
-          ( Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionToJson [%e encode]]),
-            None )
-      | _, Some decode ->
-          ( None,
-            Some
-              (add_attrs [ Utils.attr_partial ]
-                 [%expr Spice.optionFromJson [%e decode]]) )
-      | None, None -> codecs
-    else codecs
+    match (is_optional, get_null_inner_type pld_type) with
+    | true, Some inner_type ->
+        (* Generate codecs for the inner type, then wrap with optionalNull* *)
+        let inner_codecs = Codecs.generate_codecs generator_settings inner_type in
+        (match inner_codecs with
+        | Some inner_encode, Some inner_decode ->
+            ( Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionalNullToJson [%e inner_encode]]),
+              Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionalNullFromJson [%e inner_decode]]) )
+        | Some inner_encode, _ ->
+            ( Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionalNullToJson [%e inner_encode]]),
+              None )
+        | _, Some inner_decode ->
+            ( None,
+              Some
+                (add_attrs [ Utils.attr_partial ]
+                   [%expr Spice.optionalNullFromJson [%e inner_decode]]) )
+        | None, None -> (None, None))
+    | _ ->
+        (* Standard path for non-optional or non-Null.t fields *)
+        let codecs = Codecs.generate_codecs generator_settings pld_type in
+        if is_optional then
+          match codecs with
+          | Some encode, Some decode ->
+              ( Some
+                  (add_attrs [ Utils.attr_partial ]
+                     [%expr Spice.optionToJson [%e encode]]),
+                Some
+                  (add_attrs [ Utils.attr_partial ]
+                     [%expr Spice.optionFromJson [%e decode]]) )
+          | Some encode, _ ->
+              ( Some
+                  (add_attrs [ Utils.attr_partial ]
+                     [%expr Spice.optionToJson [%e encode]]),
+                None )
+          | _, Some decode ->
+              ( None,
+                Some
+                  (add_attrs [ Utils.attr_partial ]
+                     [%expr Spice.optionFromJson [%e decode]]) )
+          | None, None -> codecs
+        else codecs
   in
 
   {

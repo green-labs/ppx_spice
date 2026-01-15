@@ -116,6 +116,52 @@ Zora.test("record with null", t => {
   });
 });
 
+Zora.test("record with optional null field set to null", t => {
+  let sample = {
+    n: null,
+    on: null,
+    n2: "n2"
+  };
+  let sampleJson = sample;
+  let sampleRecord = {
+    o: undefined,
+    n: null,
+    on: null,
+    n2: "n2"
+  };
+  let encoded = Records.t2_encode(sampleRecord);
+  testEqual(t, `encode with explicit null for optional Null.t`, encoded, sampleJson);
+  let decoded = Records.t2_decode(sampleJson);
+  ((sampleRecord["o"]= undefined));
+  testEqual(t, `decode with explicit null for optional Null.t`, decoded, {
+    TAG: "Ok",
+    _0: sampleRecord
+  });
+});
+
+Zora.test("record with optional null field set to value", t => {
+  let sample = {
+    n: null,
+    on: "on_value",
+    n2: "n2"
+  };
+  let sampleJson = sample;
+  let sampleRecord = {
+    o: undefined,
+    n: null,
+    on: "on_value",
+    n2: "n2"
+  };
+  let encoded = Records.t2_encode(sampleRecord);
+  testEqual(t, `encode with value for optional Null.t`, encoded, sampleJson);
+  let decoded = Records.t2_decode(sampleJson);
+  ((sampleRecord["o"]= undefined));
+  testEqual(t, `decode with value for optional Null.t`, decoded, {
+    TAG: "Ok",
+    _0: sampleRecord
+  });
+});
+
 Zora.test("record with spice.default", t => {
   let sample = {};
   let sampleJson = sample;

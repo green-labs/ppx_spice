@@ -127,6 +127,23 @@ let nullFromJson = (decoder, json) =>
   | _ => Result.map(decoder(json), v => Null.Value(v))
   }
 
+// For optional Null.t fields: correctly handles explicit null vs missing key
+// - Missing key: handled by Option.map returning None
+// - Explicit null: returns Some(Null.Null)
+// - Value present: returns Some(Null.Value(x))
+let optionalNullToJson = (encoder, opt): option<JSON.t> =>
+  switch opt {
+  | Some(Null.Value(x)) => Some(encoder(x))
+  | Some(Null.Null) => Some(JSON.Null)
+  | None => None
+  }
+
+let optionalNullFromJson = (decoder, json) =>
+  switch (json: JSON.t) {
+  | JSON.Null => Ok(Some(Null.Null))
+  | _ => Result.map(decoder(json), v => Some(Null.Value(v)))
+  }
+
 let resultToJson = (okEncoder, errorEncoder, result): JSON.t => JSON.Array(
   switch result {
   | Ok(v) => [JSON.String("Ok"), okEncoder(v)]
