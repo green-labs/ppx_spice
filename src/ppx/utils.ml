@@ -146,3 +146,17 @@ let check_option_type { ptyp_desc } =
   match ptyp_desc with
   | Ptyp_constr ({ txt = Lident "option" }, [ _ ]) -> true
   | _ -> false
+
+let check_null_type { ptyp_desc } =
+  match ptyp_desc with
+  | Ptyp_constr ({ txt = Ldot (Lident "Js", "null") }, [ _ ]) -> true
+  | Ptyp_constr ({ txt = Ldot (Ldot (Lident "Js", "Null"), "t") }, [ _ ]) -> true
+  | Ptyp_constr ({ txt = Ldot (Lident "Null", "t") }, [ _ ]) -> true
+  | _ -> false
+
+let get_null_inner_type { ptyp_desc } =
+  match ptyp_desc with
+  | Ptyp_constr ({ txt = Ldot (Lident "Js", "null") }, [ inner ]) -> Some inner
+  | Ptyp_constr ({ txt = Ldot (Ldot (Lident "Js", "Null"), "t") }, [ inner ]) -> Some inner
+  | Ptyp_constr ({ txt = Ldot (Lident "Null", "t") }, [ inner ]) -> Some inner
+  | _ -> None
