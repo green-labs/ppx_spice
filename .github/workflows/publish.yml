@@ -65,17 +65,14 @@ jobs:
           path: src/ppx.exe
           if-no-files-found: error
 
-  build_macos:
-    name: ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
+  build_macos_x64:
+    name: macOS-x64
+    runs-on: macos-15
     defaults:
       run:
         working-directory: src
-    strategy:
-      matrix:
-        os: [macOS-latest]
-        ocaml-compiler:
-          - 4.14.2
+    env:
+      ocaml-compiler: 4.14.2
 
     steps:
       - uses: actions/checkout@v3
@@ -83,10 +80,10 @@ jobs:
           repository: ${{ env.TARGET_REPO }}
           ref: ${{ env.TARGET_REF }}
 
-      - name: Use OCaml ${{ matrix.ocaml-compiler}}
+      - name: Use OCaml ${{ env.ocaml-compiler }}
         uses: ocaml/setup-ocaml@v2
         with:
-          ocaml-compiler: ${{ matrix.ocaml-compiler }}
+          ocaml-compiler: ${{ env.ocaml-compiler }}
 
       - name: Install deps
         run: opam install . --deps-only --with-test
@@ -98,10 +95,47 @@ jobs:
         run: |
           mv ./_build/default/bin/bin.exe ppx.exe
 
-      - name: (only on release) Upload artifacts ${{ matrix.os }}
+      - name: Upload artifacts
         uses: actions/upload-artifact@master
         with:
-          name: ${{ matrix.os }}
+          name: macOS-x64
+          path: src/ppx.exe
+          if-no-files-found: error
+
+  build_macos_arm64:
+    name: macOS-arm64
+    runs-on: macos-14
+    defaults:
+      run:
+        working-directory: src
+    env:
+      ocaml-compiler: 4.14.2
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ env.TARGET_REPO }}
+          ref: ${{ env.TARGET_REF }}
+
+      - name: Use OCaml ${{ env.ocaml-compiler }}
+        uses: ocaml/setup-ocaml@v2
+        with:
+          ocaml-compiler: ${{ env.ocaml-compiler }}
+
+      - name: Install deps
+        run: opam install . --deps-only --with-test
+
+      - name: Build
+        run: opam exec -- dune build
+
+      - name: Copy built PPX file
+        run: |
+          mv ./_build/default/bin/bin.exe ppx.exe
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@master
+        with:
+          name: macOS-arm64
           path: src/ppx.exe
           if-no-files-found: error
 
@@ -146,7 +180,7 @@ jobs:
           if-no-files-found: error
 
   publish:
-    needs: [build_linux, build_macos, build_windows]
+    needs: [build_linux, build_macos_x64, build_macos_arm64, build_windows]
     name: (only on release) Publish
     runs-on: ubuntu-latest
     steps:
@@ -169,12 +203,19 @@ jobs:
           name: ubuntu-latest
           path: binaries/linux
 
-      - name: Download macOS artifacts
+      - name: Download macOS x64 artifacts
         if: success()
         uses: actions/download-artifact@master
         with:
-          name: macOS-latest
-          path: binaries/darwin
+          name: macOS-x64
+          path: binaries/darwin-x64
+
+      - name: Download macOS arm64 artifacts
+        if: success()
+        uses: actions/download-artifact@master
+        with:
+          name: macOS-arm64
+          path: binaries/darwin-arm64
 
       - name: Download windows artifacts
         if: success()
@@ -188,8 +229,13 @@ jobs:
         run: |
           mkdir -p bin
           mv binaries/linux/ppx.exe ppx-linux.exe
-          mv binaries/darwin/ppx.exe ppx-osx.exe
+          mv binaries/darwin-x64/ppx.exe ppx-osx-x64.exe
+          mv binaries/darwin-arm64/ppx.exe ppx-osx-arm64.exe
           mv binaries/windows/ppx.exe ppx-windows.exe
+
+      - name: Set executable permissions
+        if: success()
+        run: chmod +x ppx-linux.exe ppx-osx-x64.exe ppx-osx-arm64.exe
 
       - name: Pack package
         if: success()
