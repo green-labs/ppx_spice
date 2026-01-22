@@ -2,6 +2,8 @@
 
 ## 0.3.2(unreleased)
 
+- Fixes O(n) nested match decoder replaces O(n²) tuple pattern matching to prevent the hang with the recode with many fields https://github.com/green-labs/ppx_spice/pull/111
+
 ## 0.3.1
 
 - Fixes [#107](https://github.com/green-labs/ppx_spice/issues/107) Arrays being reversed by Spice.arrayFromJson
