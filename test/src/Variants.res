@@ -12,3 +12,7 @@ type t3 = One3(int)
 
 @spice
 type t4 = | @spice.as(1.0) One | @spice.as(2.0) Two
+
+// Types for testing error paths
+@spice.decode
+type withArgs = WithArgs(int, string)

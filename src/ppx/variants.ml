@@ -76,7 +76,8 @@ let generate_decode_success_case num_args constructor_name =
 let generate_arg_decoder generator_settings args constructor_name =
   let num_args = List.length args in
   args
-  |> List.mapi (Decode_cases.generate_error_case num_args)
+  (* has_type_offset because index 0 is the constructor *)
+  |> List.mapi (Decode_cases.generate_error_case ~has_type_offset:true num_args)
   |> List.append [ generate_decode_success_case num_args constructor_name ]
   |> Exp.match_
        (args
