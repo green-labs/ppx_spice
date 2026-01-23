@@ -140,18 +140,18 @@ Read our [Guide with examples](docs/GUIDE.md)
 NOTE: Starting from v0.2.8, support for curried mode is discontinued to align with the changes in compiler v12.
 
 ```sh
-yarn add -D @greenlabs/ppx-spice
+yarn add -D @mununki/ppx-spice
 ```
 
 ```json
 // bsconfig.json
 
 "bs-dependencies": [
-  "@greenlabs/ppx-spice"
+  "@mununki/ppx-spice"
 ],
 "ppx-flags": [
   ...,
-  "@greenlabs/ppx-spice/ppx"
+  "@mununki/ppx-spice/ppx"
 ],
 ```
 

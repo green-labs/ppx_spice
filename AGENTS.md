@@ -90,7 +90,7 @@ ppx_spice/
 ### PPX Integration (rescript.json)
 ```json
 {
-  "ppx-flags": ["@greenlabs/ppx-spice/ppx"],
+  "ppx-flags": ["@mununki/ppx-spice/ppx"],
   "warnings": { "error": true, "number": "-48" }
 }
 ```

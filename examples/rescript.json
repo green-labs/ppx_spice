@@ -12,9 +12,13 @@
       "in-source": true
     }
   ],
-  "dependencies": ["@greenlabs/ppx-spice"],
+  "dependencies": [
+    "@mununki/ppx-spice"
+  ],
   "dev-dependencies": [],
-  "ppx-flags": ["@greenlabs/ppx-spice/ppx"],
+  "ppx-flags": [
+    "@mununki/ppx-spice/ppx"
+  ],
   "warnings": {
     "error": true,
     "number": "-48"
