@@ -3,6 +3,7 @@
 ## 0.3.3(unreleased)
 
 - fix: include nested error path in record field decode errors https://github.com/mununki/ppx_spice/pull/118
+- Support `result`, `dict` types https://github.com/mununki/ppx_spice/pull/119
 
 ## 0.3.2
 
