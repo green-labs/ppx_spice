@@ -158,6 +158,40 @@ Zora.test("record with bigint", t => {
   }), "decode");
 });
 
+Zora.test("nested record error path", t => {
+  let invalidJson = {
+    one: {
+      value: "not an int"
+    }
+  };
+  let decoded = Records.outer_decode(invalidJson);
+  t.test("error path includes full nested path", async t => {
+    if (decoded.TAG === "Ok") {
+      t.fail("expected decode to fail");
+      return;
+    }
+    t.equal(decoded._0.path, ".one.value", "path should be .one.value");
+  });
+});
+
+Zora.test("deeply nested record error path", t => {
+  let invalidJson = {
+    level1: {
+      one: {
+        value: "not an int"
+      }
+    }
+  };
+  let decoded = Records.deeplyNested_decode(invalidJson);
+  t.test("error path includes deeply nested path", async t => {
+    if (decoded.TAG === "Ok") {
+      t.fail("expected decode to fail");
+      return;
+    }
+    t.equal(decoded._0.path, ".level1.one.value", "path should be .level1.one.value");
+  });
+});
+
 export {
   testEqual,
   deepEqualWithBigInt,

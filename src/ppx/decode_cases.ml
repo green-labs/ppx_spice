@@ -3,7 +3,8 @@ open Parsetree
 open Ast_helper
 open Utils
 
-let generate_error_case numArgs i _ =
+let generate_error_case ?(has_type_offset = false) numArgs i _ =
+  let offset = if has_type_offset then 1 else 0 in
   {
     pc_lhs =
       Array.init numArgs (fun which ->
@@ -14,5 +15,5 @@ let generate_error_case numArgs i _ =
       |> tuple_or_singleton Pat.tuple;
     pc_guard = None;
     pc_rhs =
-      [%expr Error { e with path = [%e index_const i] ^ e.path }];
+      [%expr Error { e with path = [%e index_const (i + offset)] ^ e.path }];
   }

@@ -176,3 +176,50 @@ zoraBlock("record with bigint", t => {
   let _ = %raw(`sampleRecord["c"] = undefined`)
   t->ok(deepEqualWithBigInt(decoded, Ok(sampleRecord)), "decode")
 })
+
+zoraBlock("nested record error path", t => {
+  // Test that error paths correctly capture the full nested path
+  // When inner.value fails to decode, the path should be ".one.value" not just ".value"
+  let invalidJson = JSON.Object(
+    dict{
+      "one": JSON.Object(
+        dict{
+          "value": JSON.String("not an int"),
+        },
+      ),
+    },
+  )
+
+  let decoded = invalidJson->Records.outer_decode
+  t->test("error path includes full nested path", async t => {
+    switch decoded {
+    | Error({path}) => t->equal(path, ".one.value", "path should be .one.value")
+    | Ok(_) => t->fail("expected decode to fail")
+    }
+  })
+})
+
+zoraBlock("deeply nested record error path", t => {
+  // Test deeply nested paths: .level1.one.value
+  let invalidJson = JSON.Object(
+    dict{
+      "level1": JSON.Object(
+        dict{
+          "one": JSON.Object(
+            dict{
+              "value": JSON.String("not an int"),
+            },
+          ),
+        },
+      ),
+    },
+  )
+
+  let decoded = invalidJson->Records.deeplyNested_decode
+  t->test("error path includes deeply nested path", async t => {
+    switch decoded {
+    | Error({path}) => t->equal(path, ".level1.one.value", "path should be .level1.one.value")
+    | Ok(_) => t->fail("expected decode to fail")
+    }
+  })
+})
