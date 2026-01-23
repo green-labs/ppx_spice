@@ -21,7 +21,7 @@ env:
 
 permissions:
   id-token: write  # Required for OIDC publish to npm
-  contents: read
+  contents: write  # Required for creating GitHub releases
 
 jobs:
   build_linux:
@@ -249,4 +249,17 @@ jobs:
           else
             npm publish --tag "${NPM_TAG}"
           fi
+
+      - name: Create GitHub Release
+        if: success() && startsWith(env.TARGET_REF, 'refs/tags/') || startsWith(env.TARGET_REF, 'v')
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ env.TARGET_REF }}
+          name: Release ${{ env.TARGET_REF }}
+          generate_release_notes: true
+          files: |
+            ppx-linux.exe
+            ppx-osx-x64.exe
+            ppx-osx-arm64.exe
+            ppx-windows.exe
 
