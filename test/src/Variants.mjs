@@ -120,6 +120,54 @@ function t4_decode(v) {
   }
 }
 
+function withArgs_decode(v) {
+  if (!Array.isArray(v)) {
+    return Spice.error(undefined, "Not a variant", v);
+  }
+  if (v.length === 0) {
+    return Spice.error(undefined, "Expected variant, found empty array", v);
+  }
+  let match = v[0];
+  if (match === "WithArgs") {
+    if (v.length !== 3) {
+      return Spice.error(undefined, "Invalid number of arguments to variant constructor", v);
+    }
+    let match$1 = Spice.intFromJson(v[1]);
+    let match$2 = Spice.stringFromJson(v[2]);
+    if (match$1.TAG === "Ok") {
+      if (match$2.TAG === "Ok") {
+        return {
+          TAG: "Ok",
+          _0: {
+            TAG: "WithArgs",
+            _0: match$1._0,
+            _1: match$2._0
+          }
+        };
+      }
+      let e = match$2._0;
+      return {
+        TAG: "Error",
+        _0: {
+          path: "[2]" + e.path,
+          message: e.message,
+          value: e.value
+        }
+      };
+    }
+    let e$1 = match$1._0;
+    return {
+      TAG: "Error",
+      _0: {
+        path: "[1]" + e$1.path,
+        message: e$1.message,
+        value: e$1.value
+      }
+    };
+  }
+  return Spice.error(undefined, "Invalid variant constructor", v[0]);
+}
+
 export {
   t_encode,
   t_decode,
@@ -131,5 +179,6 @@ export {
   t3_decode,
   t4_encode,
   t4_decode,
+  withArgs_decode,
 }
 /* No side effect */

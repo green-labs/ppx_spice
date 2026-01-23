@@ -60,6 +60,22 @@ Zora.test("polymorphic variants with @spice.as number", t => {
   });
 });
 
+Zora.test("polyvariant error path includes correct index", t => {
+  let invalidJson = [
+    "WithArgs",
+    "not an int",
+    "valid string"
+  ];
+  let decoded = Polyvariants.withArgs_decode(invalidJson);
+  t.test("error path shows [1] for first argument", async t => {
+    if (decoded.TAG === "Ok") {
+      t.fail("expected decode to fail");
+      return;
+    }
+    t.equal(decoded._0.path, "[1]", "path should be [1]");
+  });
+});
+
 export {
   testEqual,
 }
