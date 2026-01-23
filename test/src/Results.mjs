@@ -41,10 +41,10 @@ function inner_decode(v) {
       };
     }
     let e = name._0;
-    return Spice.error("name", e.message, e.value);
+    return Spice.error("." + ("name" + e.path), e.message, e.value);
   }
   let e$1 = id._0;
-  return Spice.error("id", e$1.message, e$1.value);
+  return Spice.error("." + ("id" + e$1.path), e$1.message, e$1.value);
 }
 
 function innerResult_encode(v) {
