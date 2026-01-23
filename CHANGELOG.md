@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.3.4
+
+- migration to mununki
+
 ## 0.3.3
 
 - fix: include nested error path in record field decode errors https://github.com/mununki/ppx_spice/pull/118
