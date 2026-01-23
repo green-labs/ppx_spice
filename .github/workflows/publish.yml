@@ -20,8 +20,8 @@ env:
   NPM_TAG: ${{ github.event.inputs.npm_tag || 'latest' }}
 
 permissions:
-  id-token: write  # Required for OIDC publish to npm
-  contents: write  # Required for creating GitHub releases
+  id-token: write # Required for OIDC publish to npm
+  contents: write # Required for creating GitHub releases
 
 jobs:
   build_linux:
@@ -245,9 +245,9 @@ jobs:
         if: success()
         run: |
           if [ "${NPM_TAG:-latest}" = "latest" ]; then
-            npm publish
+            npm publish --provenance
           else
-            npm publish --tag "${NPM_TAG}"
+            npm publish --provenance --tag "${NPM_TAG}"
           fi
 
       - name: Create GitHub Release
@@ -262,4 +262,3 @@ jobs:
             ppx-osx-x64.exe
             ppx-osx-arm64.exe
             ppx-windows.exe
-
