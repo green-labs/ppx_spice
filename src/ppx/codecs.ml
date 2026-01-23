@@ -61,10 +61,14 @@ and generate_constr_codecs { do_encode; do_decode }
   | Ldot (Lident "Null", "t") ->
       ( (if do_encode then Some [%expr Spice.nullToJson] else None),
         if do_decode then Some [%expr Spice.nullFromJson] else None )
-  | Lident "result" | Ldot (Ldot (Lident "Belt", "Result"), "t") ->
+  | Lident "result"
+  | Ldot (Lident "Result", "t")
+  | Ldot (Ldot (Lident "Belt", "Result"), "t") ->
       ( (if do_encode then Some [%expr Spice.resultToJson] else None),
         if do_decode then Some [%expr Spice.resultFromJson] else None )
-  | Ldot (Ldot (Lident "Js", "Dict"), "t") | Ldot (Lident "Dict", "t") ->
+  | Lident "dict"
+  | Ldot (Ldot (Lident "Js", "Dict"), "t")
+  | Ldot (Lident "Dict", "t") ->
       ( (if do_encode then Some [%expr Spice.dictToJson] else None),
         if do_decode then Some [%expr Spice.dictFromJson] else None )
   | Ldot (Ldot (Lident "Js", "Json"), "t") | Ldot (Lident "JSON", "t") ->
