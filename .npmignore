@@ -1,7 +1,11 @@
 .github
 .vscode
+.claude
+.editorconfig
 examples
 test
+docs
+AGENTS.md
 src/bin
 src/ppx
 src/.ocamlformat
@@ -9,4 +13,5 @@ src/dune
 src/dune-project
 src/dune-workspace
 src/ppx_spice.opam
+src/_build
 .changeset
