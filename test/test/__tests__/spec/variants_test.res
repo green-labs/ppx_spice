@@ -81,3 +81,61 @@ zoraBlock("variant error path includes correct index", t => {
     }
   })
 })
+
+zoraBlock("generic variant with single type parameter", t => {
+  let someEncoded = Variants.Some("hello")->Variants.t5_string_encode
+  t->testEqual(
+    `encode Some("hello")`,
+    someEncoded,
+    JSON.Array([JSON.String("Some"), JSON.String("hello")]),
+  )
+
+  let noneEncoded = Variants.None->Variants.t5_string_encode
+  t->testEqual(`encode None`, noneEncoded, JSON.Array([JSON.String("None")]))
+
+  let someDecoded =
+    JSON.Array([JSON.String("Some"), JSON.String("hello")])->Variants.t5_string_decode
+  t->testEqual(`decode Some`, someDecoded, Ok(Variants.Some("hello")))
+
+  let noneDecoded = JSON.Array([JSON.String("None")])->Variants.t5_string_decode
+  t->testEqual(`decode None`, noneDecoded, Ok(Variants.None))
+})
+
+zoraBlock("generic variant with multiple type parameters", t => {
+  let leftEncoded = Variants.Left("hello")->Variants.t6_string_int_encode
+  t->testEqual(
+    `encode Left("hello")`,
+    leftEncoded,
+    JSON.Array([JSON.String("Left"), JSON.String("hello")]),
+  )
+
+  let rightEncoded = Variants.Right(42)->Variants.t6_string_int_encode
+  t->testEqual(
+    `encode Right(42)`,
+    rightEncoded,
+    JSON.Array([JSON.String("Right"), JSON.Number(42.0)]),
+  )
+
+  let bothEncoded = Variants.Both("hello", 42)->Variants.t6_string_int_encode
+  t->testEqual(
+    `encode Both("hello", 42)`,
+    bothEncoded,
+    JSON.Array([JSON.String("Both"), JSON.String("hello"), JSON.Number(42.0)]),
+  )
+
+  let leftDecoded =
+    JSON.Array([JSON.String("Left"), JSON.String("hello")])->Variants.t6_string_int_decode
+  t->testEqual(`decode Left`, leftDecoded, Ok(Variants.Left("hello")))
+
+  let rightDecoded =
+    JSON.Array([JSON.String("Right"), JSON.Number(42.0)])->Variants.t6_string_int_decode
+  t->testEqual(`decode Right`, rightDecoded, Ok(Variants.Right(42)))
+
+  let bothDecoded =
+    JSON.Array([
+      JSON.String("Both"),
+      JSON.String("hello"),
+      JSON.Number(42.0),
+    ])->Variants.t6_string_int_decode
+  t->testEqual(`decode Both`, bothDecoded, Ok(Variants.Both("hello", 42)))
+})
