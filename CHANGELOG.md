@@ -1,5 +1,9 @@
 # CHANGELOG
 
+# 0.3.5 (unreleased)
+
+- Fixes [#105](https://github.com/green-labs/ppx_spice/issues/105) Arity of generated codecs was incorrect, causing a type error when called.
+
 # 0.3.4
 
 - migration to mununki

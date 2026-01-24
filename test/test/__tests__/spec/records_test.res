@@ -223,3 +223,42 @@ zoraBlock("deeply nested record error path", t => {
     }
   })
 })
+
+zoraBlock("generic record with single type parameter", t => {
+  let sample = dict{
+    "a": JSON.Array([JSON.String("one"), JSON.String("two"), JSON.String("three")]),
+  }
+  let sampleJson = sample->JSON.Object
+
+  let sampleRecord: Records.t5<string> = {
+    a: ["one", "two", "three"],
+  }
+
+  let encoded = sampleRecord->Records.t5_string_encode
+  t->testEqual(`encode`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t5_string_decode
+  let expectedDecoded: Records.t5<string> = {
+    a: ["one", "two", "three"],
+  }
+  t->testEqual(`decode`, decoded, Ok(expectedDecoded))
+})
+
+zoraBlock("generic record with multiple type parameters", t => {
+  let sample = dict{
+    "key": JSON.String("myKey"),
+    "value": JSON.Number(42.0),
+  }
+  let sampleJson = sample->JSON.Object
+
+  let sampleRecord: Records.t6<string, int> = {
+    key: "myKey",
+    value: 42,
+  }
+
+  let encoded = sampleRecord->Records.t6_string_int_encode
+  t->testEqual(`encode`, encoded, sampleJson)
+
+  let decoded = sampleJson->Records.t6_string_int_decode
+  t->testEqual(`decode`, decoded, Ok(sampleRecord))
+})

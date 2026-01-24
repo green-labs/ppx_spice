@@ -4,13 +4,23 @@ open Ast_helper
 open Codecs
 open Utils
 
+(** For parameterized types, wrap the codec expression with function parameters
+    for each type parameter's codec. Sets the correct arity for uncurried calls.
+
+    e.g., for [type t<'a, 'b>], generates encoder with signature:
+    [('a => JSON.t, 'b => JSON.t) => t<'a, 'b> => JSON.t] *)
 let add_params param_names expr =
-  List.fold_right
-    (fun s acc ->
-      let pat = Pat.var (mknoloc s) in
-      Exp.fun_ Asttypes.Nolabel None pat acc)
-    param_names
-    (Utils.expr_func ~arity:1 [%expr fun v -> [%e expr] v])
+  match param_names with
+  | [] -> expr
+  | _ ->
+      let num_params, with_params =
+        List.fold_right
+          (fun s (count, acc) ->
+            let pat = Pat.var (mknoloc s) in
+            (count + 1, Exp.fun_ Asttypes.Nolabel None pat acc))
+          param_names (0, expr)
+      in
+      Utils.expr_func ~arity:num_params with_params
 
 let generate_codec_decls type_name param_names (encoder, decoder) =
   let encoder_pat = Pat.var (mknoloc (type_name ^ Utils.encoder_func_suffix)) in

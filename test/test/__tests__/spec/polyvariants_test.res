@@ -65,3 +65,61 @@ zoraBlock("polyvariant error path includes correct index", t => {
     }
   })
 })
+
+zoraBlock("generic polyvariant with single type parameter", t => {
+  let someEncoded = #Some("hello")->Polyvariants.t3_string_encode
+  t->testEqual(
+    `encode #Some("hello")`,
+    someEncoded,
+    JSON.Array([JSON.String("Some"), JSON.String("hello")]),
+  )
+
+  let noneEncoded = #None->Polyvariants.t3_string_encode
+  t->testEqual(`encode #None`, noneEncoded, JSON.Array([JSON.String("None")]))
+
+  let someDecoded =
+    JSON.Array([JSON.String("Some"), JSON.String("hello")])->Polyvariants.t3_string_decode
+  t->testEqual(`decode #Some`, someDecoded, Ok(#Some("hello")))
+
+  let noneDecoded = JSON.Array([JSON.String("None")])->Polyvariants.t3_string_decode
+  t->testEqual(`decode #None`, noneDecoded, Ok(#None))
+})
+
+zoraBlock("generic polyvariant with multiple type parameters", t => {
+  let leftEncoded = #Left("hello")->Polyvariants.t4_string_int_encode
+  t->testEqual(
+    `encode #Left("hello")`,
+    leftEncoded,
+    JSON.Array([JSON.String("Left"), JSON.String("hello")]),
+  )
+
+  let rightEncoded = #Right(42)->Polyvariants.t4_string_int_encode
+  t->testEqual(
+    `encode #Right(42)`,
+    rightEncoded,
+    JSON.Array([JSON.String("Right"), JSON.Number(42.0)]),
+  )
+
+  let bothEncoded = #Both("hello", 42)->Polyvariants.t4_string_int_encode
+  t->testEqual(
+    `encode #Both("hello", 42)`,
+    bothEncoded,
+    JSON.Array([JSON.String("Both"), JSON.String("hello"), JSON.Number(42.0)]),
+  )
+
+  let leftDecoded =
+    JSON.Array([JSON.String("Left"), JSON.String("hello")])->Polyvariants.t4_string_int_decode
+  t->testEqual(`decode #Left`, leftDecoded, Ok(#Left("hello")))
+
+  let rightDecoded =
+    JSON.Array([JSON.String("Right"), JSON.Number(42.0)])->Polyvariants.t4_string_int_decode
+  t->testEqual(`decode #Right`, rightDecoded, Ok(#Right(42)))
+
+  let bothDecoded =
+    JSON.Array([
+      JSON.String("Both"),
+      JSON.String("hello"),
+      JSON.Number(42.0),
+    ])->Polyvariants.t4_string_int_decode
+  t->testEqual(`decode #Both`, bothDecoded, Ok(#Both("hello", 42)))
+})
